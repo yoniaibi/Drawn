@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import TicketLogo from '../../src/components/TicketLogo';
 import PrimaryButton from '../../src/components/PrimaryButton';
@@ -8,13 +9,52 @@ import GhostButton from '../../src/components/GhostButton';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
 import { useAuthStore } from '../../src/store';
 
+const RECENT_WINS = [
+  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: '30p', value: '£2,400', emoji: '👜', timeAgo: '3 mins ago', multiple: '80×' },
+  { handle: '@dan.west', item: 'Air Jordan 4 Retro', ticketPrice: '15p', value: '£340', emoji: '👟', timeAgo: '12 mins ago', multiple: '22×' },
+  { handle: '@chloe_j', item: 'Louis Vuitton Speedy', ticketPrice: '20p', value: '£820', emoji: '👛', timeAgo: '27 mins ago', multiple: '41×' },
+];
+
+const SOCIAL_PROOF = [
+  '🎉 1,247 people watching tonight',
+  '🏆 23 winners this week',
+  '💜 £48,000 in prizes drawn so far',
+  '⚡ Payouts in 24 hours',
+];
+
 export default function SplashScreen() {
   const router = useRouter();
   const login = useAuthStore(s => s.login);
   const [time, setTime] = useState(getCountdownTo9pm());
+  const [winnerIdx, setWinnerIdx] = useState(0);
+  const [proofIdx, setProofIdx] = useState(0);
+  const winnerOpacity = useRef(new RNAnimated.Value(1)).current;
+  const proofOpacity = useRef(new RNAnimated.Value(1)).current;
 
   useEffect(() => {
     const id = setInterval(() => setTime(getCountdownTo9pm()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Rotate winner showcase
+  useEffect(() => {
+    const id = setInterval(() => {
+      RNAnimated.timing(winnerOpacity, { toValue: 0, duration: 350, useNativeDriver: true }).start(() => {
+        setWinnerIdx(i => (i + 1) % RECENT_WINS.length);
+        RNAnimated.timing(winnerOpacity, { toValue: 1, duration: 350, useNativeDriver: true }).start();
+      });
+    }, 3500);
+    return () => clearInterval(id);
+  }, []);
+
+  // Rotate social proof
+  useEffect(() => {
+    const id = setInterval(() => {
+      RNAnimated.timing(proofOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
+        setProofIdx(i => (i + 1) % SOCIAL_PROOF.length);
+        RNAnimated.timing(proofOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+      });
+    }, 2500);
     return () => clearInterval(id);
   }, []);
 
@@ -27,8 +67,10 @@ export default function SplashScreen() {
     router.replace('/(tabs)');
   }
 
+  const currentWin = RECENT_WINS[winnerIdx];
+
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content} bounces={false}>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content} bounces={false} showsVerticalScrollIndicator={false}>
       <View style={styles.logoRow}>
         <TicketLogo size="lg" />
       </View>
@@ -36,60 +78,79 @@ export default function SplashScreen() {
       <Text style={styles.headline}>Their loss.{'\n'}Your win.</Text>
       <Text style={styles.sub}>Win designer things for pennies.{'\n'}Sell what you don't wear. Get paid in 24h.</Text>
 
-      {/* Latest win card */}
-      <View style={styles.card}>
-        <View style={styles.cardLabelRow}>
-          <View style={[styles.dot, { backgroundColor: Colors.gold }]} />
-          <Text style={[styles.cardLabel, { color: Colors.gold }]}>LATEST WIN</Text>
-        </View>
-        <View style={styles.cardRow}>
-          <View style={styles.itemBox}><Text style={styles.itemEmoji}>👜</Text></View>
-          <View style={styles.cardInfo}>
-            <Text style={styles.cardTitle}>Chanel Classic Flap</Text>
-            <Text style={styles.cardSub}>Won by @sophie_k · 3 mins ago</Text>
-          </View>
-          <View style={styles.cardRight}>
-            <Text style={styles.cardPrice}>30p</Text>
-            <Text style={styles.cardPriceSub}>ticket price</Text>
-          </View>
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.cardRow}>
-          <Text style={styles.cardSub}>Retail value</Text>
-          <Text style={styles.cardValue}>£2,400</Text>
-        </View>
+      {/* Animated social proof ticker */}
+      <View style={styles.proofTicker}>
+        <View style={styles.proofDot} />
+        <RNAnimated.Text style={[styles.proofText, { opacity: proofOpacity }]}>
+          {SOCIAL_PROOF[proofIdx]}
+        </RNAnimated.Text>
       </View>
 
-      {/* Latest payout card */}
-      <View style={styles.card}>
-        <View style={styles.cardLabelRow}>
-          <View style={[styles.dot, { backgroundColor: Colors.lilac }]} />
-          <Text style={[styles.cardLabel, { color: Colors.lilac }]}>LATEST PAYOUT</Text>
+      {/* Live winner showcase */}
+      <View style={styles.winnerShowcase}>
+        <View style={styles.winnerShowcaseHeader}>
+          <View style={styles.winnerDot} />
+          <Text style={styles.winnerShowcaseLabel}>LATEST WIN</Text>
+          <Text style={styles.winnerDots}>
+            {RECENT_WINS.map((_, i) => i === winnerIdx ? '●' : '○').join(' ')}
+          </Text>
         </View>
-        <View style={styles.cardRow}>
-          <View style={styles.itemBox}>
-            <Text style={{ fontSize: 10 }}>👔👟👛👗</Text>
+
+        <RNAnimated.View style={{ opacity: winnerOpacity }}>
+          <View style={styles.winnerRow}>
+            <View style={styles.winnerEmojiBox}>
+              <Text style={styles.winnerEmoji}>{currentWin.emoji}</Text>
+            </View>
+            <View style={styles.winnerInfo}>
+              <Text style={styles.winnerHandle}>{currentWin.handle}</Text>
+              <Text style={styles.winnerItem}>{currentWin.item}</Text>
+              <Text style={styles.winnerTime}>{currentWin.timeAgo}</Text>
+            </View>
+            <View style={styles.winnerRight}>
+              <Text style={styles.winnerMultiple}>{currentWin.multiple}</Text>
+              <Text style={styles.winnerMultipleSub}>return</Text>
+            </View>
           </View>
-          <View style={styles.cardInfo}>
-            <Text style={styles.cardTitle}>Wardrobe drop · 28 pieces</Text>
-            <Text style={styles.cardSub}>@sophiestyle · paid out today</Text>
+
+          <View style={styles.winnerDivider} />
+
+          <View style={styles.winnerValueRow}>
+            <View style={styles.winnerValueStat}>
+              <Text style={styles.winnerValueStatVal}>{currentWin.ticketPrice}</Text>
+              <Text style={styles.winnerValueStatLabel}>ticket price</Text>
+            </View>
+            <View style={styles.winnerValueArrowBox}>
+              <Text style={styles.winnerValueArrow}>→</Text>
+            </View>
+            <View style={styles.winnerValueStat}>
+              <Text style={[styles.winnerValueStatVal, { color: Colors.gold }]}>{currentWin.value}</Text>
+              <Text style={styles.winnerValueStatLabel}>retail value</Text>
+            </View>
           </View>
-          <View style={styles.cardRight}>
-            <Text style={[styles.cardPrice, { color: Colors.lilac }]}>£876</Text>
-            <Text style={styles.cardPriceSub}>she earned</Text>
+        </RNAnimated.View>
+      </View>
+
+      {/* Latest payout */}
+      <View style={styles.payoutCard}>
+        <View style={styles.payoutLeft}>
+          <View style={styles.payoutLabelRow}>
+            <View style={[styles.proofDot, { backgroundColor: Colors.lilac }]} />
+            <Text style={[styles.winnerShowcaseLabel, { color: Colors.lilac }]}>LATEST PAYOUT</Text>
           </View>
+          <Text style={styles.payoutTitle}>Wardrobe drop · 28 pieces</Text>
+          <Text style={styles.payoutSeller}>@sophiestyle · paid out today</Text>
+          <Text style={styles.payoutTime}>Listed in under 5 minutes →</Text>
         </View>
-        <View style={styles.divider} />
-        <View style={styles.cardRow}>
-          <Text style={styles.cardSub}>Time to list</Text>
-          <Text style={[styles.cardSub, { color: Colors.lilac, fontWeight: '600' }]}>Under 5 minutes →</Text>
+        <View style={styles.payoutEarned}>
+          <Text style={styles.payoutAmount}>£876</Text>
+          <Text style={styles.payoutLabel}>she earned</Text>
         </View>
       </View>
 
       {/* Countdown */}
       <View style={styles.countdown}>
         <View style={styles.countdownLeft}>
-          <View style={[styles.dot, { backgroundColor: Colors.pink }]} />
+          <View style={[styles.proofDot, { backgroundColor: Colors.pink }]} />
           <Text style={styles.countdownLabel}>Next draw closes in</Text>
         </View>
         <View style={styles.countdownRight}>
@@ -101,9 +162,23 @@ export default function SplashScreen() {
         </View>
       </View>
 
+      {/* Trust badges */}
+      <View style={styles.trustRow}>
+        {[
+          { icon: 'shield-checkmark-outline', label: 'Verified items' },
+          { icon: 'lock-closed-outline', label: 'Secure checkout' },
+          { icon: 'mail-outline', label: 'Free entry option' },
+        ].map(b => (
+          <View key={b.label} style={styles.trustBadge}>
+            <Ionicons name={b.icon as any} size={14} color={Colors.lilac} />
+            <Text style={styles.trustLabel}>{b.label}</Text>
+          </View>
+        ))}
+      </View>
+
       <PrimaryButton label="Get started — it's free" onPress={handleGetStarted} style={styles.btn} />
       <GhostButton label="Log in" onPress={handleLogin} style={styles.ghostBtn} />
-      <Text style={styles.noCard}>No card needed to browse</Text>
+      <Text style={styles.noCard}>No card needed to browse · Free postal entry available</Text>
     </ScrollView>
   );
 }
@@ -111,33 +186,67 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.violet },
   content: { padding: Spacing.lg, paddingBottom: 40 },
-  logoRow: { alignItems: 'center', paddingTop: 16, paddingBottom: 20 },
+  logoRow: { alignItems: 'center', paddingTop: 16, paddingBottom: 16 },
+
   headline: {
-    fontFamily: Fonts.serif, fontSize: 36, color: Colors.white,
-    textAlign: 'center', lineHeight: 38, marginBottom: 8,
+    fontFamily: Fonts.serif, fontSize: 38, color: Colors.white,
+    textAlign: 'center', lineHeight: 40, marginBottom: 8,
   },
-  sub: { fontSize: FontSizes.sm, color: '#C9B3EF', textAlign: 'center', lineHeight: 20, marginBottom: 20 },
-  card: {
+  sub: { fontSize: FontSizes.sm, color: '#C9B3EF', textAlign: 'center', lineHeight: 20, marginBottom: 14 },
+
+  proofTicker: {
+    flexDirection: 'row', alignItems: 'center', gap: 7,
+    backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: Radius.pill,
+    paddingHorizontal: 12, paddingVertical: 7, marginBottom: 14,
+    alignSelf: 'center',
+  },
+  proofDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
+  proofText: { fontSize: FontSizes.xs, color: '#E9D5FF', fontWeight: '600' },
+
+  winnerShowcase: {
     backgroundColor: Colors.ink, borderRadius: Radius.lg, padding: Spacing.md,
-    marginBottom: Spacing.sm, borderWidth: 1, borderColor: 'rgba(249,200,70,0.15)',
+    marginBottom: Spacing.sm, borderWidth: 1, borderColor: 'rgba(249,200,70,0.2)',
   },
-  cardLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
-  dot: { width: 7, height: 7, borderRadius: 99 },
-  cardLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 1 },
-  cardRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  itemBox: {
-    width: 44, height: 44, borderRadius: 11, backgroundColor: '#2a1216',
-    alignItems: 'center', justifyContent: 'center', marginRight: 10,
+  winnerShowcaseHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  winnerDot: { width: 7, height: 7, borderRadius: 99, backgroundColor: Colors.gold },
+  winnerShowcaseLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 1, color: Colors.gold, flex: 1 },
+  winnerDots: { fontSize: 8, color: 'rgba(255,255,255,0.3)', letterSpacing: 2 },
+  winnerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  winnerEmojiBox: {
+    width: 50, height: 50, borderRadius: 14,
+    backgroundColor: 'rgba(249,200,70,0.08)', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.15)',
   },
-  itemEmoji: { fontSize: 24 },
-  cardInfo: { flex: 1 },
-  cardTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '600' },
-  cardSub: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
-  cardRight: { alignItems: 'flex-end' },
-  cardPrice: { fontFamily: Fonts.serif, fontSize: 20, color: Colors.gold, lineHeight: 22 },
-  cardPriceSub: { fontSize: 8, color: Colors.textTertiary, marginTop: 1 },
-  cardValue: { fontFamily: Fonts.serif, fontSize: 15, color: 'rgba(255,255,255,0.85)' },
-  divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)', marginVertical: 10 },
+  winnerEmoji: { fontSize: 28 },
+  winnerInfo: { flex: 1 },
+  winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.base, color: Colors.white, lineHeight: 18 },
+  winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+  winnerTime: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
+  winnerRight: { alignItems: 'center' },
+  winnerMultiple: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.gold },
+  winnerMultipleSub: { fontSize: 8, color: Colors.textTertiary },
+  winnerDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)', marginVertical: 12 },
+  winnerValueRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  winnerValueStat: { flex: 1, alignItems: 'center' },
+  winnerValueStatVal: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white },
+  winnerValueStatLabel: { fontSize: 9, color: Colors.textTertiary, marginTop: 3 },
+  winnerValueArrowBox: { paddingHorizontal: 8 },
+  winnerValueArrow: { fontSize: 20, color: 'rgba(255,255,255,0.3)' },
+
+  payoutCard: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: Colors.ink, borderRadius: Radius.lg, padding: Spacing.md,
+    marginBottom: Spacing.sm, borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
+  },
+  payoutLeft: { flex: 1 },
+  payoutLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  payoutTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '600' },
+  payoutSeller: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
+  payoutTime: { fontSize: 9, color: Colors.lilac, fontWeight: '600', marginTop: 4 },
+  payoutEarned: { alignItems: 'center', paddingLeft: 12 },
+  payoutAmount: { fontFamily: Fonts.serif, fontSize: 22, color: Colors.lilac },
+  payoutLabel: { fontSize: 8, color: Colors.textTertiary, marginTop: 2 },
+
   countdown: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: 13, padding: 12, marginBottom: Spacing.md,
@@ -147,6 +256,14 @@ const styles = StyleSheet.create({
   countdownRight: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
   countdownNum: { fontFamily: Fonts.serif, fontSize: 20, color: Colors.white, lineHeight: 22 },
   countdownColon: { fontSize: 13, color: Colors.lilac, fontWeight: '700', marginHorizontal: 1 },
+
+  trustRow: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    marginBottom: Spacing.md,
+  },
+  trustBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  trustLabel: { fontSize: 9, color: '#C9B3EF' },
+
   btn: { marginBottom: Spacing.sm },
   ghostBtn: { marginBottom: Spacing.sm },
   noCard: { textAlign: 'center', fontSize: 9, color: 'rgba(255,255,255,0.25)' },

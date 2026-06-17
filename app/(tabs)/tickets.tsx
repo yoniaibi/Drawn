@@ -1,20 +1,56 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { MOCK_MY_TICKETS } from '../../src/mocks';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
 
+function getOddsColor(pct: number) {
+  if (pct >= 1) return Colors.gold;
+  if (pct >= 0.5) return Colors.lilac;
+  return Colors.textSecondary;
+}
+
 export default function TicketsScreen() {
   const router = useRouter();
+  const totalTickets = MOCK_MY_TICKETS.reduce((s, d) => s + d.myTickets, 0);
+  const totalValue = MOCK_MY_TICKETS.reduce((s, d) => s + d.retailValue, 0);
 
   return (
     <ScreenWrapper>
       <View style={styles.header}>
         <Text style={styles.heading}>My Tickets</Text>
-        <Text style={styles.sub}>You're in {MOCK_MY_TICKETS.length} draws</Text>
+        <Text style={styles.sub}>You're in {MOCK_MY_TICKETS.length} draws tonight</Text>
+      </View>
+
+      {/* Summary strip */}
+      <View style={styles.summaryStrip}>
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryVal}>{totalTickets}</Text>
+          <Text style={styles.summaryLabel}>tickets held</Text>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryItem}>
+          <Text style={[styles.summaryVal, { color: Colors.gold }]}>£{totalValue.toLocaleString()}</Text>
+          <Text style={styles.summaryLabel}>could win tonight</Text>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryVal}>{MOCK_MY_TICKETS.length}</Text>
+          <Text style={styles.summaryLabel}>draws entered</Text>
+        </View>
+      </View>
+
+      {/* Callout */}
+      <View style={styles.callout}>
+        <Ionicons name="flash" size={14} color={Colors.gold} />
+        <Text style={styles.calloutText}>
+          Win up to <Text style={styles.calloutBold}>£{Math.max(...MOCK_MY_TICKETS.map(d => d.retailValue)).toLocaleString()}</Text> for as little as{' '}
+          <Text style={styles.calloutBold}>{formatTicketPrice(Math.min(...MOCK_MY_TICKETS.map(d => d.ticketPrice)))}</Text>
+        </Text>
       </View>
 
       <FlatList
@@ -24,25 +60,52 @@ export default function TicketsScreen() {
         renderItem={({ item }) => {
           const progress = item.ticketsSold / item.totalTickets;
           const isTonight = item.status === 'closing_tonight';
+          const myOddsPct = (item.myTickets / item.totalTickets) * 100;
+          const remaining = item.totalTickets - item.ticketsSold;
+          const valueRatio = `${item.ticketPrice}p ticket → £${item.retailValue.toLocaleString()} prize`;
+
           return (
             <TouchableOpacity style={styles.card} onPress={() => router.push(`/draw/${item.id}`)}>
+              {/* Top */}
               <View style={styles.cardTop}>
-                <Text style={styles.emoji}>{item.emoji}</Text>
-                <View style={styles.info}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.seller}>{item.seller}</Text>
-                  <ProgressBar progress={progress} height={4} />
-                  <Text style={styles.threshold}>
-                    {Math.round(progress * 100)}% sold · {isTonight ? '🔴 Tonight' : 'Tomorrow'}
-                  </Text>
+                <View style={styles.emojiBox}>
+                  <Text style={styles.emoji}>{item.emoji}</Text>
+                  {isTonight && <View style={styles.tonightDot} />}
                 </View>
-                <View style={styles.right}>
-                  <View style={styles.valueBadge}>
-                    <Text style={styles.valueText}>£{item.retailValue.toLocaleString()}</Text>
+                <View style={styles.info}>
+                  <View style={styles.titleRow}>
+                    <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+                    {item.verified && (
+                      <Ionicons name="checkmark-circle" size={12} color={Colors.lilac} />
+                    )}
                   </View>
+                  <Text style={styles.seller}>{item.seller}</Text>
+                  <Text style={styles.valueRatio}>{valueRatio}</Text>
+                  <View style={styles.progressRow}>
+                    <ProgressBar
+                      progress={progress}
+                      height={5}
+                      color={progress > 0.85 ? Colors.danger : Colors.lilac}
+                    />
+                    <Text style={styles.progressLabel}>{Math.round(progress * 100)}%</Text>
+                  </View>
+                  {remaining < 500 && (
+                    <Text style={styles.scarcity}>⚠️ Only {remaining} tickets left!</Text>
+                  )}
                 </View>
               </View>
+
+              {/* Status tag */}
+              <View style={[styles.statusTag, { backgroundColor: isTonight ? 'rgba(244,114,182,0.12)' : 'rgba(139,92,246,0.12)' }]}>
+                <View style={[styles.statusDot, { backgroundColor: isTonight ? Colors.pink : Colors.lilac }]} />
+                <Text style={[styles.statusText, { color: isTonight ? Colors.pink : Colors.lilac }]}>
+                  {isTonight ? '🔴 Draws tonight at 9pm' : 'Draws tomorrow at 9pm'}
+                </Text>
+              </View>
+
               <View style={styles.divider} />
+
+              {/* Bottom stats */}
               <View style={styles.cardBottom}>
                 <View style={styles.statBox}>
                   <Text style={styles.statVal}>{item.myTickets}</Text>
@@ -53,18 +116,29 @@ export default function TicketsScreen() {
                   <Text style={styles.statLabel}>each</Text>
                 </View>
                 <View style={styles.statBox}>
-                  <Text style={[styles.statVal, { color: Colors.lilac }]}>
-                    {((item.myTickets / item.totalTickets) * 100).toFixed(2)}%
+                  <Text style={[styles.statVal, { color: getOddsColor(myOddsPct) }]}>
+                    {myOddsPct.toFixed(2)}%
                   </Text>
                   <Text style={styles.statLabel}>your odds</Text>
                 </View>
-                <TouchableOpacity style={styles.addMore} onPress={() => router.push(`/purchase/${item.id}`)}>
-                  <Text style={styles.addMoreText}>+ More</Text>
+                <TouchableOpacity
+                  style={styles.addMore}
+                  onPress={e => { e.stopPropagation?.(); router.push(`/purchase/${item.id}`); }}
+                >
+                  <Ionicons name="add" size={12} color={Colors.white} />
+                  <Text style={styles.addMoreText}>More</Text>
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
           );
         }}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyEmoji}>🎫</Text>
+            <Text style={styles.emptyTitle}>No tickets yet</Text>
+            <Text style={styles.emptySub}>Browse draws and enter for as little as 10p</Text>
+          </View>
+        }
       />
     </ScreenWrapper>
   );
@@ -74,22 +148,58 @@ const styles = StyleSheet.create({
   header: { padding: Spacing.lg, paddingBottom: Spacing.sm },
   heading: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white },
   sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, marginTop: 2 },
-  list: { padding: Spacing.lg, gap: 12, paddingBottom: 40 },
-  card: { backgroundColor: Colors.darkCard, borderRadius: Radius.lg, padding: Spacing.md },
-  cardTop: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  emoji: { fontSize: 32, marginTop: 4 },
-  info: { flex: 1, gap: 4 },
-  title: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '600' },
+
+  summaryStrip: {
+    flexDirection: 'row', backgroundColor: Colors.darkCard,
+    marginHorizontal: Spacing.lg, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.sm,
+  },
+  summaryItem: { flex: 1, alignItems: 'center' },
+  summaryVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
+  summaryLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2 },
+  summaryDivider: { width: 1, backgroundColor: Colors.darkBorder },
+
+  callout: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    marginHorizontal: Spacing.lg, marginBottom: Spacing.sm,
+    backgroundColor: 'rgba(249,200,70,0.08)', borderRadius: Radius.sm,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.2)',
+    padding: Spacing.sm,
+  },
+  calloutText: { fontSize: FontSizes.xs, color: Colors.textSecondary, flex: 1 },
+  calloutBold: { color: Colors.gold, fontWeight: '700' },
+
+  list: { paddingHorizontal: Spacing.lg, gap: 12, paddingBottom: 40 },
+  card: { backgroundColor: Colors.darkCard, borderRadius: Radius.lg, padding: Spacing.md, overflow: 'hidden' },
+  cardTop: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: Spacing.sm },
+  emojiBox: { position: 'relative' },
+  emoji: { fontSize: 36, marginTop: 4 },
+  tonightDot: { position: 'absolute', top: 0, right: -2, width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.pink, borderWidth: 1.5, borderColor: Colors.darkCard },
+  info: { flex: 1, gap: 3 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  title: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '600', flex: 1 },
   seller: { fontSize: FontSizes.xs, color: Colors.textSecondary },
-  threshold: { fontSize: FontSizes.xs, color: Colors.textTertiary, marginTop: 2 },
-  right: {},
-  valueBadge: { backgroundColor: Colors.gold, borderRadius: Radius.sm, paddingHorizontal: 8, paddingVertical: 3 },
-  valueText: { fontSize: FontSizes.xs, fontWeight: '800', color: Colors.ink },
-  divider: { height: 1, backgroundColor: Colors.darkBorder, marginVertical: Spacing.sm },
+  valueRatio: { fontSize: 9, color: Colors.gold, fontWeight: '600' },
+  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
+  progressLabel: { fontSize: 9, color: Colors.textTertiary, minWidth: 26, textAlign: 'right' },
+  scarcity: { fontSize: 9, color: Colors.danger, fontWeight: '700', marginTop: 2 },
+
+  statusTag: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: Radius.sm, paddingHorizontal: 8, paddingVertical: 4, marginBottom: Spacing.sm },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { fontSize: 9, fontWeight: '700' },
+
+  divider: { height: 1, backgroundColor: Colors.darkBorder, marginBottom: Spacing.sm },
   cardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   statBox: { alignItems: 'center' },
   statVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
-  statLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
-  addMore: { backgroundColor: Colors.lilac, borderRadius: Radius.pill, paddingHorizontal: 14, paddingVertical: 6 },
+  statLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2 },
+  addMore: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: Colors.lilac, borderRadius: Radius.pill, paddingHorizontal: 12, paddingVertical: 6,
+  },
   addMoreText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
+
+  empty: { alignItems: 'center', paddingVertical: 60 },
+  emptyEmoji: { fontSize: 44, marginBottom: 12 },
+  emptyTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: 6 },
+  emptySub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center' },
 });

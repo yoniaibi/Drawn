@@ -8,28 +8,37 @@ import ScreenWrapper from '../../src/components/ScreenWrapper';
 import { formatTicketPrice } from '../../src/utils/countdown';
 
 const MENU = [
-  { label: 'My wallet', icon: 'wallet-outline', route: '/wallet' },
-  { label: 'Notifications', icon: 'notifications-outline', route: null },
-  { label: 'Become a seller', icon: 'storefront-outline', route: '/seller/gate' },
-  { label: 'Seller dashboard', icon: 'bar-chart-outline', route: '/seller/dashboard' },
-  { label: 'Privacy policy', icon: 'shield-outline', route: null },
-  { label: 'Terms of service', icon: 'document-text-outline', route: null },
+  { label: 'My wallet', icon: 'wallet-outline', route: '/wallet', sub: 'Top up & see transactions' },
+  { label: 'Notifications', icon: 'notifications-outline', route: null, sub: 'Draw alerts & win notifications' },
+  { label: 'Become a seller', icon: 'storefront-outline', route: '/seller/gate', sub: 'List items & earn cash' },
+  { label: 'Seller dashboard', icon: 'bar-chart-outline', route: '/seller/dashboard', sub: 'Your draws & earnings' },
+  { label: 'Privacy policy', icon: 'shield-outline', route: null, sub: null },
+  { label: 'Terms of service', icon: 'document-text-outline', route: null, sub: null },
+];
+
+const RECENT_WINS = [
+  { emoji: '👟', item: 'Jordan 1 Chicago', value: '£280', date: 'Last week' },
 ];
 
 export default function AccountScreen() {
   const router = useRouter();
   const { handle, avatar, walletBalance, logout } = useAuthStore();
 
+  const referralCode = 'DRAWN-' + (handle ?? 'YOU').replace('@', '').toUpperCase().slice(0, 5);
+
   return (
     <ScreenWrapper>
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Profile */}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Profile hero */}
         <View style={styles.profile}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{avatar}</Text>
+          <View style={styles.avatarRing}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{avatar}</Text>
+            </View>
           </View>
           <Text style={styles.handle}>{handle}</Text>
           <View style={styles.balancePill}>
+            <Ionicons name="wallet" size={12} color={Colors.gold} />
             <Text style={styles.balanceText}>{formatTicketPrice(walletBalance)}</Text>
           </View>
         </View>
@@ -46,30 +55,76 @@ export default function AccountScreen() {
             <Text style={styles.statLabel}>Tickets held</Text>
           </View>
           <View style={styles.statDivider} />
+          <View style={[styles.stat]}>
+            <Text style={[styles.statVal, { color: Colors.gold }]}>1</Text>
+            <Text style={styles.statLabel}>Won 🏆</Text>
+          </View>
+          <View style={styles.statDivider} />
           <View style={styles.stat}>
-            <Text style={styles.statVal}>1</Text>
-            <Text style={styles.statLabel}>Won</Text>
+            <Text style={[styles.statVal, { color: Colors.lilac }]}>£280</Text>
+            <Text style={styles.statLabel}>Won total</Text>
           </View>
         </View>
 
+        {/* Recent wins */}
+        {RECENT_WINS.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Recent wins</Text>
+            {RECENT_WINS.map((w, i) => (
+              <View key={i} style={styles.winCard}>
+                <Text style={styles.winEmoji}>{w.emoji}</Text>
+                <View style={styles.winInfo}>
+                  <Text style={styles.winItem}>{w.item}</Text>
+                  <Text style={styles.winDate}>{w.date}</Text>
+                </View>
+                <View style={styles.winValueBadge}>
+                  <Text style={styles.winValue}>{w.value}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Referral CTA */}
+        <TouchableOpacity style={styles.referralCard} onPress={() => {}}>
+          <View style={styles.referralLeft}>
+            <Text style={styles.referralTitle}>Invite friends, earn tickets 🎫</Text>
+            <Text style={styles.referralSub}>
+              Share your code and get <Text style={styles.referralBold}>£1 credit</Text> for every friend who joins
+            </Text>
+            <View style={styles.referralCodeBox}>
+              <Text style={styles.referralCode}>{referralCode}</Text>
+            </View>
+          </View>
+          <Ionicons name="share-social" size={22} color={Colors.lilac} />
+        </TouchableOpacity>
+
         {/* Menu */}
         <View style={styles.menu}>
-          {MENU.map(item => (
+          {MENU.map((item, idx) => (
             <TouchableOpacity
               key={item.label}
-              style={styles.menuRow}
+              style={[styles.menuRow, idx === MENU.length - 1 && { borderBottomWidth: 0 }]}
               onPress={() => item.route && router.push(item.route as any)}
             >
-              <Ionicons name={item.icon as any} size={18} color={Colors.textSecondary} />
-              <Text style={styles.menuLabel}>{item.label}</Text>
+              <View style={styles.menuIconBox}>
+                <Ionicons name={item.icon as any} size={17} color={Colors.lilac} />
+              </View>
+              <View style={styles.menuTextBox}>
+                <Text style={styles.menuLabel}>{item.label}</Text>
+                {item.sub && <Text style={styles.menuSub}>{item.sub}</Text>}
+              </View>
               <Ionicons name="chevron-forward" size={14} color={Colors.textTertiary} />
             </TouchableOpacity>
           ))}
         </View>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={() => { logout(); router.replace('/(auth)'); }}>
+          <Ionicons name="log-out-outline" size={16} color={Colors.danger} />
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
+
+        <Text style={styles.version}>Drawn · v1.0 · London, UK</Text>
       </ScrollView>
     </ScreenWrapper>
   );
@@ -77,29 +132,84 @@ export default function AccountScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: Spacing.lg, paddingBottom: 40 },
+
   profile: { alignItems: 'center', paddingVertical: Spacing.xl },
+  avatarRing: {
+    width: 76, height: 76, borderRadius: 38,
+    borderWidth: 2, borderColor: Colors.lilac,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 10,
+  },
   avatar: {
     width: 64, height: 64, borderRadius: 32,
-    backgroundColor: Colors.royal, alignItems: 'center', justifyContent: 'center', marginBottom: 10,
+    backgroundColor: Colors.royal, alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { fontSize: 24, color: Colors.white, fontWeight: '700' },
+  avatarText: { fontSize: 26, color: Colors.white, fontWeight: '700' },
   handle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: 8 },
-  balancePill: { backgroundColor: Colors.darkCard, borderRadius: Radius.pill, paddingHorizontal: 14, paddingVertical: 5 },
+  balancePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.pill,
+    paddingHorizontal: 14, paddingVertical: 6,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.2)',
+  },
   balanceText: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700' },
+
   statsRow: {
     flexDirection: 'row', backgroundColor: Colors.darkCard, borderRadius: Radius.lg,
-    padding: Spacing.lg, marginBottom: Spacing.lg,
+    padding: Spacing.md, marginBottom: Spacing.lg,
   },
   stat: { flex: 1, alignItems: 'center' },
-  statVal: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white },
-  statLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+  statVal: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white },
+  statLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2, textAlign: 'center' },
   statDivider: { width: 1, backgroundColor: Colors.darkBorder },
+
+  section: { marginBottom: Spacing.lg },
+  sectionTitle: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '700', letterSpacing: 0.5, marginBottom: 8, textTransform: 'uppercase' },
+
+  winCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md, padding: Spacing.md,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.15)',
+  },
+  winEmoji: { fontSize: 28 },
+  winInfo: { flex: 1 },
+  winItem: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '600' },
+  winDate: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+  winValueBadge: { backgroundColor: Colors.gold, borderRadius: Radius.sm, paddingHorizontal: 8, paddingVertical: 3 },
+  winValue: { fontSize: FontSizes.xs, fontWeight: '800', color: Colors.ink },
+
+  referralCard: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(109,40,217,0.15)', borderRadius: Radius.lg,
+    padding: Spacing.md, marginBottom: Spacing.lg,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.3)',
+  },
+  referralLeft: { flex: 1 },
+  referralTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700', marginBottom: 4 },
+  referralSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, lineHeight: 16 },
+  referralBold: { color: Colors.gold, fontWeight: '700' },
+  referralCodeBox: {
+    alignSelf: 'flex-start', marginTop: 8,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.sm,
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderWidth: 1, borderColor: Colors.darkBorder,
+  },
+  referralCode: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '700', letterSpacing: 1 },
+
   menu: { backgroundColor: Colors.darkCard, borderRadius: Radius.lg, overflow: 'hidden', marginBottom: Spacing.lg },
   menuRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     padding: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.darkBorder,
   },
-  menuLabel: { flex: 1, fontSize: FontSizes.base, color: Colors.white },
-  logoutBtn: { alignItems: 'center', padding: Spacing.md },
+  menuIconBox: {
+    width: 32, height: 32, borderRadius: Radius.sm,
+    backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center',
+  },
+  menuTextBox: { flex: 1 },
+  menuLabel: { fontSize: FontSizes.base, color: Colors.white },
+  menuSub: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
+
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, padding: Spacing.md, marginBottom: 4 },
   logoutText: { fontSize: FontSizes.base, color: Colors.danger, fontWeight: '600' },
+
+  version: { textAlign: 'center', fontSize: 9, color: Colors.textTertiary },
 });
