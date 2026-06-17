@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { useRouter } from 'expo-router';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
+import { supabase } from '../../src/lib/supabase';
 
 const CATEGORIES: { label: string; emoji: string }[] = [
   { label: 'Fashion', emoji: '👗' },
@@ -147,7 +148,18 @@ export default function InterestsScreen() {
 
       <PrimaryButton
         label="Let's go →"
-        onPress={() => router.replace('/(tabs)')}
+        onPress={async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.from('profiles').update({
+              interests: cats,
+              preferred_sizes: sizes,
+              price_range: price,
+              notify_before_close: notify,
+            }).eq('id', user.id);
+          }
+          router.replace('/(tabs)');
+        }}
         style={{ marginTop: Spacing.xl, opacity: canProceed ? 1 : 0.4 }}
         disabled={!canProceed}
       />

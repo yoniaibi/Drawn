@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Animated as RNAnimated, Modal, Pressable,
+  Animated as RNAnimated, Modal, Pressable, ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { MOCK_DRAWS } from '../../src/mocks';
+import type { Draw } from '../../src/mocks';
 import { useAuthStore } from '../../src/store';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { supabase } from '../../src/lib/supabase';
+import { fetchDrawById } from '../../src/services/draws';
 
 const QUICK_AMOUNTS = [1, 5, 10, 25];
 
@@ -27,7 +29,25 @@ type FlowState = 'idle' | 'confirm' | 'loading' | 'success';
 export default function PurchaseScreen() {
   const { drawId } = useLocalSearchParams<{ drawId: string }>();
   const router = useRouter();
-  const draw = MOCK_DRAWS.find(d => d.id === drawId);
+
+  const [draw, setDraw] = useState<Draw | null>(MOCK_DRAWS.find(d => d.id === drawId) ?? null);
+  const [drawLoading, setDrawLoading] = useState(!MOCK_DRAWS.find(d => d.id === drawId));
+
+  useEffect(() => {
+    if (!drawId || MOCK_DRAWS.find(d => d.id === drawId)) return;
+    fetchDrawById(drawId).then(d => {
+      setDraw(d);
+      setDrawLoading(false);
+    });
+  }, [drawId]);
+
+  if (drawLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={Colors.lilac} />
+      </View>
+    );
+  }
 
   if (!draw) {
     return (

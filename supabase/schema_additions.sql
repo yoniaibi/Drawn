@@ -45,6 +45,15 @@ $$;
 -- To run manually right now: select net.http_post(url := '...', headers := '...', body := '{}');
 
 -- ============================================================
+-- PROFILES: interests + preferences (from onboarding)
+-- ============================================================
+alter table public.profiles
+  add column if not exists interests         text[]    default '{}',
+  add column if not exists preferred_sizes   text[]    default '{}',
+  add column if not exists price_range       text      default 'any',
+  add column if not exists notify_before_close boolean default true;
+
+-- ============================================================
 -- SELLER APPLICATIONS TABLE
 -- ============================================================
 create table if not exists public.seller_applications (

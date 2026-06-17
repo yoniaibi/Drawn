@@ -207,6 +207,14 @@ export default function LiveScreen() {
         {/* Tonight's draws */}
         <Text style={styles.sectionLabel}>TONIGHT'S DRAWS</Text>
 
+        {tonightDraws.length === 0 && (
+          <View style={styles.noDrawsCard}>
+            <Text style={styles.noDrawsEmoji}>🌙</Text>
+            <Text style={styles.noDrawsTitle}>No draws tonight</Text>
+            <Text style={styles.noDrawsSub}>New draws go live every evening. Check back soon — something good is always on the way.</Text>
+          </View>
+        )}
+
         {tonightDraws.map((draw, i) => {
           const remaining = draw.totalTickets - draw.ticketsSold;
           const valueRatio = `${draw.ticketPrice}p → £${draw.retailValue.toLocaleString()}`;
@@ -304,6 +312,11 @@ const styles = StyleSheet.create({
   youBadge: { backgroundColor: Colors.pink, borderRadius: Radius.pill, paddingHorizontal: 8, paddingVertical: 3 },
   youText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
   scarceText: { fontSize: 9, color: Colors.danger, fontWeight: '700' },
+
+  noDrawsCard: { alignItems: 'center', padding: Spacing.xl, marginHorizontal: Spacing.lg, gap: 8 },
+  noDrawsEmoji: { fontSize: 40, marginBottom: 4 },
+  noDrawsTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
+  noDrawsSub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 18 },
 
   legalNote: { padding: Spacing.lg, alignItems: 'center' },
   legalText: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', lineHeight: 14 },

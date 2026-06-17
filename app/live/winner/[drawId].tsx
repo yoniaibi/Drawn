@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated as RNAnimated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -16,11 +16,54 @@ import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src
 import { MOCK_WINNER } from '../../../src/mocks';
 import Confetti from '../../../src/components/Confetti';
 import PrimaryButton from '../../../src/components/PrimaryButton';
+import { supabase } from '../../../src/lib/supabase';
+
+interface WinnerData {
+  winnerHandle: string;
+  emoji: string;
+  item: string;
+  retailValue: number;
+  ticketPrice: number;
+  sellerEarned: number;
+  sellerHandle: string;
+}
+
+function mapToWinner(db: any): WinnerData {
+  const earned = Math.round((db.tickets_sold ?? 0) * (db.ticket_price ?? 0) * 0.846);
+  return {
+    winnerHandle: db.winner_handle ?? '@winner',
+    emoji: db.emoji ?? '🎁',
+    item: db.title ?? 'Prize',
+    retailValue: db.retail_value ?? 0,
+    ticketPrice: db.ticket_price ?? 10,
+    sellerEarned: earned,
+    sellerHandle: db.seller_handle ?? '@seller',
+  };
+}
 
 export default function WinnerScreen() {
   const { drawId } = useLocalSearchParams<{ drawId: string }>();
   const router = useRouter();
-  const winner = MOCK_WINNER;
+
+  const [winner, setWinner] = useState<WinnerData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!drawId) { setWinner(mapToWinner(MOCK_WINNER)); setLoading(false); return; }
+    supabase
+      .from('draws')
+      .select('title, emoji, retail_value, ticket_price, tickets_sold, winner_handle, seller_handle')
+      .eq('id', drawId)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setWinner(mapToWinner(MOCK_WINNER));
+        } else {
+          setWinner(mapToWinner(data));
+        }
+        setLoading(false);
+      });
+  }, [drawId]);
 
   // Entrance animations
   const kickerOpacity = useSharedValue(0);
@@ -32,20 +75,21 @@ export default function WinnerScreen() {
   const pulseScale = useSharedValue(1);
 
   useEffect(() => {
-    kickerOpacity.value = withDelay(400, withTiming(1, { duration: 500 }));
-    nameOpacity.value = withDelay(700, withTiming(1, { duration: 400 }));
-    nameScale.value = withDelay(700, withSpring(1, { damping: 10, stiffness: 120 }));
-    cardTranslate.value = withDelay(1100, withSpring(0, { damping: 14, stiffness: 100 }));
-    cardOpacity.value = withDelay(1100, withTiming(1, { duration: 400 }));
-    glowOpacity.value = withDelay(1500, withTiming(1, { duration: 600 }));
-    pulseScale.value = withDelay(1800, withRepeat(
+    if (!winner) return;
+    kickerOpacity.value = withDelay(300, withTiming(1, { duration: 500 }));
+    nameOpacity.value = withDelay(600, withTiming(1, { duration: 400 }));
+    nameScale.value = withDelay(600, withSpring(1, { damping: 10, stiffness: 120 }));
+    cardTranslate.value = withDelay(1000, withSpring(0, { damping: 14, stiffness: 100 }));
+    cardOpacity.value = withDelay(1000, withTiming(1, { duration: 400 }));
+    glowOpacity.value = withDelay(1400, withTiming(1, { duration: 600 }));
+    pulseScale.value = withDelay(1700, withRepeat(
       withSequence(
         withTiming(1.04, { duration: 900, easing: Easing.inOut(Easing.ease) }),
         withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
     ));
-  }, []);
+  }, [winner]);
 
   const kickerStyle = useAnimatedStyle(() => ({ opacity: kickerOpacity.value }));
   const nameStyle = useAnimatedStyle(() => ({
@@ -59,7 +103,17 @@ export default function WinnerScreen() {
   const glowStyle = useAnimatedStyle(() => ({ opacity: glowOpacity.value }));
   const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: pulseScale.value }] }));
 
-  const valueMultiple = Math.round(winner.retailValue / (winner.ticketPrice / 100));
+  if (loading) {
+    return (
+      <View style={[styles.screen, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={Colors.gold} size="large" />
+      </View>
+    );
+  }
+
+  if (!winner) return null;
+
+  const valueMultiple = Math.round(winner.retailValue / winner.ticketPrice);
 
   return (
     <View style={styles.screen}>
@@ -70,23 +124,19 @@ export default function WinnerScreen() {
       </TouchableOpacity>
 
       <View style={styles.body}>
-        {/* Kicker */}
         <Animated.Text style={[styles.kicker, kickerStyle]}>🏆 WINNER ANNOUNCED</Animated.Text>
 
-        {/* Winner name */}
         <Animated.Text style={[styles.name, nameStyle]}>
           {winner.winnerHandle}<Text style={styles.dot}>.</Text>
         </Animated.Text>
         <Animated.Text style={[styles.won, kickerStyle]}>won tonight's 9pm draw</Animated.Text>
 
-        {/* Prize card */}
         <Animated.View style={[styles.prizeCardWrap, cardStyle]}>
           <Animated.View style={[styles.prizeGlow, glowStyle]} />
           <Animated.View style={[styles.prizeCard, pulseStyle]}>
             <Text style={styles.prizeEmoji}>{winner.emoji}</Text>
             <Text style={styles.prizeTitle}>{winner.item}</Text>
 
-            {/* Value ratio hero */}
             <View style={styles.valueRatioHero}>
               <View style={styles.valueRatioSide}>
                 <Text style={styles.valueRatioAmount}>{winner.ticketPrice}p</Text>
@@ -97,19 +147,19 @@ export default function WinnerScreen() {
                 <Text style={styles.valueMultiple}>{valueMultiple}×</Text>
               </View>
               <View style={styles.valueRatioSide}>
-                <Text style={[styles.valueRatioAmount, { color: Colors.gold }]}>£{winner.retailValue.toLocaleString()}</Text>
+                <Text style={[styles.valueRatioAmount, { color: Colors.gold }]}>
+                  £{(winner.retailValue / 100).toLocaleString()}
+                </Text>
                 <Text style={styles.valueRatioSubLabel}>retail value</Text>
               </View>
             </View>
           </Animated.View>
         </Animated.View>
 
-        {/* Seller note */}
         <Animated.Text style={[styles.sellerNote, glowStyle]}>
-          @sophiestyle earned £{winner.sellerEarned} clearing her wardrobe 💜
+          {winner.sellerHandle} earned £{(winner.sellerEarned / 100).toFixed(0)} on this draw 💜
         </Animated.Text>
 
-        {/* Share */}
         <Animated.View style={[glowStyle, styles.shareRow]}>
           <TouchableOpacity style={styles.shareBtn} onPress={() => router.push(`/share/${drawId}`)}>
             <Ionicons name="share-social" size={16} color={Colors.royal} />
@@ -129,19 +179,15 @@ export default function WinnerScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.royal },
   close: { position: 'absolute', top: 56, right: Spacing.lg, zIndex: 20 },
-
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl, zIndex: 2, gap: 8 },
-
   kicker: { fontSize: FontSizes.xs, fontWeight: '800', letterSpacing: 2, color: '#E9D5FF', textAlign: 'center' },
   name: { fontFamily: Fonts.serif, fontSize: 46, color: Colors.white, lineHeight: 48, textAlign: 'center' },
   dot: { color: Colors.pink },
   won: { fontSize: FontSizes.sm, color: '#E9D5FF', textAlign: 'center', marginBottom: 12 },
-
   prizeCardWrap: { width: '100%', position: 'relative', marginBottom: 8 },
   prizeGlow: {
     position: 'absolute', top: -20, left: -20, right: -20, bottom: -20,
-    borderRadius: Radius.xl + 20,
-    backgroundColor: 'rgba(249,200,70,0.12)',
+    borderRadius: Radius.xl + 20, backgroundColor: 'rgba(249,200,70,0.12)',
   },
   prizeCard: {
     backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: Radius.xl,
@@ -150,7 +196,6 @@ const styles = StyleSheet.create({
   },
   prizeEmoji: { fontSize: 58, marginBottom: 8 },
   prizeTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '800', marginBottom: 18, textAlign: 'center' },
-
   valueRatioHero: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   valueRatioSide: { alignItems: 'center' },
   valueRatioAmount: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white },
@@ -158,9 +203,7 @@ const styles = StyleSheet.create({
   valueRatioMiddle: { alignItems: 'center' },
   valueRatioArrow: { fontSize: 20, color: 'rgba(255,255,255,0.4)' },
   valueMultiple: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '800', letterSpacing: 0.5, marginTop: 2 },
-
   sellerNote: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'center', lineHeight: 18 },
-
   shareRow: { width: '100%', alignItems: 'center' },
   shareBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -169,7 +212,6 @@ const styles = StyleSheet.create({
     ...Shadows.glow,
   },
   shareText: { fontSize: FontSizes.base, color: Colors.royal, fontWeight: '800' },
-
   cta: { padding: Spacing.lg, zIndex: 2, gap: 8 },
   ctaHint: { textAlign: 'center', fontSize: FontSizes.xs, color: Colors.textSecondary },
 });

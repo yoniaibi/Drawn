@@ -23,7 +23,7 @@ export default function AccountScreen() {
   const { user, handle, avatar, walletBalance, logout } = useAuthStore();
   const { streak } = useStreak();
 
-  const [stats, setStats] = useState<UserStats>({ activeDraws: 0, totalTickets: 0, wins: 0, totalWon: 0 });
+  const [stats, setStats] = useState<UserStats | null>(null);
   const [wins, setWins] = useState<WinResult[]>([]);
 
   useEffect(() => {
@@ -65,27 +65,35 @@ export default function AccountScreen() {
 
         {/* Stats */}
         <View style={styles.statsRow}>
-          <View style={styles.stat}>
-            <Text style={styles.statVal}>{stats.activeDraws}</Text>
-            <Text style={styles.statLabel}>Active draws</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.stat}>
-            <Text style={styles.statVal}>{stats.totalTickets}</Text>
-            <Text style={styles.statLabel}>Tickets</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={[styles.stat]}>
-            <Text style={[styles.statVal, { color: Colors.gold }]}>{stats.wins}</Text>
-            <Text style={styles.statLabel}>Won 🏆</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.stat}>
-            <Text style={[styles.statVal, { color: Colors.lilac }]}>
-              {stats.totalWon > 0 ? `£${(stats.totalWon / 100).toFixed(0)}` : '£0'}
-            </Text>
-            <Text style={styles.statLabel}>Won total</Text>
-          </View>
+          {stats === null ? (
+            <View style={{ flex: 1, alignItems: 'center', paddingVertical: 8 }}>
+              <Text style={{ color: Colors.textTertiary, fontSize: FontSizes.xs }}>Loading…</Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.stat}>
+                <Text style={styles.statVal}>{stats.activeDraws}</Text>
+                <Text style={styles.statLabel}>Active draws</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.stat}>
+                <Text style={styles.statVal}>{stats.totalTickets}</Text>
+                <Text style={styles.statLabel}>Tickets</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={[styles.stat]}>
+                <Text style={[styles.statVal, { color: Colors.gold }]}>{stats.wins}</Text>
+                <Text style={styles.statLabel}>Won 🏆</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.stat}>
+                <Text style={[styles.statVal, { color: Colors.lilac }]}>
+                  {stats.totalWon > 0 ? `£${(stats.totalWon / 100).toFixed(0)}` : '£0'}
+                </Text>
+                <Text style={styles.statLabel}>Won total</Text>
+              </View>
+            </>
+          )}
         </View>
 
         {/* Recent wins */}
