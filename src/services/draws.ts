@@ -207,3 +207,101 @@ export async function fetchWalletTransactions(userId: string): Promise<WalletTra
     return MOCK_WALLET.transactions;
   }
 }
+
+// ─── Seller ──────────────────────────────────────────────────────────────────
+
+export interface SellerStats {
+  totalEarned: number;
+  pendingPayout: number;
+}
+
+export async function fetchSellerDraws(sellerId: string): Promise<Draw[]> {
+  try {
+    const { data: draws, error } = await supabase
+      .from('draws')
+      .select('*')
+      .eq('seller_id', sellerId)
+      .order('created_at', { ascending: false });
+
+    if (error || !draws || draws.length === 0) return [];
+
+    const bundleDrawIds = draws.filter(d => d.is_bundle).map(d => d.id);
+    let bundleMap: Record<string, DBBundleItem[]> = {};
+    if (bundleDrawIds.length > 0) {
+      const { data: items } = await supabase
+        .from('bundle_items')
+        .select('*')
+        .in('draw_id', bundleDrawIds);
+      if (items) {
+        for (const item of items) {
+          if (!bundleMap[item.draw_id]) bundleMap[item.draw_id] = [];
+          bundleMap[item.draw_id].push(item);
+        }
+      }
+    }
+
+    return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchSellerStats(sellerId: string): Promise<SellerStats> {
+  try {
+    const { data: txns } = await supabase
+      .from('wallet_transactions')
+      .select('amount, type')
+      .eq('user_id', sellerId)
+      .eq('type', 'payout');
+
+    const totalEarned = txns?.reduce((sum, t) => sum + t.amount, 0) ?? 0;
+
+    const { data: pendingDraws } = await supabase
+      .from('draws')
+      .select('tickets_sold, ticket_price')
+      .eq('seller_id', sellerId)
+      .eq('status', 'completed');
+
+    const pendingPayout = pendingDraws
+      ? pendingDraws.reduce((sum, d) => sum + Math.round(d.tickets_sold * d.ticket_price * 0.846), 0) - totalEarned
+      : 0;
+
+    return { totalEarned, pendingPayout: Math.max(0, pendingPayout) };
+  } catch {
+    return { totalEarned: 0, pendingPayout: 0 };
+  }
+}
+
+// ─── User stats ──────────────────────────────────────────────────────────────
+
+export interface UserStats {
+  activeDraws: number;
+  totalTickets: number;
+  wins: number;
+  totalWon: number;
+}
+
+export async function fetchUserStats(userId: string): Promise<UserStats> {
+  try {
+    const [ticketsRes, winsRes] = await Promise.all([
+      supabase.from('tickets').select('quantity, draw_id').eq('user_id', userId),
+      supabase
+        .from('draws')
+        .select('retail_value')
+        .eq('winner_user_id', userId)
+        .eq('status', 'completed'),
+    ]);
+
+    const tickets = ticketsRes.data ?? [];
+    const wins = winsRes.data ?? [];
+
+    return {
+      activeDraws: new Set(tickets.map(t => t.draw_id)).size,
+      totalTickets: tickets.reduce((s, t) => s + t.quantity, 0),
+      wins: wins.length,
+      totalWon: wins.reduce((s, w) => s + w.retail_value, 0),
+    };
+  } catch {
+    return { activeDraws: 0, totalTickets: 0, wins: 0, totalWon: 0 };
+  }
+}

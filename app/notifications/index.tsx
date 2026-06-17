@@ -1,55 +1,126 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { MOCK_NOTIFICATIONS, Notification } from '../../src/mocks';
+import { useAuthStore } from '../../src/store';
+import { fetchWalletTransactions, checkForWins, WalletTransaction, WinResult } from '../../src/services/draws';
+import { MOCK_NOTIFICATIONS } from '../../src/mocks';
 
-function iconForType(type: Notification['type']): { name: string; color: string } {
+type NotifItem = {
+  id: string;
+  type: 'win' | 'payout' | 'purchase' | 'reminder' | 'threshold' | 'approved';
+  title: string;
+  body: string;
+  time: string;
+  read: boolean;
+};
+
+function mapTxnToNotif(t: WalletTransaction): NotifItem {
+  const isPayout = t.amount > 0 && t.label.toLowerCase().includes('payout');
+  const isWin = t.label.toLowerCase().includes('won') || t.label.toLowerCase().includes('winner');
+  const type: NotifItem['type'] = isWin ? 'win' : isPayout ? 'payout' : 'purchase';
+  return {
+    id: t.id,
+    type,
+    title: isWin ? '🏆 You won!' : isPayout ? '💸 Payout received' : '🎫 Tickets purchased',
+    body: t.label,
+    time: t.date,
+    read: false,
+  };
+}
+
+function mapWinToNotif(w: WinResult): NotifItem {
+  return {
+    id: `win-${w.drawId}`,
+    type: 'win',
+    title: `🏆 You won ${w.drawEmoji} ${w.drawTitle}!`,
+    body: `Worth £${(w.retailValue / 100).toFixed(0)} — congratulations! We'll be in touch to arrange delivery.`,
+    time: w.completedAt ? new Date(w.completedAt).toLocaleDateString() : 'Recently',
+    read: false,
+  };
+}
+
+function iconForType(type: NotifItem['type']): { name: string; color: string } {
   switch (type) {
-    case 'win':
-      return { name: 'trophy', color: Colors.gold };
+    case 'win':      return { name: 'trophy', color: Colors.gold };
+    case 'payout':   return { name: 'cash', color: Colors.pink };
+    case 'purchase': return { name: 'ticket', color: Colors.lilac };
     case 'reminder':
-      return { name: 'alarm', color: Colors.lilac };
-    case 'threshold':
-      return { name: 'checkmark-circle', color: Colors.lilac };
-    case 'approved':
-      return { name: 'shield-checkmark', color: Colors.pink };
-    case 'payout':
-      return { name: 'cash', color: Colors.pink };
-    default:
-      return { name: 'notifications', color: Colors.textSecondary };
+    case 'threshold': return { name: 'alarm', color: Colors.lilac };
+    case 'approved': return { name: 'shield-checkmark', color: Colors.pink };
+    default:         return { name: 'notifications', color: Colors.textSecondary };
   }
 }
 
-function bgForType(type: Notification['type']): string {
+function bgForType(type: NotifItem['type']): string {
   switch (type) {
     case 'win':      return 'rgba(249,200,70,0.08)';
-    case 'reminder':
-    case 'threshold': return 'rgba(139,92,246,0.08)';
-    case 'approved':
-    case 'payout':   return 'rgba(244,114,182,0.08)';
+    case 'payout':
+    case 'approved': return 'rgba(244,114,182,0.08)';
     default:         return Colors.darkCard;
   }
 }
 
-function borderForType(type: Notification['type']): string {
+function borderForType(type: NotifItem['type']): string {
   switch (type) {
     case 'win':      return 'rgba(249,200,70,0.2)';
-    case 'reminder':
-    case 'threshold': return 'rgba(139,92,246,0.2)';
-    case 'approved':
-    case 'payout':   return 'rgba(244,114,182,0.2)';
+    case 'payout':
+    case 'approved': return 'rgba(244,114,182,0.2)';
     default:         return Colors.darkBorder;
   }
 }
 
 export default function NotificationsScreen() {
   const router = useRouter();
+  const { user } = useAuthStore();
+
+  const [items, setItems] = useState<NotifItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      // Show mocks for unauthenticated preview
+      const mockItems: NotifItem[] = MOCK_NOTIFICATIONS.map(n => ({
+        id: n.id,
+        type: n.type as NotifItem['type'],
+        title: n.title,
+        body: n.body,
+        time: n.time,
+        read: n.read,
+      }));
+      setItems(mockItems);
+      setLoading(false);
+      return;
+    }
+
+    Promise.all([
+      fetchWalletTransactions(user.id),
+      checkForWins(user.id),
+    ]).then(([txns, wins]) => {
+      const winNotifs = wins.map(mapWinToNotif);
+      const txnNotifs = txns.map(mapTxnToNotif);
+      // Wins first, then transactions
+      const combined = [...winNotifs, ...txnNotifs];
+      if (combined.length === 0) {
+        // Fallback to mocks so screen is never empty during demo
+        const mockItems: NotifItem[] = MOCK_NOTIFICATIONS.map(n => ({
+          id: n.id,
+          type: n.type as NotifItem['type'],
+          title: n.title,
+          body: n.body,
+          time: n.time,
+          read: n.read,
+        }));
+        setItems(mockItems);
+      } else {
+        setItems(combined);
+      }
+    }).finally(() => setLoading(false));
+  }, [user]);
 
   return (
     <View style={styles.screen}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.back} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={22} color={Colors.textSecondary} />
@@ -58,7 +129,9 @@ export default function NotificationsScreen() {
         <View style={{ width: 34 }} />
       </View>
 
-      {MOCK_NOTIFICATIONS.length === 0 ? (
+      {loading ? (
+        <ActivityIndicator color={Colors.lilac} style={{ marginTop: 60 }} />
+      ) : items.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyEmoji}>🔔</Text>
           <Text style={styles.emptyTitle}>No notifications yet</Text>
@@ -66,7 +139,7 @@ export default function NotificationsScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-          {MOCK_NOTIFICATIONS.map(n => {
+          {items.map(n => {
             const { name: iconName, color: iconColor } = iconForType(n.type);
             return (
               <View
@@ -106,18 +179,15 @@ const styles = StyleSheet.create({
   },
   back: { padding: 4 },
   headerTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.md, color: Colors.white },
-
   list: { padding: Spacing.md, gap: 10, paddingBottom: 40 },
   row: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 12,
-    borderRadius: Radius.md, padding: Spacing.md,
-    borderWidth: 1,
+    borderRadius: Radius.md, padding: Spacing.md, borderWidth: 1,
   },
   rowUnread: { borderLeftWidth: 3, borderLeftColor: Colors.lilac },
   iconBox: {
     width: 36, height: 36, borderRadius: Radius.sm,
-    alignItems: 'center', justifyContent: 'center',
-    flexShrink: 0,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   textBox: { flex: 1 },
   rowTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '600', marginBottom: 2 },
@@ -125,7 +195,6 @@ const styles = StyleSheet.create({
   meta: { alignItems: 'flex-end', gap: 6, flexShrink: 0 },
   time: { fontSize: 9, color: Colors.textTertiary },
   unreadDot: { width: 7, height: 7, borderRadius: 99, backgroundColor: Colors.lilac },
-
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, padding: Spacing.xxl },
   emptyEmoji: { fontSize: 40, marginBottom: 4 },
   emptyTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },

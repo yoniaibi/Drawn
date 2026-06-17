@@ -43,3 +43,27 @@ $$;
 
 -- To verify cron jobs: select * from cron.job;
 -- To run manually right now: select net.http_post(url := '...', headers := '...', body := '{}');
+
+-- ============================================================
+-- SELLER APPLICATIONS TABLE
+-- ============================================================
+create table if not exists public.seller_applications (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references public.profiles on delete cascade not null,
+  handle      text,
+  full_name   text not null,
+  instagram   text,
+  first_item  text not null,
+  status      text not null default 'pending', -- pending | approved | rejected
+  created_at  timestamptz not null default now()
+);
+
+alter table public.seller_applications enable row level security;
+
+create policy "Users can insert their own applications"
+  on public.seller_applications for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can read their own applications"
+  on public.seller_applications for select
+  using (auth.uid() = user_id);

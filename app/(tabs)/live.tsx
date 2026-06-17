@@ -28,7 +28,7 @@ const CHAT_POOL = [
   { handle: '@chloe_j', msg: 'omg I need that Chanel so bad 🙏', color: Colors.pink },
   { handle: '@marcus_t', msg: 'just bought 5 more on the Rolex 👀', color: Colors.gold },
   { handle: '@priya__', msg: 'my first time on here — this is insane', color: Colors.lilac },
-  { handle: '@dan.west', msg: 'LET'S GOOO 🔥🔥🔥', color: Colors.pink },
+  { handle: '@dan.west', msg: "LET'S GOOO 🔥🔥🔥", color: Colors.pink },
   { handle: '@jade_m', msg: 'already in 3 draws tonight lol', color: Colors.lilac },
   { handle: '@sophie_r', msg: '97% on Rolex?? almost there!!', color: Colors.gold },
   { handle: '@ryan.k', msg: 'this is literally better than gambling apps', color: Colors.textSecondary },
@@ -37,7 +37,6 @@ const CHAT_POOL = [
   { handle: '@kian_j', msg: 'sending this to all my friends rn', color: Colors.lilac },
   { handle: '@amy_s', msg: 'got 10 tickets on the designer closet 🤞', color: Colors.textSecondary },
   { handle: '@leo.c', msg: 'this is the most exciting thing on my phone', color: Colors.lilac },
-];
 ];
 
 interface ChatMsg { id: number; handle: string; msg: string; color: string; }

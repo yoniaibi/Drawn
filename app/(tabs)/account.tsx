@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { useAuthStore } from '../../src/store';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { useStreak } from '../../src/hooks/useStreak';
+import { fetchUserStats, checkForWins, UserStats, WinResult } from '../../src/services/draws';
 
 const MENU = [
   { label: 'My wallet', icon: 'wallet-outline', route: '/wallet', sub: 'Top up & see transactions' },
@@ -17,15 +18,21 @@ const MENU = [
   { label: 'Terms of service', icon: 'document-text-outline', route: null, sub: null },
 ];
 
-const RECENT_WINS = [
-  { emoji: '⌚', item: 'Rolex Submariner', value: '£8,500', date: 'Last month', ticketCost: '50p' },
-  { emoji: '👟', item: 'Jordan 1 Chicago', value: '£280', date: 'Last week', ticketCost: '10p' },
-];
-
 export default function AccountScreen() {
   const router = useRouter();
-  const { handle, avatar, walletBalance, logout } = useAuthStore();
+  const { user, handle, avatar, walletBalance, logout } = useAuthStore();
   const { streak } = useStreak();
+
+  const [stats, setStats] = useState<UserStats>({ activeDraws: 0, totalTickets: 0, wins: 0, totalWon: 0 });
+  const [wins, setWins] = useState<WinResult[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    Promise.all([fetchUserStats(user.id), checkForWins(user.id)]).then(([s, w]) => {
+      setStats(s);
+      setWins(w.slice(0, 3));
+    });
+  }, [user]);
 
   const referralCode = 'DRAWN-' + (handle ?? 'YOU').replace('@', '').toUpperCase().slice(0, 5);
 
@@ -59,39 +66,41 @@ export default function AccountScreen() {
         {/* Stats */}
         <View style={styles.statsRow}>
           <View style={styles.stat}>
-            <Text style={styles.statVal}>4</Text>
+            <Text style={styles.statVal}>{stats.activeDraws}</Text>
             <Text style={styles.statLabel}>Active draws</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.stat}>
-            <Text style={styles.statVal}>28</Text>
+            <Text style={styles.statVal}>{stats.totalTickets}</Text>
             <Text style={styles.statLabel}>Tickets</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={[styles.stat]}>
-            <Text style={[styles.statVal, { color: Colors.gold }]}>2</Text>
+            <Text style={[styles.statVal, { color: Colors.gold }]}>{stats.wins}</Text>
             <Text style={styles.statLabel}>Won 🏆</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.stat}>
-            <Text style={[styles.statVal, { color: Colors.lilac }]}>£8,780</Text>
+            <Text style={[styles.statVal, { color: Colors.lilac }]}>
+              {stats.totalWon > 0 ? `£${(stats.totalWon / 100).toFixed(0)}` : '£0'}
+            </Text>
             <Text style={styles.statLabel}>Won total</Text>
           </View>
         </View>
 
         {/* Recent wins */}
-        {RECENT_WINS.length > 0 && (
+        {wins.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Recent wins</Text>
-            {RECENT_WINS.map((w, i) => (
-              <View key={i} style={styles.winCard}>
-                <Text style={styles.winEmoji}>{w.emoji}</Text>
+            {wins.map((w) => (
+              <View key={w.drawId} style={styles.winCard}>
+                <Text style={styles.winEmoji}>{w.drawEmoji}</Text>
                 <View style={styles.winInfo}>
-                  <Text style={styles.winItem}>{w.item}</Text>
-                  <Text style={styles.winDate}>{w.ticketCost} ticket · {w.date}</Text>
+                  <Text style={styles.winItem}>{w.drawTitle}</Text>
+                  <Text style={styles.winDate}>{w.completedAt ? new Date(w.completedAt).toLocaleDateString() : 'Recently'}</Text>
                 </View>
                 <View style={styles.winValueBadge}>
-                  <Text style={styles.winValue}>{w.value}</Text>
+                  <Text style={styles.winValue}>£{(w.retailValue / 100).toFixed(0)}</Text>
                 </View>
               </View>
             ))}

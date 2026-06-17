@@ -5,9 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence } from 'react-native-reanimated';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../src/theme';
 import { MOCK_DRAWS } from '../../src/mocks';
+import type { Draw } from '../../src/mocks';
 import ProgressBar from '../../src/components/ProgressBar';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../src/utils/countdown';
+import { fetchDrawById } from '../../src/services/draws';
 
 const BUYER_TICKERS = [
   '@sophie_k just bought 5 tickets',
@@ -22,7 +24,13 @@ const VIEWER_COUNTS = [84, 91, 88, 97, 103, 89];
 export default function DrawDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const draw = MOCK_DRAWS.find(d => d.id === id);
+
+  const [draw, setDraw] = useState<Draw | null>(MOCK_DRAWS.find(d => d.id === id) ?? null);
+
+  useEffect(() => {
+    if (!id) return;
+    fetchDrawById(id).then(d => { if (d) setDraw(d); });
+  }, [id]);
 
   if (!draw) {
     return (
