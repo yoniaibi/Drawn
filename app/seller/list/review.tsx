@@ -149,7 +149,7 @@ export default function ListReviewScreen() {
             ['Retail value', draft.retailValue > 0 ? `£${(draft.retailValue / 100).toFixed(0)}` : '—'],
             ['Ticket price', formatTicketPrice(draft.ticketPrice)],
             ['Total tickets', draft.totalTickets.toLocaleString()],
-            ['Value ratio', draft.retailValue > 0 ? `${Math.round(draft.retailValue / draft.ticketPrice)}× return for buyers` : '—'],
+            ['Value ratio', draft.retailValue > 0 ? `${Math.round((draft.retailValue / 100) / draft.ticketPrice)}× return for buyers` : '—'],
             ['You receive', `${formatTicketPrice(sellerGets)} (if all sell)`],
           ] as [string, string][]).map(([label, val]) => (
             <View key={label} style={styles.summaryRow}>

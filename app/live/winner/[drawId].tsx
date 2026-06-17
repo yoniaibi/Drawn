@@ -34,7 +34,7 @@ function mapToWinner(db: any): WinnerData {
     winnerHandle: db.winner_handle ?? '@winner',
     emoji: db.emoji ?? '🎁',
     item: db.title ?? 'Prize',
-    retailValue: db.retail_value ?? 0,
+    retailValue: Math.round((db.retail_value ?? 0) / 100), // pence → display-pounds
     ticketPrice: db.ticket_price ?? 10,
     sellerEarned: earned,
     sellerHandle: db.seller_handle ?? '@seller',

@@ -22,7 +22,7 @@ export function mapDraw(db: DBDraw, myTickets = 0, bundleItems?: DBBundleItem[])
     seller: db.seller_handle,
     sellerAvatar: db.seller_avatar,
     emoji: db.emoji,
-    retailValue: db.retail_value,
+    retailValue: Math.round(db.retail_value / 100), // DB stores pence; Draw.retailValue is display-pounds
     ticketPrice: db.ticket_price,
     totalTickets: db.total_tickets,
     ticketsSold: db.tickets_sold,
