@@ -6,6 +6,7 @@ import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { useAuthStore } from '../../src/store';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import { formatTicketPrice } from '../../src/utils/countdown';
+import { useStreak } from '../../src/hooks/useStreak';
 
 const MENU = [
   { label: 'My wallet', icon: 'wallet-outline', route: '/wallet', sub: 'Top up & see transactions' },
@@ -24,6 +25,7 @@ const RECENT_WINS = [
 export default function AccountScreen() {
   const router = useRouter();
   const { handle, avatar, walletBalance, logout } = useAuthStore();
+  const { streak } = useStreak();
 
   const referralCode = 'DRAWN-' + (handle ?? 'YOU').replace('@', '').toUpperCase().slice(0, 5);
 
@@ -38,8 +40,15 @@ export default function AccountScreen() {
             </View>
           </View>
           <Text style={styles.handle}>{handle}</Text>
-          <View style={styles.memberBadge}>
-            <Text style={styles.memberBadgeText}>✦ FOUNDING MEMBER</Text>
+          <View style={styles.badgeRow}>
+            <View style={styles.memberBadge}>
+              <Text style={styles.memberBadgeText}>✦ FOUNDING MEMBER</Text>
+            </View>
+            {streak >= 1 && (
+              <View style={styles.streakBadge}>
+                <Text style={styles.streakBadgeText}>🔥 {streak} day streak</Text>
+              </View>
+            )}
           </View>
           <View style={styles.balancePill}>
             <Ionicons name="wallet" size={12} color={Colors.gold} />
@@ -149,12 +158,19 @@ const styles = StyleSheet.create({
   },
   avatarText: { fontSize: 26, color: Colors.white, fontWeight: '700' },
   handle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: 4 },
+  badgeRow: { flexDirection: 'row', gap: 6, marginBottom: 8 },
   memberBadge: {
     backgroundColor: 'rgba(249,200,70,0.12)', borderRadius: Radius.pill,
-    paddingHorizontal: 10, paddingVertical: 3, marginBottom: 8,
+    paddingHorizontal: 10, paddingVertical: 3,
     borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)',
   },
   memberBadgeText: { fontSize: 8, color: Colors.gold, fontWeight: '800', letterSpacing: 1 },
+  streakBadge: {
+    backgroundColor: 'rgba(244,114,182,0.12)', borderRadius: Radius.pill,
+    paddingHorizontal: 10, paddingVertical: 3,
+    borderWidth: 1, borderColor: 'rgba(244,114,182,0.25)',
+  },
+  streakBadgeText: { fontSize: 8, color: Colors.pink, fontWeight: '800' },
   balancePill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: Colors.darkCard, borderRadius: Radius.pill,

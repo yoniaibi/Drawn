@@ -122,9 +122,8 @@ export default function PurchaseScreen() {
     setFlow('success');
     successOpacity.setValue(1);
     setTimeout(() => {
-      successOpacity.setValue(0);
-      router.replace('/(tabs)');
-    }, 1500);
+      router.replace(`/purchase/success?drawId=${draw.id}&qty=${qty}&total=${total}` as any);
+    }, 600);
   }
 
   return (

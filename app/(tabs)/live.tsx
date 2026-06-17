@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence, Easing } from 'react-native-reanimated';
@@ -9,7 +9,7 @@ import ScreenWrapper from '../../src/components/ScreenWrapper';
 import PrizeWheel from '../../src/components/PrizeWheel';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
 
-const VIEWERS = [1247, 1253, 1241, 1258, 1264, 1249];
+const VIEWERS = [1247, 1253, 1241, 1258, 1264, 1249, 1271, 1266];
 
 const HYPE_MESSAGES = [
   '@chloe_j is watching 👀',
@@ -18,7 +18,29 @@ const HYPE_MESSAGES = [
   '@priya__ is ready for tonight',
   'Threshold hit on Chanel draw! 🔥',
   '3 draws close in under 2 hours',
+  '@dan.west going BIG tonight 🎯',
+  'Rolex is 97% sold — last few tickets!',
+  '@jade_m: omg I actually need that Chanel 😭',
+  '✅ Draw confirmed — all thresholds met',
 ];
+
+const CHAT_POOL = [
+  { handle: '@chloe_j', msg: 'omg I need that Chanel so bad 🙏', color: Colors.pink },
+  { handle: '@marcus_t', msg: 'just bought 5 more on the Rolex 👀', color: Colors.gold },
+  { handle: '@priya__', msg: 'my first time on here — this is insane', color: Colors.lilac },
+  { handle: '@dan.west', msg: 'LET'S GOOO 🔥🔥🔥', color: Colors.pink },
+  { handle: '@jade_m', msg: 'already in 3 draws tonight lol', color: Colors.lilac },
+  { handle: '@sophie_r', msg: '97% on Rolex?? almost there!!', color: Colors.gold },
+  { handle: '@ryan.k', msg: 'this is literally better than gambling apps', color: Colors.textSecondary },
+  { handle: '@tom_w', msg: 'won a Jordan 1 last week btw 👟', color: Colors.gold },
+  { handle: '@ellie.b', msg: 'threshold confirmed — Chanel is RUNNING 🎉', color: Colors.pink },
+  { handle: '@kian_j', msg: 'sending this to all my friends rn', color: Colors.lilac },
+  { handle: '@amy_s', msg: 'got 10 tickets on the designer closet 🤞', color: Colors.textSecondary },
+  { handle: '@leo.c', msg: 'this is the most exciting thing on my phone', color: Colors.lilac },
+];
+];
+
+interface ChatMsg { id: number; handle: string; msg: string; color: string; }
 
 export default function LiveScreen() {
   const router = useRouter();
@@ -26,6 +48,11 @@ export default function LiveScreen() {
   const [viewerCount, setViewerCount] = useState(VIEWERS[0]);
   const [hypeIdx, setHypeIdx] = useState(0);
   const hypeOpacity = useRef(new RNAnimated.Value(1)).current;
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>(
+    CHAT_POOL.slice(0, 4).map((m, i) => ({ ...m, id: i }))
+  );
+  const chatRef = useRef<ScrollView>(null);
+  const msgIdRef = useRef(100);
 
   const tonightDraws = MOCK_DRAWS.filter(d => d.status === 'closing_tonight');
 
@@ -78,6 +105,18 @@ export default function LiveScreen() {
         RNAnimated.timing(hypeOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
       });
     }, 3200);
+    return () => clearInterval(id);
+  }, []);
+
+  // Live chat messages popping in
+  useEffect(() => {
+    const add = () => {
+      const pick = CHAT_POOL[Math.floor(Math.random() * CHAT_POOL.length)];
+      const newMsg: ChatMsg = { ...pick, id: msgIdRef.current++ };
+      setChatMessages(prev => [...prev.slice(-11), newMsg]);
+      setTimeout(() => chatRef.current?.scrollToEnd({ animated: true }), 50);
+    };
+    const id = setInterval(add, 2800 + Math.random() * 2200);
     return () => clearInterval(id);
   }, []);
 
@@ -144,6 +183,27 @@ export default function LiveScreen() {
             <Ionicons name="chevron-forward" size={16} color={Colors.white} />
           </TouchableOpacity>
         )}
+
+        {/* Live chat box */}
+        <View style={styles.chatBox}>
+          <View style={styles.chatHeader}>
+            <View style={styles.chatDot} />
+            <Text style={styles.chatLabel}>LIVE CHAT</Text>
+            <Text style={styles.chatCount}>{viewerCount.toLocaleString()} watching</Text>
+          </View>
+          <ScrollView
+            ref={chatRef}
+            style={styles.chatScroll}
+            showsVerticalScrollIndicator={false}
+          >
+            {chatMessages.map(m => (
+              <View key={m.id} style={styles.chatRow}>
+                <Text style={[styles.chatHandle, { color: m.color }]}>{m.handle}</Text>
+                <Text style={styles.chatMsg}>{m.msg}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
 
         {/* Tonight's draws */}
         <Text style={styles.sectionLabel}>TONIGHT'S DRAWS</Text>
@@ -248,4 +308,24 @@ const styles = StyleSheet.create({
 
   legalNote: { padding: Spacing.lg, alignItems: 'center' },
   legalText: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', lineHeight: 14 },
+
+  chatBox: {
+    marginHorizontal: Spacing.lg, marginBottom: Spacing.lg,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
+    overflow: 'hidden',
+  },
+  chatHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: Spacing.md, paddingVertical: 8,
+    borderBottomWidth: 1, borderBottomColor: Colors.darkBorder,
+    backgroundColor: 'rgba(139,92,246,0.06)',
+  },
+  chatDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
+  chatLabel: { fontSize: 9, fontWeight: '800', color: Colors.textSecondary, letterSpacing: 0.8, flex: 1 },
+  chatCount: { fontSize: 9, color: Colors.textTertiary },
+  chatScroll: { maxHeight: 150, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
+  chatRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 6 },
+  chatHandle: { fontSize: FontSizes.xs, fontWeight: '700' },
+  chatMsg: { fontSize: FontSizes.xs, color: Colors.textSecondary, flex: 1 },
 });
