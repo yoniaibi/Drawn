@@ -3,6 +3,7 @@
     "name": "DRAWN",
     "slug": "drawn",
     "version": "1.0.0",
+    "owner": "yoniaibi",
     "scheme": "drawn",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
