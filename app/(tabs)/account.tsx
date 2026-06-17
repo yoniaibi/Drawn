@@ -9,7 +9,7 @@ import { formatTicketPrice } from '../../src/utils/countdown';
 
 const MENU = [
   { label: 'My wallet', icon: 'wallet-outline', route: '/wallet', sub: 'Top up & see transactions' },
-  { label: 'Notifications', icon: 'notifications-outline', route: null, sub: 'Draw alerts & win notifications' },
+  { label: 'Notifications', icon: 'notifications-outline', route: '/notifications', sub: 'Draw alerts & win notifications' },
   { label: 'Become a seller', icon: 'storefront-outline', route: '/seller/gate', sub: 'List items & earn cash' },
   { label: 'Seller dashboard', icon: 'bar-chart-outline', route: '/seller/dashboard', sub: 'Your draws & earnings' },
   { label: 'Privacy policy', icon: 'shield-outline', route: null, sub: null },

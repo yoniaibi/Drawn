@@ -84,7 +84,7 @@ export default function HomeScreen() {
       <View style={styles.nav}>
         <TicketLogo size="md" />
         <View style={styles.navRight}>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => router.push('/search')}>
             <Ionicons name="search" size={20} color={Colors.textSecondary} />
           </TouchableOpacity>
           <WalletBadge />
