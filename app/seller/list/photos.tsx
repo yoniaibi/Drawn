@@ -4,24 +4,50 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
 import PrimaryButton from '../../../src/components/PrimaryButton';
+import { useSellerDraft } from '../../../src/store/sellerDraft';
+
+function StepBar({ current, total }: { current: number; total: number }) {
+  return (
+    <View style={styles.stepBar}>
+      {Array.from({ length: total }).map((_, i) => (
+        <View
+          key={i}
+          style={[styles.stepSegment, i + 1 <= current ? styles.stepActive : styles.stepInactive]}
+        />
+      ))}
+    </View>
+  );
+}
 
 export default function ListPhotosScreen() {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [condition, setCondition] = useState<string | null>(null);
+  const setDetails = useSellerDraft((s) => s.setDetails);
+  const draft = useSellerDraft((s) => ({ title: s.title, description: s.description, condition: s.condition }));
+
+  const [title, setTitle] = useState(draft.title);
+  const [description, setDescription] = useState(draft.description);
+  const [condition, setCondition] = useState<string | null>(draft.condition);
+
+  const handleNext = () => {
+    setDetails(title, description, condition ?? '');
+    router.push('/seller/list/pricing');
+  };
 
   return (
     <View style={styles.screen}>
       <TouchableOpacity style={styles.back} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={22} color={Colors.textSecondary} />
       </TouchableOpacity>
+
+      <StepBar current={2} total={4} />
+      <Text style={styles.stepLabel}>Step 2 of 4</Text>
+
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Photos & details</Text>
         <Text style={styles.sub}>Add at least 3 photos. Clear, well-lit shots get more ticket buyers.</Text>
 
         <View style={styles.photoGrid}>
-          {[0, 1, 2, 3].map(i => (
+          {[0, 1, 2, 3].map((i) => (
             <TouchableOpacity key={i} style={styles.photoSlot}>
               <Ionicons name="camera-outline" size={24} color={Colors.textTertiary} />
               {i === 0 && <Text style={styles.mainPhotoLabel}>Main photo</Text>}
@@ -50,7 +76,7 @@ export default function ListPhotosScreen() {
 
         <Text style={styles.label}>CONDITION</Text>
         <View style={styles.condRow}>
-          {(['New', 'Like new', 'Good', 'Fair'] as const).map(c => (
+          {(['New', 'Like new', 'Good', 'Fair'] as const).map((c) => (
             <TouchableOpacity
               key={c}
               style={[styles.condChip, condition === c && styles.condChipOn]}
@@ -63,7 +89,7 @@ export default function ListPhotosScreen() {
 
         <PrimaryButton
           label="Next: Set price →"
-          onPress={() => router.push('/seller/list/pricing')}
+          onPress={handleNext}
           style={{ marginTop: Spacing.xl }}
           disabled={!title.trim() || !condition}
         />
@@ -74,7 +100,17 @@ export default function ListPhotosScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg, paddingTop: 56 },
-  back: { paddingHorizontal: Spacing.lg, marginBottom: 8 },
+  back: { paddingHorizontal: Spacing.lg, marginBottom: 12 },
+
+  stepBar: { flexDirection: 'row', gap: 4, paddingHorizontal: Spacing.lg, marginBottom: 6 },
+  stepSegment: { flex: 1, height: 3, borderRadius: 2 },
+  stepActive: { backgroundColor: Colors.lilac },
+  stepInactive: { backgroundColor: Colors.darkBorder },
+  stepLabel: {
+    fontSize: 10, color: Colors.textTertiary,
+    paddingHorizontal: Spacing.lg, marginBottom: Spacing.md, letterSpacing: 0.5,
+  },
+
   content: { padding: Spacing.lg, paddingBottom: 40 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 6 },
   sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20, marginBottom: Spacing.lg },
@@ -86,9 +122,15 @@ const styles = StyleSheet.create({
   },
   mainPhotoLabel: { fontSize: FontSizes.xs, color: Colors.textTertiary, marginTop: 4 },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 6, marginTop: 14 },
-  inputField: { backgroundColor: Colors.darkBorder, borderRadius: Radius.sm, padding: 12, fontSize: FontSizes.sm, color: Colors.white },
+  inputField: {
+    backgroundColor: Colors.darkBorder, borderRadius: Radius.sm,
+    padding: 12, fontSize: FontSizes.sm, color: Colors.white,
+  },
   condRow: { flexDirection: 'row', gap: 8 },
-  condChip: { flex: 1, backgroundColor: Colors.darkCard, borderRadius: Radius.sm, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: Colors.darkBorder },
+  condChip: {
+    flex: 1, backgroundColor: Colors.darkCard, borderRadius: Radius.sm,
+    padding: 10, alignItems: 'center', borderWidth: 1, borderColor: Colors.darkBorder,
+  },
   condChipOn: { backgroundColor: Colors.lilac, borderColor: Colors.lilac },
   condText: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '600' },
   condTextOn: { color: Colors.white },

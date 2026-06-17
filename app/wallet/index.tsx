@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -17,11 +17,39 @@ export default function WalletScreen() {
   const [selected, setSelected] = useState(1000);
   const [transactions, setTransactions] = useState<WalletTransaction[]>(MOCK_WALLET.transactions);
 
+  // Per-button flash: maps amount → 'added' | null
+  const [flashedAmt, setFlashedAmt] = useState<number | null>(null);
+
+  // Confirmation chip
+  const [lastAdded, setLastAdded] = useState<number | null>(null);
+  const chipOpacity = useRef(new RNAnimated.Value(0)).current;
+  const chipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (!user?.id) return;
     refreshProfile();
     fetchWalletTransactions(user.id).then(setTransactions);
   }, [user?.id]);
+
+  function handleTopUp(amt: number) {
+    addFunds(amt);
+    setFlashedAmt(amt);
+
+    // Show confirmation chip
+    if (chipTimer.current) clearTimeout(chipTimer.current);
+    setLastAdded(amt);
+    RNAnimated.timing(chipOpacity, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+
+    // Reset button flash after 1s
+    setTimeout(() => setFlashedAmt(null), 1000);
+
+    // Fade out chip after 2s
+    chipTimer.current = setTimeout(() => {
+      RNAnimated.timing(chipOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
+        setLastAdded(null);
+      });
+    }, 2000);
+  }
 
   return (
     <View style={styles.screen}>
@@ -37,25 +65,46 @@ export default function WalletScreen() {
         <Text style={styles.balance}>{formatTicketPrice(walletBalance)}</Text>
       </View>
 
+      {/* Added chip */}
+      {lastAdded !== null && (
+        <RNAnimated.View style={[styles.addedChip, { opacity: chipOpacity }]}>
+          <Ionicons name="checkmark-circle" size={14} color={Colors.success} />
+          <Text style={styles.addedChipText}>{formatTicketPrice(lastAdded)} added to your wallet</Text>
+        </RNAnimated.View>
+      )}
+
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.sectionLabel}>TOP UP</Text>
         <View style={styles.topUpGrid}>
-          {TOP_UPS.map(amt => (
-            <TouchableOpacity
-              key={amt}
-              style={[styles.topUpBtn, selected === amt && styles.topUpBtnOn]}
-              onPress={() => setSelected(amt)}
-            >
-              <Text style={[styles.topUpText, selected === amt && styles.topUpTextOn]}>
-                {formatTicketPrice(amt)}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {TOP_UPS.map(amt => {
+            const isFlashed = flashedAmt === amt;
+            return (
+              <TouchableOpacity
+                key={amt}
+                style={[
+                  styles.topUpBtn,
+                  selected === amt && styles.topUpBtnOn,
+                  isFlashed && styles.topUpBtnFlash,
+                ]}
+                onPress={() => {
+                  setSelected(amt);
+                }}
+              >
+                <Text style={[
+                  styles.topUpText,
+                  selected === amt && styles.topUpTextOn,
+                  isFlashed && styles.topUpTextFlash,
+                ]}>
+                  {isFlashed ? 'Added!' : formatTicketPrice(amt)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <PrimaryButton
           label={`Add ${formatTicketPrice(selected)}`}
-          onPress={() => { addFunds(selected); router.back(); }}
+          onPress={() => handleTopUp(selected)}
           style={{ marginBottom: Spacing.xl }}
         />
 
@@ -82,10 +131,21 @@ const styles = StyleSheet.create({
   heading: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white },
   balanceCard: {
     backgroundColor: Colors.violet, marginHorizontal: Spacing.lg, borderRadius: Radius.xl,
-    padding: Spacing.xl, alignItems: 'center', marginBottom: Spacing.xl,
+    padding: Spacing.xl, alignItems: 'center', marginBottom: Spacing.md,
   },
   balanceLabel: { fontSize: FontSizes.xs, color: '#C9B3EF', letterSpacing: 0.5, marginBottom: 6 },
   balance: { fontFamily: Fonts.serif, fontSize: FontSizes.hero, color: Colors.white },
+
+  addedChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(29,158,117,0.15)', borderRadius: Radius.pill,
+    borderWidth: 1, borderColor: 'rgba(29,158,117,0.3)',
+    paddingHorizontal: Spacing.md, paddingVertical: 6,
+    marginBottom: Spacing.md, marginHorizontal: Spacing.lg,
+  },
+  addedChipText: { fontSize: FontSizes.sm, color: Colors.success, fontWeight: '600' },
+
   content: { paddingHorizontal: Spacing.lg, paddingBottom: 40 },
   sectionLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, letterSpacing: 0.8, marginBottom: 12 },
   topUpGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: Spacing.lg },
@@ -94,8 +154,10 @@ const styles = StyleSheet.create({
     padding: 14, alignItems: 'center', borderWidth: 1, borderColor: Colors.darkBorder,
   },
   topUpBtnOn: { backgroundColor: Colors.lilac, borderColor: Colors.lilac },
+  topUpBtnFlash: { backgroundColor: Colors.gold, borderColor: Colors.gold },
   topUpText: { fontSize: FontSizes.md, color: Colors.textSecondary, fontWeight: '700' },
   topUpTextOn: { color: Colors.white },
+  topUpTextFlash: { color: Colors.ink },
   txRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.darkBorder,

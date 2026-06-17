@@ -64,6 +64,8 @@ export default function RootLayout() {
         <Stack.Screen name="seller/kyc-approved" />
         <Stack.Screen name="seller/dashboard" />
         <Stack.Screen name="share/[drawId]" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="notifications/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="search/index" options={{ presentation: 'modal' }} />
       </Stack>
     </SafeAreaProvider>
   );

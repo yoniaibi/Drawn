@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated as RNAnimated } from 'react-native';
+import {
+  View, Text, StyleSheet, TouchableOpacity,
+  Animated as RNAnimated, Modal, Pressable,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -18,6 +21,8 @@ const BUYER_MESSAGES = [
   '@dan.west just joined',
 ];
 
+type FlowState = 'idle' | 'confirm' | 'loading' | 'success';
+
 export default function PurchaseScreen() {
   const { drawId } = useLocalSearchParams<{ drawId: string }>();
   const router = useRouter();
@@ -26,6 +31,10 @@ export default function PurchaseScreen() {
   const { walletBalance, deductFunds } = useAuthStore();
   const [msgIdx, setMsgIdx] = useState(0);
   const msgOpacity = useRef(new RNAnimated.Value(1)).current;
+
+  // Flow state
+  const [flow, setFlow] = useState<FlowState>('idle');
+  const bannerOpacity = useRef(new RNAnimated.Value(0)).current;
 
   const total = qty * draw.ticketPrice;
   const canAfford = walletBalance >= total;
@@ -46,13 +55,41 @@ export default function PurchaseScreen() {
   }, []);
 
   function handleBuy() {
-    if (!canAfford) { router.push('/wallet'); return; }
+    if (!canAfford) {
+      // Inline error card is shown via canAfford flag — button does nothing extra here
+      // But we can still guide user to wallet via the error card button
+      return;
+    }
+    setFlow('confirm');
+  }
+
+  function handleConfirm() {
     deductFunds(total);
-    router.replace(`/live/winner/${draw.id}`);
+    setFlow('loading');
+
+    // Show loading for 500ms, then success banner
+    setTimeout(() => {
+      setFlow('success');
+      RNAnimated.timing(bannerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+
+      // After 1.5s navigate home
+      setTimeout(() => {
+        RNAnimated.timing(bannerOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+          router.replace('/(tabs)');
+        });
+      }, 1500);
+    }, 500);
   }
 
   return (
     <View style={styles.screen}>
+      {/* Success banner */}
+      {flow === 'success' && (
+        <RNAnimated.View style={[styles.successBanner, { opacity: bannerOpacity }]}>
+          <Text style={styles.successBannerText}>🎟 You're in! Good luck tonight.</Text>
+        </RNAnimated.View>
+      )}
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.close}>
           <Ionicons name="close" size={22} color={Colors.textSecondary} />
@@ -160,11 +197,15 @@ export default function PurchaseScreen() {
         )}
       </View>
 
+      {/* Insufficient balance error card */}
       {!canAfford && (
-        <TouchableOpacity style={styles.topUpRow} onPress={() => router.push('/wallet')}>
-          <Ionicons name="add-circle-outline" size={16} color={Colors.lilac} />
-          <Text style={styles.topUpText}>Top up your wallet to continue</Text>
-        </TouchableOpacity>
+        <View style={styles.errorCard}>
+          <Ionicons name="warning-outline" size={16} color={Colors.danger} />
+          <Text style={styles.errorText}>Not enough balance — top up your wallet</Text>
+          <TouchableOpacity style={styles.errorBtn} onPress={() => router.push('/wallet')}>
+            <Text style={styles.errorBtnText}>Top up</Text>
+          </TouchableOpacity>
+        </View>
       )}
 
       <View style={styles.cta}>
@@ -175,6 +216,54 @@ export default function PurchaseScreen() {
         />
         <Text style={styles.freeNote}>Or enter free via postal entry · T&Cs apply</Text>
       </View>
+
+      {/* Confirmation bottom sheet (modal overlay) */}
+      <Modal
+        visible={flow === 'confirm' || flow === 'loading'}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setFlow('idle')}
+      >
+        <Pressable style={styles.sheetOverlay} onPress={() => flow === 'confirm' && setFlow('idle')}>
+          <Pressable style={styles.sheet} onPress={() => {}}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>Confirm your entry</Text>
+
+            <View style={styles.sheetRow}>
+              <Text style={styles.sheetLabel}>Draw</Text>
+              <Text style={styles.sheetVal}>{draw.title}</Text>
+            </View>
+            <View style={styles.sheetRow}>
+              <Text style={styles.sheetLabel}>Tickets</Text>
+              <Text style={styles.sheetVal}>{qty}</Text>
+            </View>
+            <View style={styles.sheetRow}>
+              <Text style={styles.sheetLabel}>Total cost</Text>
+              <Text style={[styles.sheetVal, { color: Colors.gold }]}>{formatTicketPrice(total)}</Text>
+            </View>
+
+            <View style={styles.sheetDivider} />
+
+            {flow === 'loading' ? (
+              <View style={styles.loadingRow}>
+                <Text style={styles.loadingText}>Entering draw...</Text>
+              </View>
+            ) : (
+              <PrimaryButton
+                label="Confirm & enter"
+                onPress={handleConfirm}
+                variant="pink"
+              />
+            )}
+
+            {flow === 'confirm' && (
+              <TouchableOpacity style={styles.sheetCancel} onPress={() => setFlow('idle')}>
+                <Text style={styles.sheetCancelText}>Cancel</Text>
+              </TouchableOpacity>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -184,6 +273,15 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.md, paddingTop: Spacing.xl },
   close: { marginRight: 12 },
   heading: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white },
+
+  successBanner: {
+    backgroundColor: Colors.success,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+    alignItems: 'center',
+  },
+  successBannerText: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
 
   drawPreview: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -246,9 +344,47 @@ const styles = StyleSheet.create({
   breakdownLabel: { fontSize: FontSizes.base, color: Colors.textSecondary },
   breakdownVal: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
 
-  topUpRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12, justifyContent: 'center' },
-  topUpText: { fontSize: FontSizes.sm, color: Colors.lilac },
+  errorCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(226,75,74,0.12)', borderRadius: Radius.md,
+    borderWidth: 1, borderColor: 'rgba(226,75,74,0.3)',
+    padding: Spacing.md, marginBottom: 10,
+  },
+  errorText: { flex: 1, fontSize: FontSizes.sm, color: Colors.danger },
+  errorBtn: {
+    backgroundColor: Colors.danger, borderRadius: Radius.sm,
+    paddingHorizontal: 12, paddingVertical: 6,
+  },
+  errorBtnText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
 
   cta: { marginTop: 'auto', gap: 8 },
   freeNote: { textAlign: 'center', fontSize: 9, color: Colors.textTertiary },
+
+  // Bottom sheet
+  sheetOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: Colors.darkCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
+    padding: Spacing.xl, paddingBottom: 40,
+  },
+  sheetHandle: {
+    width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.darkBorder,
+    alignSelf: 'center', marginBottom: Spacing.xl,
+  },
+  sheetTitle: {
+    fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white,
+    textAlign: 'center', marginBottom: Spacing.xl,
+  },
+  sheetRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.darkBorder,
+  },
+  sheetLabel: { fontSize: FontSizes.base, color: Colors.textSecondary },
+  sheetVal: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
+  sheetDivider: { height: Spacing.xl },
+  loadingRow: { alignItems: 'center', paddingVertical: Spacing.xl },
+  loadingText: { fontSize: FontSizes.md, color: Colors.textSecondary, fontStyle: 'italic' },
+  sheetCancel: { alignItems: 'center', marginTop: Spacing.md },
+  sheetCancelText: { fontSize: FontSizes.sm, color: Colors.textTertiary },
 });
