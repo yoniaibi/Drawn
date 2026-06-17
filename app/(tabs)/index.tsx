@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated as RNAnimated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated as RNAnimated, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { MOCK_DRAWS } from '../../src/mocks';
+import { Draw, MOCK_DRAWS } from '../../src/mocks';
+import { fetchDraws } from '../../src/services/draws';
 import TicketLogo from '../../src/components/TicketLogo';
 import DrawCard from '../../src/components/DrawCard';
 import WalletBadge from '../../src/components/WalletBadge';
@@ -30,11 +31,21 @@ export default function HomeScreen() {
   const [filter, setFilter] = useState('Tonight');
   const [tickerIdx, setTickerIdx] = useState(0);
   const [winnerIdx, setWinnerIdx] = useState(0);
+  const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
+  const [loadingDraws, setLoadingDraws] = useState(true);
   const tickerOpacity = useRef(new RNAnimated.Value(1)).current;
   const winnerSlide = useRef(new RNAnimated.Value(0)).current;
 
-  const tonightCount = MOCK_DRAWS.filter(d => d.status === 'closing_tonight').length;
-  const myCount = MOCK_DRAWS.filter(d => d.myTickets > 0).length;
+  const tonightCount = draws.filter(d => d.status === 'closing_tonight').length;
+  const myCount = draws.filter(d => d.myTickets > 0).length;
+
+  // Fetch draws from Supabase
+  useEffect(() => {
+    fetchDraws().then(result => {
+      setDraws(result);
+      setLoadingDraws(false);
+    });
+  }, []);
 
   // Rotate live ticker
   useEffect(() => {
@@ -58,7 +69,7 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  const filtered = MOCK_DRAWS.filter(d => {
+  const filtered = draws.filter(d => {
     if (filter === 'Tonight') return d.status === 'closing_tonight';
     if (filter === 'Bundles') return d.isBundle;
     if (filter === 'High value') return d.retailValue >= 500;
@@ -147,7 +158,13 @@ export default function HomeScreen() {
 
         {/* 2-col grid */}
         <View style={styles.grid}>
-          {filtered.map((draw, i) => {
+          {loadingDraws && (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color={Colors.lilac} />
+              <Text style={styles.loadingText}>Loading draws…</Text>
+            </View>
+          )}
+          {!loadingDraws && filtered.map((draw, i) => {
             if (draw.isBundle) {
               return (
                 <View key={draw.id} style={styles.wideCard}>
@@ -261,4 +278,7 @@ const styles = StyleSheet.create({
 
   bottomProof: { paddingHorizontal: Spacing.lg, paddingBottom: 24, alignItems: 'center' },
   bottomProofText: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', lineHeight: 14 },
+
+  loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 20, justifyContent: 'center' },
+  loadingText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
 });

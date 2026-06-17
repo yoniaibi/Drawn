@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { useAuthStore } from '../../src/store';
 import { MOCK_WALLET } from '../../src/mocks';
+import { fetchWalletTransactions, WalletTransaction } from '../../src/services/draws';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../src/utils/countdown';
 
@@ -12,8 +13,15 @@ const TOP_UPS = [500, 1000, 2000, 5000]; // pence
 
 export default function WalletScreen() {
   const router = useRouter();
-  const { walletBalance, addFunds } = useAuthStore();
+  const { walletBalance, addFunds, user, refreshProfile } = useAuthStore();
   const [selected, setSelected] = useState(1000);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>(MOCK_WALLET.transactions);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    refreshProfile();
+    fetchWalletTransactions(user.id).then(setTransactions);
+  }, [user?.id]);
 
   return (
     <View style={styles.screen}>
@@ -52,7 +60,7 @@ export default function WalletScreen() {
         />
 
         <Text style={styles.sectionLabel}>RECENT ACTIVITY</Text>
-        {MOCK_WALLET.transactions.map(tx => (
+        {transactions.map(tx => (
           <View key={tx.id} style={styles.txRow}>
             <View style={styles.txLeft}>
               <Text style={styles.txLabel}>{tx.label}</Text>

@@ -1,9 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { MOCK_MY_TICKETS } from '../../src/mocks';
+import { Draw, MOCK_MY_TICKETS } from '../../src/mocks';
+import { fetchMyTickets } from '../../src/services/draws';
+import { useAuthStore } from '../../src/store';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
@@ -16,14 +18,30 @@ function getOddsColor(pct: number) {
 
 export default function TicketsScreen() {
   const router = useRouter();
-  const totalTickets = MOCK_MY_TICKETS.reduce((s, d) => s + d.myTickets, 0);
-  const totalValue = MOCK_MY_TICKETS.reduce((s, d) => s + d.retailValue, 0);
+  const { user } = useAuthStore();
+  const [myTickets, setMyTickets] = useState<Draw[]>(MOCK_MY_TICKETS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setMyTickets(MOCK_MY_TICKETS);
+      setLoading(false);
+      return;
+    }
+    fetchMyTickets(user.id).then(result => {
+      setMyTickets(result);
+      setLoading(false);
+    });
+  }, [user?.id]);
+
+  const totalTickets = myTickets.reduce((s, d) => s + d.myTickets, 0);
+  const totalValue = myTickets.reduce((s, d) => s + d.retailValue, 0);
 
   return (
     <ScreenWrapper>
       <View style={styles.header}>
         <Text style={styles.heading}>My Tickets</Text>
-        <Text style={styles.sub}>You're in {MOCK_MY_TICKETS.length} draws tonight</Text>
+        <Text style={styles.sub}>You're in {myTickets.length} draws tonight</Text>
       </View>
 
       {/* Summary strip */}
@@ -39,7 +57,7 @@ export default function TicketsScreen() {
         </View>
         <View style={styles.summaryDivider} />
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryVal}>{MOCK_MY_TICKETS.length}</Text>
+          <Text style={styles.summaryVal}>{myTickets.length}</Text>
           <Text style={styles.summaryLabel}>draws entered</Text>
         </View>
       </View>
@@ -48,13 +66,19 @@ export default function TicketsScreen() {
       <View style={styles.callout}>
         <Ionicons name="flash" size={14} color={Colors.gold} />
         <Text style={styles.calloutText}>
-          Win up to <Text style={styles.calloutBold}>£{Math.max(...MOCK_MY_TICKETS.map(d => d.retailValue)).toLocaleString()}</Text> for as little as{' '}
-          <Text style={styles.calloutBold}>{formatTicketPrice(Math.min(...MOCK_MY_TICKETS.map(d => d.ticketPrice)))}</Text>
+          {myTickets.length > 0
+            ? <>Win up to <Text style={styles.calloutBold}>£{Math.max(...myTickets.map(d => d.retailValue)).toLocaleString()}</Text> for as little as <Text style={styles.calloutBold}>{formatTicketPrice(Math.min(...myTickets.map(d => d.ticketPrice)))}</Text></>
+            : 'Enter a draw to see your potential winnings'}
         </Text>
       </View>
 
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.lilac} />
+        </View>
+      ) : (
       <FlatList
-        data={MOCK_MY_TICKETS}
+        data={myTickets}
         keyExtractor={d => d.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => {
@@ -140,6 +164,7 @@ export default function TicketsScreen() {
           </View>
         }
       />
+      )}
     </ScreenWrapper>
   );
 }
@@ -198,6 +223,7 @@ const styles = StyleSheet.create({
   },
   addMoreText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
 
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 60 },
   empty: { alignItems: 'center', paddingVertical: 60 },
   emptyEmoji: { fontSize: 44, marginBottom: 12 },
   emptyTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: 6 },
