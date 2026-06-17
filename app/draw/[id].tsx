@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, Modal, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence } from 'react-native-reanimated';
@@ -57,6 +57,7 @@ export default function DrawDetailScreen() {
 
   const [buyerIdx, setBuyerIdx] = useState(0);
   const [viewers, setViewers] = useState(VIEWER_COUNTS[0]);
+  const [trustVisible, setTrustVisible] = useState(false);
   const buyerOpacity = useRef(new RNAnimated.Value(1)).current;
 
   // Pulse for scarcity
@@ -217,6 +218,13 @@ export default function DrawDetailScreen() {
           </View>
         )}
 
+        {/* Trust signal */}
+        <TouchableOpacity style={styles.trustRow} onPress={() => setTrustVisible(true)} activeOpacity={0.8}>
+          <Ionicons name="shield-checkmark-outline" size={14} color={Colors.lilac} />
+          <Text style={styles.trustText}>How we verify authenticity</Text>
+          <Ionicons name="chevron-forward" size={12} color={Colors.textTertiary} />
+        </TouchableOpacity>
+
         <Text style={styles.desc}>{draw.description}</Text>
 
         {/* Bundle items */}
@@ -233,6 +241,34 @@ export default function DrawDetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Trust modal */}
+      <Modal visible={trustVisible} transparent animationType="slide" onRequestClose={() => setTrustVisible(false)}>
+        <Pressable style={styles.trustOverlay} onPress={() => setTrustVisible(false)}>
+          <Pressable style={styles.trustSheet} onPress={() => {}}>
+            <View style={styles.trustHandle} />
+            <Text style={styles.trustTitle}>How we verify</Text>
+            {[
+              { icon: '📦', step: 'Seller ships to us', desc: 'Every item is sent to our London warehouse before going live.' },
+              { icon: '🔍', step: 'Authenticity check', desc: "Our team inspects condition, brand, and authenticates within 24 hours of receipt." },
+              { icon: '🔒', step: 'Secure storage', desc: 'The item is held in our secure facility until the draw completes.' },
+              { icon: '🚚', step: 'Direct to winner', desc: 'We ship straight to the winner — tracked, insured, next-day delivery.' },
+            ].map(s => (
+              <View key={s.step} style={styles.trustStep}>
+                <Text style={styles.trustStepIcon}>{s.icon}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.trustStepTitle}>{s.step}</Text>
+                  <Text style={styles.trustStepDesc}>{s.desc}</Text>
+                </View>
+              </View>
+            ))}
+            <View style={styles.trustFooter}>
+              <Ionicons name="shield-checkmark" size={14} color={Colors.lilac} />
+              <Text style={styles.trustFooterText}>All draws are independently verified by DRAWN</Text>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* CTA */}
       <View style={styles.cta}>
@@ -283,6 +319,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 4,
   },
   verifiedText: { fontSize: 8, fontWeight: '700', color: Colors.white },
+
+  trustRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.md,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
+    padding: Spacing.sm, marginBottom: Spacing.sm,
+  },
+  trustText: { flex: 1, fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '600' },
+  trustOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  trustSheet: {
+    backgroundColor: Colors.darkCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
+    padding: Spacing.xl, paddingBottom: 48,
+  },
+  trustHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.darkBorder, alignSelf: 'center', marginBottom: Spacing.lg },
+  trustTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: Spacing.lg, textAlign: 'center' },
+  trustStep: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: Spacing.md },
+  trustStepIcon: { fontSize: 26, width: 36, textAlign: 'center' },
+  trustStepTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700', marginBottom: 3 },
+  trustStepDesc: { fontSize: FontSizes.xs, color: Colors.textSecondary, lineHeight: 17 },
+  trustFooter: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: Spacing.md,
+    paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.darkBorder,
+  },
+  trustFooterText: { fontSize: FontSizes.xs, color: Colors.textTertiary, flex: 1 },
 
   body: { flex: 1 },
   bodyContent: { padding: Spacing.lg, paddingBottom: 120, gap: 14 },

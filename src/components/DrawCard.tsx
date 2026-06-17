@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
 import { Draw } from '../mocks';
 import { Colors, Radius, FontSizes, Spacing } from '../theme';
-import { formatTicketPrice } from '../utils/countdown';
+import { formatTicketPrice, getCountdownTo9pm } from '../utils/countdown';
 import ProgressBar from './ProgressBar';
 
 interface Props {
@@ -22,6 +23,14 @@ const URGENCY_COLORS = {
 
 export default function DrawCard({ draw, wide }: Props) {
   const router = useRouter();
+  const [countdown, setCountdown] = useState(getCountdownTo9pm());
+
+  useEffect(() => {
+    if (draw.status !== 'closing_tonight') return;
+    const id = setInterval(() => setCountdown(getCountdownTo9pm()), 60000);
+    return () => clearInterval(id);
+  }, [draw.status]);
+
   const progress = draw.ticketsSold / draw.totalTickets;
   const remaining = draw.totalTickets - draw.ticketsSold;
   const isTonight = draw.status === 'closing_tonight';
@@ -129,8 +138,11 @@ export default function DrawCard({ draw, wide }: Props) {
               isTonight && styles.timingTonight,
               isLive && styles.timingLive,
             ]}>
-              {isLive ? 'LIVE' : isTonight ? 'Tonight' : 'Tomorrow'}
+              {isLive ? 'LIVE' : isTonight ? `${countdown.h}h ${countdown.m}m` : 'Open'}
             </Text>
+            {draw.verified && (
+              <Ionicons name="shield-checkmark" size={8} color={Colors.lilac} />
+            )}
           </View>
         </View>
       </View>

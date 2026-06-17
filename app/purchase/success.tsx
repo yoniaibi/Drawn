@@ -60,14 +60,15 @@ export default function PurchaseSuccessScreen() {
     );
   }
 
+  const d = draw!;
   const qtyNum = parseInt(qty ?? '1');
-  const totalNum = parseInt(total ?? String(draw.ticketPrice));
-  const oddsPercent = ((qtyNum / draw.totalTickets) * 100).toFixed(2);
-  const returnMultiple = Math.round(draw.retailValue * 100 / totalNum);
+  const totalNum = parseInt(total ?? String(d.ticketPrice));
+  const oddsPercent = ((qtyNum / d.totalTickets) * 100).toFixed(2);
+  const returnMultiple = Math.round(d.retailValue * 100 / totalNum);
 
   function handleShare() {
     Share.share({
-      message: `I just entered the ${draw.title} draw on Drawn for ${formatTicketPrice(totalNum)}. Could win £${draw.retailValue.toLocaleString()} tonight at 9pm 🎟️ drawn.app`,
+      message: `I just entered the ${d.title} draw on Drawn for ${formatTicketPrice(totalNum)}. Could win £${d.retailValue.toLocaleString()} tonight at 9pm 🎟️ drawn.app`,
     });
   }
 
@@ -88,12 +89,12 @@ export default function PurchaseSuccessScreen() {
 
       {/* Big emoji */}
       <Animated2.View style={emojiStyle}>
-        <Text style={styles.bigEmoji}>{draw.emoji}</Text>
+        <Text style={styles.bigEmoji}>{d.emoji}</Text>
       </Animated2.View>
 
       <Text style={styles.heading}>You're in!</Text>
-      <Text style={styles.subHeading}>{draw.title}</Text>
-      <Text style={styles.seller}>{draw.seller} · {draw.condition.replace('_', ' ')}</Text>
+      <Text style={styles.subHeading}>{d.title}</Text>
+      <Text style={styles.seller}>{d.seller} · {d.condition.replace('_', ' ')}</Text>
 
       {/* Odds card */}
       <Animated2.View style={[styles.oddsCard, oddsStyle]}>
@@ -116,7 +117,7 @@ export default function PurchaseSuccessScreen() {
         <View style={styles.oddsValueRow}>
           <Text style={styles.oddsValueText}>
             Paid <Text style={styles.oddsValueBold}>{formatTicketPrice(totalNum)}</Text>
-            {'  ·  '}could win <Text style={[styles.oddsValueBold, { color: Colors.gold }]}>£{draw.retailValue.toLocaleString()}</Text>
+            {'  ·  '}could win <Text style={[styles.oddsValueBold, { color: Colors.gold }]}>£{d.retailValue.toLocaleString()}</Text>
           </Text>
         </View>
       </Animated2.View>
@@ -348,5 +349,20 @@ const styles = StyleSheet.create({
   browseBtnText: {
     fontSize: FontSizes.base,
     color: Colors.textSecondary,
+  },
+  secondaryBtn: {
+    marginTop: Spacing.xl,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: Colors.darkCard,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+  },
+  secondaryBtnText: {
+    fontSize: FontSizes.base,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

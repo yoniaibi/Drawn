@@ -96,6 +96,29 @@ export default function AccountScreen() {
           )}
         </View>
 
+        {/* Achievement badges */}
+        {stats !== null && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Achievements</Text>
+            <View style={styles.badgesGrid}>
+              {[
+                { emoji: '✦', label: 'Founding Member', unlocked: true, color: Colors.gold },
+                { emoji: '🎟️', label: 'First Entry', unlocked: (stats.totalTickets ?? 0) >= 1, color: Colors.lilac },
+                { emoji: '🔥', label: '3-Day Streak', unlocked: streak >= 3, color: Colors.pink },
+                { emoji: '🏆', label: 'First Win', unlocked: (stats.wins ?? 0) >= 1, color: Colors.gold },
+                { emoji: '🎯', label: '25 Tickets', unlocked: (stats.totalTickets ?? 0) >= 25, color: Colors.lilac },
+                { emoji: '💎', label: 'Big Winner', unlocked: (stats.totalWon ?? 0) >= 100000, color: Colors.gold },
+              ].map(b => (
+                <View key={b.label} style={[styles.badge, !b.unlocked && styles.badgeLocked]}>
+                  <Text style={[styles.badgeEmoji, !b.unlocked && { opacity: 0.3 }]}>{b.emoji}</Text>
+                  <Text style={[styles.badgeLabel, !b.unlocked && { color: Colors.textTertiary }]} numberOfLines={1}>{b.label}</Text>
+                  {!b.unlocked && <View style={styles.badgeLockIcon}><Text style={styles.badgeLockText}>🔒</Text></View>}
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Recent wins */}
         {wins.length > 0 && (
           <View style={styles.section}>
@@ -237,6 +260,18 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.darkBorder,
   },
   referralCode: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '700', letterSpacing: 1 },
+
+  badgesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  badge: {
+    width: '30%', flexGrow: 1, backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    padding: Spacing.sm, alignItems: 'center', gap: 4,
+    borderWidth: 1, borderColor: Colors.darkBorder, position: 'relative', minWidth: 90,
+  },
+  badgeLocked: { opacity: 0.6 },
+  badgeEmoji: { fontSize: 22 },
+  badgeLabel: { fontSize: 9, color: Colors.white, fontWeight: '700', textAlign: 'center', letterSpacing: 0.2 },
+  badgeLockIcon: { position: 'absolute', top: 4, right: 4 },
+  badgeLockText: { fontSize: 8 },
 
   menu: { backgroundColor: Colors.darkCard, borderRadius: Radius.lg, overflow: 'hidden', marginBottom: Spacing.lg },
   menuRow: {

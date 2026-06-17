@@ -72,12 +72,14 @@ export default function PurchaseScreen() {
   const successOpacity = bannerOpacity;
   const [error, setError] = useState<string | null>(null);
 
-  const total = qty * draw.ticketPrice;
+  // draw is guaranteed non-null here: early return above guards against null
+  const d = draw!;
+  const total = qty * d.ticketPrice;
   const canAfford = walletBalance >= total;
-  const maxAllowed = Math.floor(draw.totalTickets * 0.25);
-  const remaining = draw.totalTickets - draw.ticketsSold;
-  const myNewOdds = ((qty / draw.totalTickets) * 100).toFixed(2);
-  const progress = draw.ticketsSold / draw.totalTickets;
+  const maxAllowed = Math.floor(d.totalTickets * 0.25);
+  const remaining = d.totalTickets - d.ticketsSold;
+  const myNewOdds = ((qty / d.totalTickets) * 100).toFixed(2);
+  const progress = d.ticketsSold / d.totalTickets;
   const isLow = remaining < 500;
 
   useEffect(() => {
@@ -108,7 +110,7 @@ export default function PurchaseScreen() {
     // 1. Insert ticket purchase
     const { error: ticketError } = await supabase
       .from('tickets')
-      .insert({ draw_id: draw.id, user_id: user.id, quantity: qty });
+      .insert({ draw_id: d.id, user_id: user.id, quantity: qty });
 
     if (ticketError) {
       setFlow('idle');
@@ -127,14 +129,14 @@ export default function PurchaseScreen() {
       user_id: user.id,
       amount: -total,
       type: 'purchase',
-      description: `${qty} ticket${qty > 1 ? 's' : ''} · ${draw.title}`,
+      description: `${qty} ticket${qty > 1 ? 's' : ''} · ${d.title}`,
     });
 
     // 4. Increment tickets_sold on the draw
     await supabase
       .from('draws')
-      .update({ tickets_sold: draw.ticketsSold + qty })
-      .eq('id', draw.id);
+      .update({ tickets_sold: d.ticketsSold + qty })
+      .eq('id', d.id);
 
     // 5. Deduct local state too so UI updates immediately
     deductFunds(total);
@@ -142,7 +144,7 @@ export default function PurchaseScreen() {
     setFlow('success');
     successOpacity.setValue(1);
     setTimeout(() => {
-      router.replace(`/purchase/success?drawId=${draw.id}&qty=${qty}&total=${total}` as any);
+      router.replace(`/purchase/success?drawId=${d.id}&qty=${qty}&total=${total}` as any);
     }, 600);
   }
 
@@ -164,15 +166,15 @@ export default function PurchaseScreen() {
 
       {/* Draw preview */}
       <View style={styles.drawPreview}>
-        <Text style={styles.previewEmoji}>{draw.emoji}</Text>
+        <Text style={styles.previewEmoji}>{d.emoji}</Text>
         <View style={styles.previewInfo}>
-          <Text style={styles.previewTitle}>{draw.title}</Text>
-          <Text style={styles.previewSeller}>{draw.seller}</Text>
+          <Text style={styles.previewTitle}>{d.title}</Text>
+          <Text style={styles.previewSeller}>{d.seller}</Text>
           {/* Value ratio */}
           <View style={styles.valueRatioRow}>
-            <Text style={styles.valueRatioLabel}>{formatTicketPrice(draw.ticketPrice)}</Text>
+            <Text style={styles.valueRatioLabel}>{formatTicketPrice(d.ticketPrice)}</Text>
             <Text style={styles.valueRatioArrow}> → </Text>
-            <Text style={styles.valueRatioAmount}>£{draw.retailValue.toLocaleString()}</Text>
+            <Text style={styles.valueRatioAmount}>£{d.retailValue.toLocaleString()}</Text>
           </View>
         </View>
       </View>
@@ -211,7 +213,7 @@ export default function PurchaseScreen() {
             >
               <Text style={[styles.quickText, qty === n && styles.quickTextOn]}>{n}</Text>
               {qty === n && (
-                <Text style={styles.quickOdds}>{((n / draw.totalTickets) * 100).toFixed(1)}%</Text>
+                <Text style={styles.quickOdds}>{((n / d.totalTickets) * 100).toFixed(1)}%</Text>
               )}
             </TouchableOpacity>
           ))}
@@ -234,7 +236,7 @@ export default function PurchaseScreen() {
         <View style={styles.oddsCard}>
           <Ionicons name="trophy-outline" size={14} color={Colors.gold} />
           <Text style={styles.oddsText}>
-            {qty} tickets = <Text style={styles.oddsBold}>{myNewOdds}% chance</Text> to win £{draw.retailValue.toLocaleString()}
+            {qty} tickets = <Text style={styles.oddsBold}>{myNewOdds}% chance</Text> to win £{d.retailValue.toLocaleString()}
           </Text>
         </View>
 
@@ -244,7 +246,7 @@ export default function PurchaseScreen() {
       {/* Cost breakdown */}
       <View style={styles.breakdown}>
         <View style={styles.breakdownRow}>
-          <Text style={styles.breakdownLabel}>{qty} × {formatTicketPrice(draw.ticketPrice)}</Text>
+          <Text style={styles.breakdownLabel}>{qty} × {formatTicketPrice(d.ticketPrice)}</Text>
           <Text style={styles.breakdownVal}>{formatTicketPrice(total)}</Text>
         </View>
         <View style={styles.breakdownDivider} />
@@ -296,7 +298,7 @@ export default function PurchaseScreen() {
 
             <View style={styles.sheetRow}>
               <Text style={styles.sheetLabel}>Draw</Text>
-              <Text style={styles.sheetVal}>{draw.title}</Text>
+              <Text style={styles.sheetVal}>{d.title}</Text>
             </View>
             <View style={styles.sheetRow}>
               <Text style={styles.sheetLabel}>Tickets</Text>
