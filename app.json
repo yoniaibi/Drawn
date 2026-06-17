@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "DRAWN",
+    "slug": "drawn",
+    "version": "1.0.0",
+    "scheme": "drawn",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "backgroundColor": "#2D1B69"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.drawn.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#2D1B69"
+      },
+      "package": "com.drawn.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ]
+  }
+}
