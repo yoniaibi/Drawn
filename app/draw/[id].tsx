@@ -58,23 +58,23 @@ export default function DrawDetailScreen() {
 
   // Rotate buyer ticker
   useEffect(() => {
-    const id = setInterval(() => {
+    const intervalId = setInterval(() => {
       RNAnimated.timing(buyerOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
         setBuyerIdx(i => (i + 1) % BUYER_TICKERS.length);
         RNAnimated.timing(buyerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
       });
     }, 3000);
-    return () => clearInterval(id);
+    return () => clearInterval(intervalId);
   }, []);
 
   // Rotate viewer count
   useEffect(() => {
     let i = 0;
-    const id = setInterval(() => {
+    const intervalId = setInterval(() => {
       i = (i + 1) % VIEWER_COUNTS.length;
       setViewers(VIEWER_COUNTS[i]);
     }, 5000);
-    return () => clearInterval(id);
+    return () => clearInterval(intervalId);
   }, []);
 
   const myOdds = draw.myTickets > 0

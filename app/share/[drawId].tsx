@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -37,9 +37,9 @@ export default function ShareCardScreen() {
         </View>
       </View>
 
-      <PrimaryButton label="Share on Instagram" onPress={() => {}} style={{ marginBottom: Spacing.sm }} />
-      <PrimaryButton label="Share on TikTok" onPress={() => {}} variant="lilac" style={{ marginBottom: Spacing.sm }} />
-      <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => {}}>
+      <PrimaryButton label="Share on Instagram" onPress={() => Share.share({ message: 'I just won on DRAWN! drawn.app' })} style={{ marginBottom: Spacing.sm }} />
+      <PrimaryButton label="Share on TikTok" onPress={() => Share.share({ message: 'I just won on DRAWN! drawn.app' })} variant="lilac" style={{ marginBottom: Spacing.sm }} />
+      <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => Share.share({ message: 'I just won on DRAWN! drawn.app' })}>
         <Text style={{ fontSize: FontSizes.sm, color: Colors.textSecondary }}>Copy link</Text>
       </TouchableOpacity>
     </View>
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.royal, borderRadius: Radius.xl, padding: Spacing.xxl,
     marginBottom: Spacing.xl, alignItems: 'flex-start',
   },
-  cardLogoRow: { flexDirection: 'row', marginBottom: 'auto', marginBottom: 24 },
+  cardLogoRow: { flexDirection: 'row', marginBottom: 24 },
   logoMain: { backgroundColor: Colors.ink, borderTopLeftRadius: 6, borderBottomLeftRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
   logoWord: { fontFamily: Fonts.serif, fontSize: 16, color: Colors.white },
   logoStub: { backgroundColor: Colors.lilac, borderTopRightRadius: 6, borderBottomRightRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },

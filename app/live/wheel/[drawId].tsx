@@ -13,13 +13,13 @@ export default function LiveWheelScreen() {
   const [phase, setPhase] = useState<'spinning' | 'slowing' | 'done'>('spinning');
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('slowing'), 4000);
-    const t2 = setTimeout(() => {
+    const timerId1 = setTimeout(() => setPhase('slowing'), 4000);
+    const timerId2 = setTimeout(() => {
       setPhase('done');
       router.replace(`/live/winner/${drawId}`);
     }, 6000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+    return () => { clearTimeout(timerId1); clearTimeout(timerId2); };
+  }, [drawId]);
 
   return (
     <View style={styles.screen}>
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.pink },
   liveText: { fontSize: FontSizes.xs, fontWeight: '800', color: Colors.pink, letterSpacing: 1 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, textAlign: 'center' },
-  sub: { fontSize: FontSizes.xs, color: '#b9a8e8', textAlign: 'center', marginBottom: 8 },
+  sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'center', marginBottom: 8 },
   wheelWrap: { alignItems: 'center', paddingVertical: Spacing.md },
   prizeRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   prizeEmoji: { fontSize: 22 },
   prizeInfo: { flex: 1 },
   prizeTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700' },
-  prizeSub: { fontSize: FontSizes.xs, color: '#b9a8e8', marginTop: 2 },
+  prizeSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
   youBadge: { backgroundColor: Colors.pink, borderRadius: Radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
   youText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
   counters: { flexDirection: 'row', gap: 8 },

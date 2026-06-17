@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -86,7 +86,7 @@ export default function AccountScreen() {
         )}
 
         {/* Referral CTA */}
-        <TouchableOpacity style={styles.referralCard} onPress={() => {}}>
+        <TouchableOpacity style={styles.referralCard} onPress={() => Share.share({ message: `Join DRAWN and win designer pieces from 10p! Use my code ${referralCode} · drawn.app` })}>
           <View style={styles.referralLeft}>
             <Text style={styles.referralTitle}>Invite friends, earn tickets 🎫</Text>
             <Text style={styles.referralSub}>

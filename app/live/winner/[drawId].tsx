@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   valueRatioArrow: { fontSize: 20, color: 'rgba(255,255,255,0.4)' },
   valueMultiple: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '800', letterSpacing: 0.5, marginTop: 2 },
 
-  sellerNote: { fontSize: FontSizes.xs, color: '#d9c7f5', textAlign: 'center', lineHeight: 18 },
+  sellerNote: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'center', lineHeight: 18 },
 
   shareRow: { width: '100%', alignItems: 'center' },
   shareBtn: {
@@ -171,5 +171,5 @@ const styles = StyleSheet.create({
   shareText: { fontSize: FontSizes.base, color: Colors.royal, fontWeight: '800' },
 
   cta: { padding: Spacing.lg, zIndex: 2, gap: 8 },
-  ctaHint: { textAlign: 'center', fontSize: FontSizes.xs, color: '#d9c7f5' },
+  ctaHint: { textAlign: 'center', fontSize: FontSizes.xs, color: Colors.textSecondary },
 });

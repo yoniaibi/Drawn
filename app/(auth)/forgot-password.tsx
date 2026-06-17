@@ -4,20 +4,26 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
+import { supabase } from '../../src/lib/supabase';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  function handleSend() {
+  async function handleSend() {
     if (!email.trim()) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setErrorMsg(null);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+    setLoading(false);
+    if (error) {
+      setErrorMsg(error.message);
+    } else {
       setSent(true);
-    }, 800);
+    }
   }
 
   return (
@@ -26,7 +32,7 @@ export default function ForgotPasswordScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <TouchableOpacity style={styles.back} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.back} onPress={() => router.replace('/(auth)/log-in')}>
           <Ionicons name="chevron-back" size={22} color={Colors.textSecondary} />
         </TouchableOpacity>
 
@@ -62,10 +68,13 @@ export default function ForgotPasswordScreen() {
               disabled={loading || !email.trim()}
               style={{ marginTop: Spacing.xl }}
             />
+            {errorMsg && (
+              <Text style={{ fontSize: FontSizes.xs, color: Colors.danger, marginTop: 8 }}>{errorMsg}</Text>
+            )}
           </>
         )}
 
-        <TouchableOpacity onPress={() => router.back()} style={styles.backLink}>
+        <TouchableOpacity onPress={() => router.replace('/(auth)/log-in')} style={styles.backLink}>
           <Text style={styles.backLinkText}>Back to log in</Text>
         </TouchableOpacity>
       </ScrollView>

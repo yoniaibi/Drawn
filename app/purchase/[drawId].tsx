@@ -26,7 +26,20 @@ type FlowState = 'idle' | 'confirm' | 'loading' | 'success';
 export default function PurchaseScreen() {
   const { drawId } = useLocalSearchParams<{ drawId: string }>();
   const router = useRouter();
-  const draw = MOCK_DRAWS.find(d => d.id === drawId) ?? MOCK_DRAWS[0];
+  const draw = MOCK_DRAWS.find(d => d.id === drawId);
+
+  if (!draw) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <Text style={{ fontSize: 40 }}>🎟️</Text>
+        <Text style={{ color: Colors.white, fontSize: FontSizes.base, fontWeight: '700' }}>Draw not found</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={{ color: Colors.lilac, fontSize: FontSizes.sm }}>Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   const [qty, setQty] = useState(5);
   const { walletBalance, deductFunds } = useAuthStore();
   const [msgIdx, setMsgIdx] = useState(0);
