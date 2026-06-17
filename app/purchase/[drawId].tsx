@@ -11,6 +11,7 @@ import { useAuthStore } from '../../src/store';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
+import { supabase } from '../../src/lib/supabase';
 
 const QUICK_AMOUNTS = [1, 5, 10, 25];
 
@@ -48,6 +49,8 @@ export default function PurchaseScreen() {
   // Flow state
   const [flow, setFlow] = useState<FlowState>('idle');
   const bannerOpacity = useRef(new RNAnimated.Value(0)).current;
+  const successOpacity = bannerOpacity;
+  const [error, setError] = useState<string | null>(null);
 
   const total = qty * draw.ticketPrice;
   const canAfford = walletBalance >= total;
@@ -76,22 +79,52 @@ export default function PurchaseScreen() {
     setFlow('confirm');
   }
 
-  function handleConfirm() {
-    deductFunds(total);
+  async function handleConfirm() {
+    setError(null);
     setFlow('loading');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setFlow('idle'); return; }
 
-    // Show loading for 500ms, then success banner
+    // 1. Insert ticket purchase
+    const { error: ticketError } = await supabase
+      .from('tickets')
+      .insert({ draw_id: draw.id, user_id: user.id, quantity: qty });
+
+    if (ticketError) {
+      setFlow('idle');
+      setError('Something went wrong. Please try again.');
+      return;
+    }
+
+    // 2. Deduct wallet balance in DB
+    await supabase
+      .from('profiles')
+      .update({ wallet_balance: walletBalance - total })
+      .eq('id', user.id);
+
+    // 3. Log wallet transaction
+    await supabase.from('wallet_transactions').insert({
+      user_id: user.id,
+      amount: -total,
+      type: 'purchase',
+      description: `${qty} ticket${qty > 1 ? 's' : ''} · ${draw.title}`,
+    });
+
+    // 4. Increment tickets_sold on the draw
+    await supabase
+      .from('draws')
+      .update({ tickets_sold: draw.ticketsSold + qty })
+      .eq('id', draw.id);
+
+    // 5. Deduct local state too so UI updates immediately
+    deductFunds(total);
+
+    setFlow('success');
+    successOpacity.setValue(1);
     setTimeout(() => {
-      setFlow('success');
-      RNAnimated.timing(bannerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
-
-      // After 1.5s navigate home
-      setTimeout(() => {
-        RNAnimated.timing(bannerOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
-          router.replace('/(tabs)');
-        });
-      }, 1500);
-    }, 500);
+      successOpacity.setValue(0);
+      router.replace('/(tabs)');
+    }, 1500);
   }
 
   return (
@@ -257,6 +290,13 @@ export default function PurchaseScreen() {
 
             <View style={styles.sheetDivider} />
 
+            {error && (
+              <View style={styles.sheetError}>
+                <Ionicons name="warning-outline" size={14} color={Colors.danger} />
+                <Text style={styles.sheetErrorText}>{error}</Text>
+              </View>
+            )}
+
             {flow === 'loading' ? (
               <View style={styles.loadingRow}>
                 <Text style={styles.loadingText}>Entering draw...</Text>
@@ -400,4 +440,11 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: FontSizes.md, color: Colors.textSecondary, fontStyle: 'italic' },
   sheetCancel: { alignItems: 'center', marginTop: Spacing.md },
   sheetCancelText: { fontSize: FontSizes.sm, color: Colors.textTertiary },
+  sheetError: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: 'rgba(226,75,74,0.12)', borderRadius: Radius.sm,
+    borderWidth: 1, borderColor: 'rgba(226,75,74,0.3)',
+    padding: Spacing.sm, marginBottom: Spacing.md,
+  },
+  sheetErrorText: { flex: 1, fontSize: FontSizes.sm, color: Colors.danger },
 });

@@ -8,6 +8,7 @@ import { MOCK_WALLET } from '../../src/mocks';
 import { fetchWalletTransactions, WalletTransaction } from '../../src/services/draws';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../src/utils/countdown';
+import { supabase } from '../../src/lib/supabase';
 
 const TOP_UPS = [500, 1000, 2000, 5000]; // pence
 
@@ -31,7 +32,7 @@ export default function WalletScreen() {
     fetchWalletTransactions(user.id).then(setTransactions);
   }, [user?.id]);
 
-  function handleTopUp(amt: number) {
+  async function handleTopUp(amt: number) {
     addFunds(amt);
     setFlashedAmt(amt);
 
@@ -49,6 +50,24 @@ export default function WalletScreen() {
         setLastAdded(null);
       });
     }, 2000);
+
+    // Persist to DB
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      // Update balance in profiles
+      await supabase
+        .from('profiles')
+        .update({ wallet_balance: walletBalance + amt })
+        .eq('id', user.id);
+
+      // Log transaction
+      await supabase.from('wallet_transactions').insert({
+        user_id: user.id,
+        amount: amt,
+        type: 'topup',
+        description: `Wallet top-up · ${formatTicketPrice(amt)}`,
+      });
+    }
   }
 
   return (
