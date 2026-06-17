@@ -119,7 +119,7 @@ export default function AccountScreen() {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={() => { logout(); router.replace('/(auth)'); }}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={async () => { await logout(); router.replace('/(auth)'); }}>
           <Ionicons name="log-out-outline" size={16} color={Colors.danger} />
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>

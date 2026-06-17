@@ -4,24 +4,36 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
-import { useAuthStore } from '../../src/store';
+import { supabase } from '../../src/lib/supabase';
 
 export default function LogInScreen() {
   const router = useRouter();
-  const login = useAuthStore(s => s.login);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function handleLogin() {
+  async function handleLogin() {
     if (!email.trim() || !password) {
       setError('Please enter your email and password.');
       return;
     }
     setError('');
-    login();
-    router.replace('/(tabs)');
+    setLoading(true);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    setLoading(false);
+
+    if (signInError) {
+      setError('Incorrect email or password.');
+      return;
+    }
+    // Auth listener in _layout.tsx redirects to /(tabs) automatically
   }
 
   return (
@@ -34,7 +46,6 @@ export default function LogInScreen() {
         <Text style={styles.title}>Welcome back</Text>
         <Text style={styles.sub}>Log in to check your tickets and tonight's draw.</Text>
 
-        {/* Apple SSO */}
         <TouchableOpacity style={styles.appleBt}>
           <Ionicons name="logo-apple" size={16} color={Colors.white} />
           <Text style={styles.appleText}>Continue with Apple</Text>
@@ -79,7 +90,12 @@ export default function LogInScreen() {
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <PrimaryButton label="Log in" onPress={handleLogin} style={{ marginTop: Spacing.md }} />
+        <PrimaryButton
+          label={loading ? 'Logging in…' : 'Log in'}
+          onPress={handleLogin}
+          disabled={loading}
+          style={{ marginTop: Spacing.md }}
+        />
 
         <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')} style={styles.signUpRow}>
           <Text style={styles.signUpText}>Don't have an account? <Text style={styles.signUpLink}>Sign up</Text></Text>
@@ -94,6 +110,14 @@ const styles = StyleSheet.create({
   back: { marginBottom: 20, alignSelf: 'flex-start' },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 4 },
   sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 20 },
+  appleBt: {
+    backgroundColor: '#000', borderRadius: Radius.md, padding: 13,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16,
+  },
+  appleText: { color: Colors.white, fontSize: FontSizes.sm, fontWeight: '600' },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.darkBorder },
+  dividerOr: { fontSize: FontSizes.xs, color: Colors.textTertiary },
   error: { fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12, backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 14 },
   input: {
@@ -107,12 +131,4 @@ const styles = StyleSheet.create({
   signUpRow: { marginTop: 20, alignItems: 'center' },
   signUpText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
   signUpLink: { color: Colors.pink, fontWeight: '600' },
-  appleBt: {
-    backgroundColor: '#000', borderRadius: Radius.md, padding: 13,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16,
-  },
-  appleText: { color: Colors.white, fontSize: FontSizes.sm, fontWeight: '600' },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.darkBorder },
-  dividerOr: { fontSize: FontSizes.xs, color: Colors.textTertiary },
 });

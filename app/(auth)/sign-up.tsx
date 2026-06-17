@@ -1,35 +1,63 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
-import { useAuthStore } from '../../src/store';
+import { supabase } from '../../src/lib/supabase';
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const login = useAuthStore(s => s.login);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  function handleCreate() {
-    login();
+  async function handleCreate() {
+    if (!name.trim() || !email.trim() || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    setError('');
+    setLoading(true);
+
+    const handle = '@' + name.trim().toLowerCase().replace(/\s+/g, '_');
+
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        data: { handle, avatar_letter: name.trim()[0].toUpperCase() },
+      },
+    });
+
+    setLoading(false);
+
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+
+    // Auth listener in _layout.tsx will handle redirect
     router.replace('/(auth)/interests');
   }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: Colors.darkBg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <TouchableOpacity style={styles.back} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={22} color={Colors.textSecondary} />
         </TouchableOpacity>
 
         <Text style={styles.title}>Join DRAWN</Text>
-        <Text style={styles.sub}>Win things worth hundreds for pennies.</Text>
+        <Text style={styles.sub}>Win designer things for pennies.</Text>
 
-        {/* Apple SSO */}
         <TouchableOpacity style={styles.appleBt}>
           <Ionicons name="logo-apple" size={16} color={Colors.white} />
           <Text style={styles.appleText}>Continue with Apple</Text>
@@ -41,16 +69,19 @@ export default function SignUpScreen() {
           <View style={styles.dividerLine} />
         </View>
 
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
         <Text style={styles.label}>FULL NAME</Text>
         <TextInput
           style={styles.input} placeholder="Your name" placeholderTextColor={Colors.textTertiary}
-          value={name} onChangeText={setName} autoCapitalize="words"
+          value={name} onChangeText={t => { setName(t); setError(''); }} autoCapitalize="words"
         />
 
         <Text style={styles.label}>EMAIL ADDRESS</Text>
         <TextInput
           style={styles.input} placeholder="you@example.com" placeholderTextColor={Colors.textTertiary}
-          value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none"
+          value={email} onChangeText={t => { setEmail(t); setError(''); }}
+          keyboardType="email-address" autoCapitalize="none" autoCorrect={false}
         />
 
         <Text style={styles.label}>PASSWORD</Text>
@@ -58,7 +89,7 @@ export default function SignUpScreen() {
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
             placeholder="••••••••" placeholderTextColor={Colors.textTertiary}
-            value={password} onChangeText={setPassword}
+            value={password} onChangeText={t => { setPassword(t); setError(''); }}
             secureTextEntry={!showPw}
           />
           <TouchableOpacity style={styles.eye} onPress={() => setShowPw(v => !v)}>
@@ -66,7 +97,12 @@ export default function SignUpScreen() {
           </TouchableOpacity>
         </View>
 
-        <PrimaryButton label="Create my account" onPress={handleCreate} style={{ marginTop: Spacing.lg }} />
+        <PrimaryButton
+          label={loading ? 'Creating account…' : 'Create my account'}
+          onPress={handleCreate}
+          disabled={loading}
+          style={{ marginTop: Spacing.lg }}
+        />
 
         <TouchableOpacity onPress={() => router.replace('/(auth)/log-in')} style={styles.loginRow}>
           <Text style={styles.loginText}>Already have an account? <Text style={styles.loginLink}>Log in</Text></Text>
@@ -91,6 +127,7 @@ const styles = StyleSheet.create({
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   dividerLine: { flex: 1, height: 1, backgroundColor: Colors.darkBorder },
   dividerOr: { fontSize: FontSizes.xs, color: Colors.textTertiary },
+  error: { fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12, backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 10 },
   input: {
     backgroundColor: Colors.darkBorder, borderRadius: Radius.sm,

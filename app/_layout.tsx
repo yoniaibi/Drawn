@@ -1,20 +1,51 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useFonts, PlayfairDisplay_700Bold_Italic } from '@expo-google-fonts/playfair-display';
 import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from '../src/theme';
+import { supabase } from '../src/lib/supabase';
+import { useAuthStore } from '../src/store';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold_Italic });
+  const { setSession, refreshProfile, session, loading } = useAuthStore();
+  const router = useRouter();
+  const segments = useSegments();
+
+  // Listen for Supabase auth changes
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) refreshProfile();
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) refreshProfile();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Redirect based on auth state once fonts + session are resolved
+  useEffect(() => {
+    if (!fontsLoaded || loading) return;
+    const inAuth = segments[0] === '(auth)';
+    if (!session && !inAuth) {
+      router.replace('/(auth)');
+    } else if (session && inAuth) {
+      router.replace('/(tabs)');
+    }
+  }, [session, fontsLoaded, loading]);
 
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded && !loading) SplashScreen.hideAsync();
+  }, [fontsLoaded, loading]);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded || loading) return null;
 
   return (
     <SafeAreaProvider>

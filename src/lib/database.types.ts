@@ -1,0 +1,58 @@
+export type DrawStatus = 'open' | 'closing_tonight' | 'live' | 'completed' | 'cancelled';
+export type ConditionType = 'new' | 'like_new' | 'good' | 'fair';
+
+export interface Profile {
+  id: string;
+  handle: string;
+  avatar_letter: string;
+  is_seller: boolean;
+  wallet_balance: number; // pence
+  created_at: string;
+}
+
+export interface Draw {
+  id: string;
+  title: string;
+  emoji: string;
+  seller_id: string;
+  seller_handle: string;
+  seller_avatar: string;
+  seller_verified: boolean;
+  ticket_price: number; // pence
+  total_tickets: number;
+  tickets_sold: number;
+  status: DrawStatus;
+  retail_value: number; // pence
+  min_threshold: number; // 0–1
+  description: string;
+  condition: ConditionType;
+  is_bundle: boolean;
+  draw_date: string;
+  created_at: string;
+}
+
+export interface BundleItem {
+  id: string;
+  draw_id: string;
+  emoji: string;
+  name: string;
+  retail_value: number;
+}
+
+export interface Ticket {
+  id: string;
+  draw_id: string;
+  user_id: string;
+  quantity: number;
+  purchased_at: string;
+  draw?: Draw;
+}
+
+export interface WalletTransaction {
+  id: string;
+  user_id: string;
+  amount: number; // pence, positive = credit, negative = debit
+  type: 'topup' | 'purchase' | 'refund' | 'win';
+  description: string;
+  created_at: string;
+}
