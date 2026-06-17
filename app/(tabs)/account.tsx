@@ -100,7 +100,7 @@ export default function AccountScreen() {
         {stats !== null && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Achievements</Text>
-            <View style={styles.badgesGrid}>
+            <View style={[styles.badgesGrid, { marginTop: 8 }]}>
               {[
                 { emoji: '✦', label: 'Founding Member', unlocked: true, color: Colors.gold },
                 { emoji: '🎟️', label: 'First Entry', unlocked: (stats.totalTickets ?? 0) >= 1, color: Colors.lilac },
@@ -120,21 +120,39 @@ export default function AccountScreen() {
         )}
 
         {/* Recent wins */}
-        {wins.length > 0 && (
+        {stats !== null && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent wins</Text>
-            {wins.map((w) => (
-              <View key={w.drawId} style={styles.winCard}>
-                <Text style={styles.winEmoji}>{w.drawEmoji}</Text>
-                <View style={styles.winInfo}>
-                  <Text style={styles.winItem}>{w.drawTitle}</Text>
-                  <Text style={styles.winDate}>{w.completedAt ? new Date(w.completedAt).toLocaleDateString() : 'Recently'}</Text>
-                </View>
-                <View style={styles.winValueBadge}>
-                  <Text style={styles.winValue}>£{(w.retailValue / 100).toFixed(0)}</Text>
-                </View>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent wins</Text>
+              {wins.length > 0 && (
+                <TouchableOpacity onPress={() => router.push('/notifications' as any)}>
+                  <Text style={styles.sectionLink}>View all →</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            {wins.length === 0 ? (
+              <View style={styles.noWinsCard}>
+                <Text style={styles.noWinsEmoji}>🎯</Text>
+                <Text style={styles.noWinsTitle}>No wins yet</Text>
+                <Text style={styles.noWinsSub}>Enter more draws to boost your chances. Winners are drawn every night at 9pm.</Text>
+                <TouchableOpacity style={styles.noWinsBtn} onPress={() => router.push('/(tabs)' as any)}>
+                  <Text style={styles.noWinsBtnText}>Browse draws →</Text>
+                </TouchableOpacity>
               </View>
-            ))}
+            ) : (
+              wins.map((w) => (
+                <TouchableOpacity key={w.drawId} style={styles.winCard} onPress={() => router.push(`/live/winner/${w.drawId}` as any)}>
+                  <Text style={styles.winEmoji}>{w.drawEmoji}</Text>
+                  <View style={styles.winInfo}>
+                    <Text style={styles.winItem}>{w.drawTitle}</Text>
+                    <Text style={styles.winDate}>{w.completedAt ? new Date(w.completedAt).toLocaleDateString() : 'Recently'}</Text>
+                  </View>
+                  <View style={styles.winValueBadge}>
+                    <Text style={styles.winValue}>£{(w.retailValue / 100).toFixed(0)}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         )}
 
@@ -229,7 +247,23 @@ const styles = StyleSheet.create({
   statDivider: { width: 1, backgroundColor: Colors.darkBorder },
 
   section: { marginBottom: Spacing.lg },
-  sectionTitle: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '700', letterSpacing: 0.5, marginBottom: 8, textTransform: 'uppercase' },
+  sectionTitle: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  sectionLink: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '600' },
+
+  noWinsCard: {
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md, padding: Spacing.lg,
+    alignItems: 'center', gap: 6, borderWidth: 1, borderColor: Colors.darkBorder,
+  },
+  noWinsEmoji: { fontSize: 32, marginBottom: 4 },
+  noWinsTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
+  noWinsSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'center', lineHeight: 16 },
+  noWinsBtn: {
+    marginTop: 8, backgroundColor: Colors.lilac, borderRadius: Radius.md,
+    paddingVertical: 8, paddingHorizontal: 20,
+  },
+  noWinsBtnText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
 
   winCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,

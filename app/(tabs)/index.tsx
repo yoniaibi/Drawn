@@ -10,7 +10,7 @@ import Animated2, {
 } from 'react-native-reanimated';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { Draw, MOCK_DRAWS } from '../../src/mocks';
-import { fetchDraws, checkForWins, WinResult } from '../../src/services/draws';
+import { fetchDraws, checkForWins, fetchRecentWinners, WinResult, RecentWinner } from '../../src/services/draws';
 import TicketLogo from '../../src/components/TicketLogo';
 import DrawCard from '../../src/components/DrawCard';
 import WalletBadge from '../../src/components/WalletBadge';
@@ -33,12 +33,6 @@ const LIVE_TICKERS = [
   'Threshold hit on Chanel Flap — draw is running tonight ✅',
 ];
 
-const RECENT_WINNERS = [
-  { handle: '@chloe_j', item: 'Chanel Classic Flap', price: '25p', value: '£2,400', emoji: '👜' },
-  { handle: '@dan.west', item: 'Rolex Submariner', price: '50p', value: '£8,500', emoji: '⌚' },
-  { handle: '@soph_r', item: 'Designer Closet Bundle', price: '40p', value: '£8,600', emoji: '👗' },
-  { handle: '@mike_j', item: 'MacBook Pro 16"', price: '30p', value: '£2,399', emoji: '💻' },
-];
 
 const DAILY_REWARDS = [
   { emoji: '🎟️', title: 'Free entry added!', body: "We've added a free entry to tonight's Chanel Flap draw. Just for showing up." },
@@ -56,6 +50,7 @@ export default function HomeScreen() {
   const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
   const [loadingDraws, setLoadingDraws] = useState(true);
   const [wins, setWins] = useState<WinResult[]>([]);
+  const [recentWinners, setRecentWinners] = useState<RecentWinner[]>([]);
   const [dailyRewardVisible, setDailyRewardVisible] = useState(false);
   const [dailyReward] = useState(DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)]);
   // Local sold-count state for live ticking
@@ -80,12 +75,13 @@ export default function HomeScreen() {
   const myCount = draws.filter(d => d.myTickets > 0).length;
   const featuredDraw = draws.find(d => d.status === 'closing_tonight' && !d.isBundle) ?? draws[0];
 
-  // Fetch draws + check for wins
+  // Fetch draws + check for wins + recent winners
   useEffect(() => {
     fetchDraws().then(result => {
       setDraws(result);
       setLoadingDraws(false);
     });
+    fetchRecentWinners().then(setRecentWinners);
     if (user?.id) {
       checkForWins(user.id).then(setWins);
     }
@@ -130,14 +126,15 @@ export default function HomeScreen() {
 
   // Rotate winner banner
   useEffect(() => {
+    const pool = recentWinners.length > 0 ? recentWinners : [{}];
     const interval = setInterval(() => {
       RNAnimated.sequence([
         RNAnimated.timing(winnerSlide, { toValue: -20, duration: 250, useNativeDriver: true }),
         RNAnimated.timing(winnerSlide, { toValue: 0, duration: 0, useNativeDriver: true }),
-      ]).start(() => setWinnerIdx(i => (i + 1) % RECENT_WINNERS.length));
+      ]).start(() => setWinnerIdx(i => (i + 1) % pool.length));
     }, 3500);
     return () => clearInterval(interval);
-  }, []);
+  }, [recentWinners]);
 
   const filtered = draws.filter(d => {
     if (filter === 'Tonight 🔥') return d.status === 'closing_tonight';
@@ -147,7 +144,10 @@ export default function HomeScreen() {
     return true;
   });
 
-  const winner = RECENT_WINNERS[winnerIdx];
+  const winnersPool = recentWinners.length > 0 ? recentWinners : [
+    { handle: '@chloe_j', item: 'Chanel Classic Flap', emoji: '👜', ticketPrice: 25, retailValue: 2400 },
+  ];
+  const winner = winnersPool[winnerIdx % winnersPool.length];
   const forYouDraw = draws.find(d => d.status === 'open' && d.myTickets === 0 && d.retailValue >= 400);
 
   return (
@@ -222,7 +222,9 @@ export default function HomeScreen() {
               </View>
               <View style={styles.heroViewers}>
                 <Ionicons name="eye-outline" size={10} color={Colors.textSecondary} />
-                <Text style={styles.heroViewersText}>1,247 watching</Text>
+                <Text style={styles.heroViewersText}>
+                  {featuredDraw ? (Math.round(featuredDraw.ticketsSold * 0.08 + 12)).toLocaleString() : '—'} watching
+                </Text>
               </View>
             </View>
 
@@ -270,8 +272,8 @@ export default function HomeScreen() {
           </View>
           <View style={styles.winnerRight}>
             <Text style={styles.winnerEmoji}>{winner.emoji}</Text>
-            <Text style={styles.winnerPrice}>{winner.price} ticket</Text>
-            <Text style={styles.winnerValue}>{winner.value}</Text>
+            <Text style={styles.winnerPrice}>{winner.ticketPrice}p ticket</Text>
+            <Text style={styles.winnerValue}>£{winner.retailValue.toLocaleString()}</Text>
           </View>
         </View>
 

@@ -191,6 +191,45 @@ export async function checkForWins(userId: string): Promise<WinResult[]> {
   }
 }
 
+export interface RecentWinner {
+  handle: string;
+  item: string;
+  emoji: string;
+  ticketPrice: number; // pence
+  retailValue: number; // display-pounds
+}
+
+const FALLBACK_WINNERS: RecentWinner[] = [
+  { handle: '@chloe_j', item: 'Chanel Classic Flap', emoji: '👜', ticketPrice: 25, retailValue: 2400 },
+  { handle: '@dan.west', item: 'Rolex Submariner', emoji: '⌚', ticketPrice: 50, retailValue: 8500 },
+  { handle: '@soph_r', item: 'Designer Closet Bundle', emoji: '👗', ticketPrice: 40, retailValue: 8600 },
+  { handle: '@mike_j', item: 'MacBook Pro 16"', emoji: '💻', ticketPrice: 30, retailValue: 2399 },
+];
+
+export async function fetchRecentWinners(): Promise<RecentWinner[]> {
+  try {
+    const { data, error } = await supabase
+      .from('draws')
+      .select('winner_handle, title, emoji, ticket_price, retail_value')
+      .eq('status', 'completed')
+      .not('winner_handle', 'is', null)
+      .order('completed_at', { ascending: false })
+      .limit(6);
+
+    if (error || !data || data.length === 0) return FALLBACK_WINNERS;
+
+    return data.map(d => ({
+      handle: d.winner_handle ?? '@winner',
+      item: d.title,
+      emoji: d.emoji ?? '🎁',
+      ticketPrice: d.ticket_price ?? 10,
+      retailValue: Math.round((d.retail_value ?? 0) / 100),
+    }));
+  } catch {
+    return FALLBACK_WINNERS;
+  }
+}
+
 export async function fetchWalletTransactions(userId: string): Promise<WalletTransaction[]> {
   try {
     const { data, error } = await supabase
