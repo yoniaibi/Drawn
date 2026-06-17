@@ -12,6 +12,10 @@ interface Props {
   size?: number;
 }
 
+// Two alternating colour pairs — lighter outer, darker centre
+const SEG_OUTER = ['#7C4DDC', '#6339C8'];
+const SEG_INNER = ['#3d2080', '#2d1660'];
+
 export default function PrizeWheel({ spinning = true, size = 220 }: Props) {
   const rotation = useSharedValue(0);
 
@@ -43,8 +47,6 @@ export default function PrizeWheel({ spinning = true, size = 220 }: Props) {
     return `M${cx} ${cy} L${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} Z`;
   }
 
-  const segColors = ['#5a3fa8', '#7C4DDC'];
-
   return (
     <View style={[styles.wrap, { width: size, height: size }]}>
       <Svg width={size} height={size} viewBox="0 0 300 300">
@@ -55,12 +57,31 @@ export default function PrizeWheel({ spinning = true, size = 220 }: Props) {
             <Stop offset="100%" stopColor="#FCE08A" />
           </LinearGradient>
           <RadialGradient id="hub" cx="38%" cy="32%" r="80%">
-            <Stop offset="0%" stopColor="#A78BFA" />
-            <Stop offset="100%" stopColor="#5223a8" />
+            <Stop offset="0%" stopColor={Colors.royal} />
+            <Stop offset="100%" stopColor={Colors.violet} />
           </RadialGradient>
+          {/* Per-segment gradients: outer lighter → centre darker */}
+          {NAMES.map((_, i) => (
+            <RadialGradient
+              key={`sg${i}`}
+              id={`sg${i}`}
+              cx={`${cx}`}
+              cy={`${cy}`}
+              r={`${r}`}
+              gradientUnits="userSpaceOnUse"
+            >
+              <Stop offset="0%" stopColor={SEG_INNER[i % 2]} stopOpacity="1" />
+              <Stop offset="100%" stopColor={SEG_OUTER[i % 2]} stopOpacity="1" />
+            </RadialGradient>
+          ))}
         </Defs>
+
+        {/* Glow ring around the wheel */}
+        <Circle cx={cx} cy={cy} r={136} fill="none" stroke={Colors.gold} strokeWidth={3} opacity={0.3} />
+
         <Circle cx={cx} cy={cy} r={142} fill="url(#rim)" />
         <Circle cx={cx} cy={cy} r={134} fill="#2a1a5e" />
+
         <Animated.View style={[StyleSheet.absoluteFill, animStyle]}>
           <Svg width={size} height={size} viewBox="0 0 300 300" style={StyleSheet.absoluteFill}>
             <G>
@@ -74,7 +95,7 @@ export default function PrizeWheel({ spinning = true, size = 220 }: Props) {
                   <React.Fragment key={i}>
                     <Path
                       d={segmentPath(i)}
-                      fill={segColors[i % 2]}
+                      fill={`url(#sg${i})`}
                       stroke={Colors.gold}
                       strokeWidth={0.5}
                     />
@@ -95,6 +116,7 @@ export default function PrizeWheel({ spinning = true, size = 220 }: Props) {
             </G>
           </Svg>
         </Animated.View>
+
         <Circle cx={cx} cy={cy} r={36} fill={Colors.gold} />
         <Circle cx={cx} cy={cy} r={31} fill="url(#hub)" />
         <SvgText
@@ -107,7 +129,10 @@ export default function PrizeWheel({ spinning = true, size = 220 }: Props) {
         >
           d.
         </SvgText>
-        {/* Pointer */}
+
+        {/* Shadow pointer (offset slightly darker) */}
+        <Path d="M151 11 L144 31 L158 31 Z" fill="rgba(0,0,0,0.45)" />
+        {/* Gold pointer */}
         <Path d="M150 8 L143 28 L157 28 Z" fill={Colors.gold} />
       </Svg>
     </View>

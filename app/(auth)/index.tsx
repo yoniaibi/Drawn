@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import Svg, { Defs, Pattern, Circle as SvgCircle, Rect } from 'react-native-svg';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import TicketLogo from '../../src/components/TicketLogo';
 import PrimaryButton from '../../src/components/PrimaryButton';
@@ -25,6 +26,7 @@ const SOCIAL_PROOF = [
 export default function SplashScreen() {
   const router = useRouter();
   const login = useAuthStore(s => s.login);
+  const { width: screenW, height: screenH } = useWindowDimensions();
   const [time, setTime] = useState(getCountdownTo9pm());
   const [winnerIdx, setWinnerIdx] = useState(0);
   const [proofIdx, setProofIdx] = useState(0);
@@ -70,6 +72,21 @@ export default function SplashScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} bounces={false} showsVerticalScrollIndicator={false}>
+      {/* Dot-grid texture background */}
+      <Svg
+        style={styles.dotGrid}
+        width={screenW}
+        height={screenH * 2}
+        pointerEvents="none"
+      >
+        <Defs>
+          <Pattern id="dotGrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+            <SvgCircle cx="12" cy="12" r="1" fill={Colors.lilac} fillOpacity="0.08" />
+          </Pattern>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#dotGrid)" />
+      </Svg>
+
       <View style={styles.logoRow}>
         <TicketLogo size="lg" />
       </View>
@@ -185,6 +202,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.violet },
   content: { padding: Spacing.lg, paddingBottom: 40 },
+  dotGrid: { position: 'absolute', top: 0, left: 0 },
   logoRow: { alignItems: 'center', paddingTop: 16, paddingBottom: 16 },
 
   headline: {

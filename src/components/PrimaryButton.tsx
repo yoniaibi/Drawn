@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { ActivityIndicator, StyleSheet, Text, ViewStyle } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, ViewStyle, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { Colors, Radius, FontSizes } from '../theme';
 
 interface Props {
@@ -38,6 +39,7 @@ export default function PrimaryButton({ label, onPress, loading, disabled, style
 
   const bg = BG[variant] ?? Colors.pink;
   const textColor = TEXT_COLOR[variant] ?? Colors.white;
+  const isPink = variant === 'pink';
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -57,12 +59,27 @@ export default function PrimaryButton({ label, onPress, loading, disabled, style
   return (
     <Animated.View style={[animatedStyle, style]}>
       <Pressable
-        style={[styles.btn, { backgroundColor: bg, opacity: disabled || loading ? 0.55 : 1 }]}
+        style={[
+          styles.btn,
+          !isPink && { backgroundColor: bg },
+          { opacity: disabled || loading ? 0.55 : 1 },
+        ]}
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
       >
+        {isPink && (
+          <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+            <Defs>
+              <LinearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <Stop offset="0%" stopColor="#f472b6" stopOpacity="1" />
+                <Stop offset="100%" stopColor="#a855f7" stopOpacity="1" />
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="100%" height="100%" fill="url(#pinkGrad)" rx={Radius.md} ry={Radius.md} />
+          </Svg>
+        )}
         {loading
           ? <ActivityIndicator color={textColor} />
           : <Text style={[styles.label, { color: textColor }]}>{label}</Text>}
@@ -78,6 +95,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    overflow: 'hidden',
   },
   label: { fontSize: FontSizes.base, fontWeight: '700', letterSpacing: 0.3 },
 });

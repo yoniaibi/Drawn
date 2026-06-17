@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { Draw } from '../mocks';
 import { Colors, Radius, FontSizes, Spacing } from '../theme';
 import { formatTicketPrice } from '../utils/countdown';
@@ -39,8 +40,19 @@ export default function DrawCard({ draw, wide }: Props) {
     >
       {draw.isBundle ? (
         <View style={styles.bundleStrip}>
+          {/* SVG gradient behind bundle cells */}
+          <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+            <Defs>
+              <LinearGradient id="bundleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#1a0d35" stopOpacity="1" />
+                <Stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.07" />
+                <Stop offset="100%" stopColor="#0a0618" stopOpacity="1" />
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="100%" height="100%" fill="url(#bundleGrad)" />
+          </Svg>
           {(draw.bundleItems ?? []).slice(0, 3).map((item, i) => (
-            <View key={i} style={[styles.bundleCell, { backgroundColor: `rgba(${45 + i * 25},15,${60 + i * 15},1)` }]}>
+            <View key={i} style={[styles.bundleCell, { backgroundColor: `rgba(${45 + i * 25},15,${60 + i * 15},0.7)` }]}>
               <Text style={styles.bundleEmoji}>{item.emoji}</Text>
             </View>
           ))}
@@ -55,6 +67,26 @@ export default function DrawCard({ draw, wide }: Props) {
         </View>
       ) : (
         <View style={styles.imageBox}>
+          {/* SVG gradient background with diagonal shimmer */}
+          <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+            <Defs>
+              <LinearGradient id="imgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#1a0d35" stopOpacity="1" />
+                <Stop offset="45%" stopColor="#120a2a" stopOpacity="1" />
+                <Stop offset="55%" stopColor="#8B5CF6" stopOpacity="0.06" />
+                <Stop offset="100%" stopColor="#0a0618" stopOpacity="1" />
+              </LinearGradient>
+              <LinearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#8B5CF6" stopOpacity="0" />
+                <Stop offset="45%" stopColor="#8B5CF6" stopOpacity="0" />
+                <Stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.09" />
+                <Stop offset="55%" stopColor="#8B5CF6" stopOpacity="0" />
+                <Stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="100%" height="100%" fill="url(#imgGrad)" />
+            <Rect x="0" y="0" width="100%" height="100%" fill="url(#shimmer)" />
+          </Svg>
           <Text style={styles.emoji}>{draw.emoji}</Text>
           <View style={styles.valueBadge}>
             <Text style={styles.valueBadgeText}>£{draw.retailValue.toLocaleString()}</Text>
@@ -121,12 +153,12 @@ const styles = StyleSheet.create({
     height: 86,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#150e28',
+    overflow: 'hidden',
   },
-  bundleStrip: { flexDirection: 'row', height: 68, position: 'relative' },
+  bundleStrip: { flexDirection: 'row', height: 68, position: 'relative', overflow: 'hidden' },
   bundleCell: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   bundleEmoji: { fontSize: 22 },
-  bundleMore: { backgroundColor: '#0f0a1e' },
+  bundleMore: { backgroundColor: 'rgba(15,10,30,0.7)' },
   bundleMoreText: { fontSize: 12, fontWeight: '800', color: Colors.gold },
   bundleBadgeAbsolute: {
     position: 'absolute', top: 6, left: 6,
