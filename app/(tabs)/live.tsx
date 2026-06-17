@@ -4,10 +4,11 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence, Easing } from 'react-native-reanimated';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { MOCK_DRAWS } from '../../src/mocks';
+import { MOCK_DRAWS, Draw } from '../../src/mocks';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import PrizeWheel from '../../src/components/PrizeWheel';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
+import { fetchDraws } from '../../src/services/draws';
 
 const VIEWERS = [1247, 1253, 1241, 1258, 1264, 1249, 1271, 1266];
 
@@ -53,7 +54,11 @@ export default function LiveScreen() {
   const chatRef = useRef<ScrollView>(null);
   const msgIdRef = useRef(100);
 
-  const tonightDraws = MOCK_DRAWS.filter(d => d.status === 'closing_tonight');
+  const [allDraws, setAllDraws] = useState<Draw[]>(MOCK_DRAWS);
+  useEffect(() => {
+    fetchDraws().then(d => setAllDraws(d));
+  }, []);
+  const tonightDraws = allDraws.filter(d => d.status === 'closing_tonight');
 
   // Pulse animation for live dot
   const pulseScale = useSharedValue(1);
@@ -86,15 +91,15 @@ export default function LiveScreen() {
     return () => clearInterval(id);
   }, []);
 
-  // Rotate viewer count
+  // Viewer count: derived from tickets sold + drift
   useEffect(() => {
-    let i = 0;
+    const base = Math.max(800, tonightDraws.reduce((s, d) => s + d.ticketsSold, 0));
+    setViewerCount(Math.round(base * 0.08 + 100));
     const id = setInterval(() => {
-      i = (i + 1) % VIEWERS.length;
-      setViewerCount(VIEWERS[i]);
+      setViewerCount(v => v + Math.floor(Math.random() * 5) - 2);
     }, 4000);
     return () => clearInterval(id);
-  }, []);
+  }, [tonightDraws.length]);
 
   // Rotate hype messages
   useEffect(() => {
