@@ -22,7 +22,19 @@ const VIEWER_COUNTS = [84, 91, 88, 97, 103, 89];
 export default function DrawDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const draw = MOCK_DRAWS.find(d => d.id === id) ?? MOCK_DRAWS[0];
+  const draw = MOCK_DRAWS.find(d => d.id === id);
+
+  if (!draw) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <Text style={{ fontSize: 40 }}>🎟️</Text>
+        <Text style={{ color: Colors.white, fontSize: FontSizes.base, fontWeight: '700' }}>Draw not found</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={{ color: Colors.lilac, fontSize: FontSizes.sm }}>Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   const progress = draw.ticketsSold / draw.totalTickets;
   const remaining = draw.totalTickets - draw.ticketsSold;
   const isVeryLow = remaining < 200;

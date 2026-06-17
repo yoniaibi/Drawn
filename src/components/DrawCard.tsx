@@ -45,7 +45,7 @@ export default function DrawCard({ draw, wide }: Props) {
             </View>
           ))}
           <View style={[styles.bundleCell, styles.bundleMore]}>
-            <Text style={styles.bundleMoreText}>+{(draw.bundleItems?.length ?? 0) - 3 + 21}</Text>
+            <Text style={styles.bundleMoreText}>+{Math.max(0, (draw.bundleItems?.length ?? 0) - 3)}</Text>
           </View>
           {draw.isBundle && (
             <View style={styles.bundleBadgeAbsolute}>

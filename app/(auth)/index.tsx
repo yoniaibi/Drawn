@@ -63,8 +63,7 @@ export default function SplashScreen() {
   }
 
   function handleLogin() {
-    login();
-    router.replace('/(tabs)');
+    router.push('/(auth)/log-in');
   }
 
   const currentWin = RECENT_WINS[winnerIdx];

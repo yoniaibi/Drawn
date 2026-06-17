@@ -68,7 +68,7 @@ export default function SignUpScreen() {
 
         <PrimaryButton label="Create my account" onPress={handleCreate} style={{ marginTop: Spacing.lg }} />
 
-        <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={styles.loginRow}>
+        <TouchableOpacity onPress={() => router.replace('/(auth)/log-in')} style={styles.loginRow}>
           <Text style={styles.loginText}>Already have an account? <Text style={styles.loginLink}>Log in</Text></Text>
         </TouchableOpacity>
 
