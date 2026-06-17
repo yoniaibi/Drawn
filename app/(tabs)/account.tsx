@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, Modal, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -8,6 +8,12 @@ import ScreenWrapper from '../../src/components/ScreenWrapper';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { useStreak } from '../../src/hooks/useStreak';
 import { fetchUserStats, checkForWins, UserStats, WinResult } from '../../src/services/draws';
+import { supabase } from '../../src/lib/supabase';
+
+const AVATAR_EMOJIS = [
+  '🦋','🌸','⭐','🔥','💜','🎯','🏆','💎','🦄','🌊',
+  '🎸','🐆','🍀','🦅','🌙','🎭','🦁','🌺','💫','🎪',
+];
 
 const MENU = [
   { label: 'My wallet', icon: 'wallet-outline', route: '/wallet', sub: 'Top up & see transactions' },
@@ -25,6 +31,8 @@ export default function AccountScreen() {
 
   const [stats, setStats] = useState<UserStats | null>(null);
   const [wins, setWins] = useState<WinResult[]>([]);
+  const [editVisible, setEditVisible] = useState(false);
+  const [selectedEmoji, setSelectedEmoji] = useState(avatar);
 
   useEffect(() => {
     if (!user) return;
@@ -36,16 +44,28 @@ export default function AccountScreen() {
 
   const referralCode = 'DRAWN-' + (handle ?? 'YOU').replace('@', '').toUpperCase().slice(0, 5);
 
+  async function saveAvatar() {
+    if (!user) return;
+    await supabase.from('profiles').update({ avatar_letter: selectedEmoji }).eq('id', user.id);
+    useAuthStore.getState().refreshProfile();
+    setEditVisible(false);
+  }
+
   return (
     <ScreenWrapper>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile hero */}
         <View style={styles.profile}>
-          <View style={styles.avatarRing}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{avatar}</Text>
+          <TouchableOpacity onPress={() => { setSelectedEmoji(avatar); setEditVisible(true); }} activeOpacity={0.8}>
+            <View style={styles.avatarRing}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{avatar}</Text>
+              </View>
+              <View style={styles.avatarEditBadge}>
+                <Ionicons name="pencil" size={9} color={Colors.white} />
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
           <Text style={styles.handle}>{handle}</Text>
           <View style={styles.badgeRow}>
             <View style={styles.memberBadge}>
@@ -197,6 +217,30 @@ export default function AccountScreen() {
 
         <Text style={styles.version}>Drawn · v1.0 · London, UK</Text>
       </ScrollView>
+
+      {/* Avatar edit modal */}
+      <Modal visible={editVisible} transparent animationType="slide" onRequestClose={() => setEditVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setEditVisible(false)}>
+          <Pressable style={styles.modalSheet} onPress={() => {}}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>Choose your avatar</Text>
+            <View style={styles.emojiGrid}>
+              {AVATAR_EMOJIS.map(e => (
+                <TouchableOpacity
+                  key={e}
+                  style={[styles.emojiBtn, selectedEmoji === e && styles.emojiBtnOn]}
+                  onPress={() => setSelectedEmoji(e)}
+                >
+                  <Text style={styles.emojiText}>{e}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity style={styles.saveBtn} onPress={saveAvatar}>
+              <Text style={styles.saveBtnText}>Save</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScreenWrapper>
   );
 }
@@ -319,6 +363,34 @@ const styles = StyleSheet.create({
   menuTextBox: { flex: 1 },
   menuLabel: { fontSize: FontSizes.base, color: Colors.white },
   menuSub: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
+
+  avatarEditBadge: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: 20, height: 20, borderRadius: 10,
+    backgroundColor: Colors.lilac, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: Colors.darkBg,
+  },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalSheet: {
+    backgroundColor: Colors.darkCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
+    padding: Spacing.xl, paddingBottom: 48,
+  },
+  modalHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.darkBorder, alignSelf: 'center', marginBottom: Spacing.lg },
+  modalTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, textAlign: 'center', marginBottom: Spacing.lg },
+  emojiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: Spacing.xl },
+  emojiBtn: {
+    width: 52, height: 52, borderRadius: Radius.md,
+    backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Colors.darkBorder,
+  },
+  emojiBtnOn: { borderColor: Colors.lilac, backgroundColor: 'rgba(139,92,246,0.15)' },
+  emojiText: { fontSize: 26 },
+  saveBtn: {
+    backgroundColor: Colors.lilac, borderRadius: Radius.md,
+    paddingVertical: 14, alignItems: 'center',
+  },
+  saveBtnText: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
 
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, padding: Spacing.md, marginBottom: 4 },
   logoutText: { fontSize: FontSizes.base, color: Colors.danger, fontWeight: '600' },
