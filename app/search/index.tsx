@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { MOCK_DRAWS } from '../../src/mocks';
+import type { Draw } from '../../src/mocks';
+import { fetchDraws } from '../../src/services/draws';
 import DrawCard from '../../src/components/DrawCard';
 
 const CHIPS = ['All', 'Tonight', 'Bundles', 'High Value'];
@@ -12,9 +14,16 @@ export default function SearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [chip, setChip] = useState('All');
+  const [allDraws, setAllDraws] = useState<Draw[]>(MOCK_DRAWS);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchDraws().then(d => { setAllDraws(d); setLoading(false); });
+  }, []);
 
   const results = useMemo(() => {
-    let pool = MOCK_DRAWS;
+    let pool = allDraws;
 
     if (chip === 'Tonight') pool = pool.filter(d => d.status === 'closing_tonight');
     else if (chip === 'Bundles') pool = pool.filter(d => d.isBundle);
@@ -29,7 +38,7 @@ export default function SearchScreen() {
       );
     }
     return pool;
-  }, [query, chip]);
+  }, [query, chip, allDraws]);
 
   return (
     <View style={styles.screen}>
@@ -78,13 +87,16 @@ export default function SearchScreen() {
 
       {/* Results */}
       <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
-        {results.length === 0 ? (
+        {loading && (
+          <ActivityIndicator color={Colors.lilac} style={{ marginTop: 40 }} />
+        )}
+        {!loading && results.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>🔍</Text>
             <Text style={styles.emptyTitle}>No draws match your search</Text>
             <Text style={styles.emptySub}>Try a different keyword or filter</Text>
           </View>
-        ) : (
+        ) : !loading && (
           results.map((draw, i) => {
             if (draw.isBundle) {
               return (

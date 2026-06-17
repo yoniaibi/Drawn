@@ -48,6 +48,11 @@ export default function ListReviewScreen() {
       // 1. Mark seller as is_seller in profiles
       await supabase.from('profiles').update({ is_seller: true }).eq('id', user.id);
 
+      // Schedule draw for next available 9pm slot (at least 3 days out for shipping)
+      const drawDate = new Date();
+      drawDate.setDate(drawDate.getDate() + 3);
+      drawDate.setHours(21, 0, 0, 0);
+
       // 2. Insert draw
       const { data: draw, error: drawErr } = await supabase.from('draws').insert({
         title: draft.title,
@@ -65,6 +70,7 @@ export default function ListReviewScreen() {
         description: draft.description,
         condition: conditionMap[draft.condition] ?? 'good',
         is_bundle: draft.type === 'bundle',
+        draw_date: drawDate.toISOString(),
       }).select().single();
 
       if (drawErr) throw new Error(drawErr.message);

@@ -41,7 +41,11 @@ export default function TicketsScreen() {
     <ScreenWrapper>
       <View style={styles.header}>
         <Text style={styles.heading}>My Tickets</Text>
-        <Text style={styles.sub}>You're in {myTickets.length} draws tonight</Text>
+        <Text style={styles.sub}>
+          {myTickets.length === 0
+            ? 'No draws entered yet'
+            : `You're in ${myTickets.length} draw${myTickets.length !== 1 ? 's' : ''}`}
+        </Text>
       </View>
 
       {/* Summary strip */}
@@ -160,7 +164,13 @@ export default function TicketsScreen() {
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>🎫</Text>
             <Text style={styles.emptyTitle}>No tickets yet</Text>
-            <Text style={styles.emptySub}>Browse draws and enter for as little as 10p</Text>
+            <Text style={styles.emptySub}>Enter your first draw for as little as 10p. Tonight's closes at 9pm.</Text>
+            <TouchableOpacity
+              style={styles.emptyBtn}
+              onPress={() => router.push('/(tabs)')}
+            >
+              <Text style={styles.emptyBtnText}>Browse tonight's draws →</Text>
+            </TouchableOpacity>
           </View>
         }
       />
@@ -224,8 +234,13 @@ const styles = StyleSheet.create({
   addMoreText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
 
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 60 },
-  empty: { alignItems: 'center', paddingVertical: 60 },
-  emptyEmoji: { fontSize: 44, marginBottom: 12 },
-  emptyTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: 6 },
-  emptySub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center' },
+  empty: { alignItems: 'center', paddingVertical: 60, paddingHorizontal: Spacing.xl, gap: 6 },
+  emptyEmoji: { fontSize: 44, marginBottom: 6 },
+  emptyTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white },
+  emptySub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+  emptyBtn: {
+    marginTop: 12, backgroundColor: Colors.lilac, borderRadius: Radius.md,
+    paddingVertical: 12, paddingHorizontal: 24,
+  },
+  emptyBtnText: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
 });
