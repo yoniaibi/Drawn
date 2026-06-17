@@ -34,6 +34,18 @@ export default function LogInScreen() {
         <Text style={styles.title}>Welcome back</Text>
         <Text style={styles.sub}>Log in to check your tickets and tonight's draw.</Text>
 
+        {/* Apple SSO */}
+        <TouchableOpacity style={styles.appleBt}>
+          <Ionicons name="logo-apple" size={16} color={Colors.white} />
+          <Text style={styles.appleText}>Continue with Apple</Text>
+        </TouchableOpacity>
+
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerOr}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Text style={styles.label}>EMAIL ADDRESS</Text>
@@ -95,4 +107,12 @@ const styles = StyleSheet.create({
   signUpRow: { marginTop: 20, alignItems: 'center' },
   signUpText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
   signUpLink: { color: Colors.pink, fontWeight: '600' },
+  appleBt: {
+    backgroundColor: '#000', borderRadius: Radius.md, padding: 13,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16,
+  },
+  appleText: { color: Colors.white, fontSize: FontSizes.sm, fontWeight: '600' },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.darkBorder },
+  dividerOr: { fontSize: FontSizes.xs, color: Colors.textTertiary },
 });
