@@ -1,15 +1,74 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Share } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Share, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { MOCK_WINNER } from '../../src/mocks';
 import PrimaryButton from '../../src/components/PrimaryButton';
+import { supabase } from '../../src/lib/supabase';
+
+interface ShareData {
+  emoji: string;
+  item: string;
+  retailValue: number; // display-pounds
+  ticketPrice: number; // pence
+  winnerHandle: string;
+}
 
 export default function ShareCardScreen() {
   const { drawId } = useLocalSearchParams<{ drawId: string }>();
   const router = useRouter();
-  const winner = MOCK_WINNER;
+
+  const [data, setData] = useState<ShareData | null>(null);
+
+  useEffect(() => {
+    if (!drawId) {
+      setData({
+        emoji: MOCK_WINNER.emoji,
+        item: MOCK_WINNER.item,
+        retailValue: MOCK_WINNER.retailValue,
+        ticketPrice: MOCK_WINNER.ticketPrice,
+        winnerHandle: MOCK_WINNER.winnerHandle,
+      });
+      return;
+    }
+    supabase
+      .from('draws')
+      .select('emoji, title, retail_value, ticket_price, winner_handle')
+      .eq('id', drawId)
+      .single()
+      .then(({ data: d }) => {
+        if (d) {
+          setData({
+            emoji: d.emoji ?? '🎁',
+            item: d.title,
+            retailValue: Math.round((d.retail_value ?? 0) / 100),
+            ticketPrice: d.ticket_price ?? 10,
+            winnerHandle: d.winner_handle ?? '@winner',
+          });
+        } else {
+          setData({
+            emoji: MOCK_WINNER.emoji,
+            item: MOCK_WINNER.item,
+            retailValue: MOCK_WINNER.retailValue,
+            ticketPrice: MOCK_WINNER.ticketPrice,
+            winnerHandle: MOCK_WINNER.winnerHandle,
+          });
+        }
+      });
+  }, [drawId]);
+
+  const shareText = data
+    ? `I just won ${data.item} worth £${data.retailValue.toLocaleString()} for just ${data.ticketPrice}p on DRAWN! drawn.app`
+    : 'I just won on DRAWN! drawn.app';
+
+  if (!data) {
+    return (
+      <View style={[styles.screen, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={Colors.gold} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -27,19 +86,22 @@ export default function ShareCardScreen() {
           <View style={styles.logoStub}><Text style={styles.logoStubText}>9PM</Text></View>
         </View>
         <Text style={styles.cardKicker}>I JUST WON</Text>
-        <Text style={styles.cardHead}>a £{winner.retailValue.toLocaleString()} bag{'\n'}<Text style={styles.cardHeadGold}>for {winner.ticketPrice}p</Text></Text>
-        <Text style={styles.cardEmoji}>{winner.emoji}</Text>
-        <Text style={styles.cardItem}>{winner.item}</Text>
-        <Text style={styles.cardVs}>1 ticket · worth £{winner.retailValue.toLocaleString()}</Text>
+        <Text style={styles.cardHead}>
+          a £{data.retailValue.toLocaleString()} prize{'\n'}
+          <Text style={styles.cardHeadGold}>for {data.ticketPrice}p</Text>
+        </Text>
+        <Text style={styles.cardEmoji}>{data.emoji}</Text>
+        <Text style={styles.cardItem}>{data.item}</Text>
+        <Text style={styles.cardVs}>1 ticket · worth £{data.retailValue.toLocaleString()}</Text>
         <View style={styles.cardFoot}>
           <View style={styles.cardFootDot} />
           <Text style={styles.cardFootText}>win designer pieces from 10p · drawn.app</Text>
         </View>
       </View>
 
-      <PrimaryButton label="Share on Instagram" onPress={() => Share.share({ message: 'I just won on DRAWN! drawn.app' })} style={{ marginBottom: Spacing.sm }} />
-      <PrimaryButton label="Share on TikTok" onPress={() => Share.share({ message: 'I just won on DRAWN! drawn.app' })} variant="lilac" style={{ marginBottom: Spacing.sm }} />
-      <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => Share.share({ message: 'I just won on DRAWN! drawn.app' })}>
+      <PrimaryButton label="Share on Instagram" onPress={() => Share.share({ message: shareText })} style={{ marginBottom: Spacing.sm }} />
+      <PrimaryButton label="Share on TikTok" onPress={() => Share.share({ message: shareText })} variant="lilac" style={{ marginBottom: Spacing.sm }} />
+      <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => Share.share({ message: shareText })}>
         <Text style={{ fontSize: FontSizes.sm, color: Colors.textSecondary }}>Copy link</Text>
       </TouchableOpacity>
     </View>
