@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/theme';
-import { MOCK_DRAWS } from '../../../src/mocks';
+import { MOCK_DRAWS, Draw } from '../../../src/mocks';
 import ProgressBar from '../../../src/components/ProgressBar';
 import PrimaryButton from '../../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../../src/utils/countdown';
+import { fetchDrawById } from '../../../src/services/draws';
 
 const BUYER_TICKERS = [
   '@sophie_k just bought 5 tickets',
@@ -19,7 +20,26 @@ const BUYER_TICKERS = [
 export default function BundleDrawScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const draw = MOCK_DRAWS.find(d => d.id === id && d.isBundle);
+
+  const mockFind = MOCK_DRAWS.find(d => d.id === id && d.isBundle);
+  const [draw, setDraw] = useState<Draw | null>(mockFind ?? null);
+  const [loading, setLoading] = useState(!mockFind);
+
+  useEffect(() => {
+    if (!id || mockFind) return;
+    fetchDrawById(id).then(d => {
+      setDraw(d);
+      setLoading(false);
+    });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={Colors.lilac} />
+      </View>
+    );
+  }
 
   if (!draw || !draw.bundleItems) {
     return (

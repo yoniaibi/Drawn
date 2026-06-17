@@ -3,14 +3,20 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
-import { MOCK_DRAWS } from '../../../src/mocks';
+import { MOCK_DRAWS, Draw } from '../../../src/mocks';
 import PrizeWheel from '../../../src/components/PrizeWheel';
+import { fetchDrawById } from '../../../src/services/draws';
 
 export default function LiveWheelScreen() {
   const { drawId } = useLocalSearchParams<{ drawId: string }>();
   const router = useRouter();
-  const draw = MOCK_DRAWS.find(d => d.id === drawId) ?? MOCK_DRAWS[0];
+  const [draw, setDraw] = useState<Draw>(MOCK_DRAWS.find(d => d.id === drawId) ?? MOCK_DRAWS[0]);
   const [phase, setPhase] = useState<'spinning' | 'slowing' | 'done'>('spinning');
+
+  useEffect(() => {
+    if (!drawId) return;
+    fetchDrawById(drawId).then(d => { if (d) setDraw(d); });
+  }, [drawId]);
 
   useEffect(() => {
     const timerId1 = setTimeout(() => setPhase('slowing'), 4000);
