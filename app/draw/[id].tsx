@@ -40,6 +40,13 @@ export default function DrawDetailScreen() {
   const isVeryLow = remaining < 200;
   const isLow = remaining < 500;
 
+  const heroBg = draw.isBundle ? '#2D1B00'
+    : draw.emoji === '⌚' ? '#0A1E38'
+    : draw.emoji === '👜' || draw.emoji === '👗' ? '#2A0D3A'
+    : draw.emoji === '💻' ? '#0A1530'
+    : draw.emoji === '👟' ? '#0A2518'
+    : '#1A0D42';
+
   const [buyerIdx, setBuyerIdx] = useState(0);
   const [viewers, setViewers] = useState(VIEWER_COUNTS[0]);
   const buyerOpacity = useRef(new RNAnimated.Value(1)).current;
@@ -84,7 +91,7 @@ export default function DrawDetailScreen() {
   return (
     <View style={styles.screen}>
       {/* Hero */}
-      <View style={styles.hero}>
+      <View style={[styles.hero, { backgroundColor: heroBg }]}>
         <TouchableOpacity style={styles.back} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={22} color={Colors.white} />
         </TouchableOpacity>
@@ -239,7 +246,7 @@ export default function DrawDetailScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg },
   hero: {
-    height: 240, backgroundColor: Colors.darkCard,
+    height: 260,
     alignItems: 'center', justifyContent: 'center', position: 'relative',
   },
   back: { position: 'absolute', top: 52, left: 16, zIndex: 10, padding: 6, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 20 },
@@ -251,7 +258,7 @@ const styles = StyleSheet.create({
   },
   viewersDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
   viewersText: { fontSize: 9, color: Colors.white, fontWeight: '600' },
-  heroEmoji: { fontSize: 90 },
+  heroEmoji: { fontSize: 110 },
   heroValueBox: {
     position: 'absolute', bottom: 12, left: 12,
     flexDirection: 'row', alignItems: 'center', gap: 5,

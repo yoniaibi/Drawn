@@ -14,16 +14,19 @@ const FILTERS = ['Tonight', 'High value', 'Bundles', 'Just listed'];
 
 const LIVE_TICKERS = [
   '@jade_m just bought 3 tickets · Chanel Flap',
-  '@ryan.k grabbed 10 tickets · Jordan 1 Chicago',
+  '@ryan.k grabbed 10 tickets · Rolex Submariner',
   '@priya__ just joined · Designer Closet',
-  '@tom_w bought 5 tickets · Tag Heuer',
-  '247 people are browsing right now',
+  '@tom_w bought 5 more · MacBook Pro',
+  '1,247 people are watching tonight',
+  '@chloe_j added 15 tickets · Chanel Flap',
+  'Rolex draw is 97% full 🔥',
 ];
 
 const RECENT_WINNERS = [
-  { handle: '@chloe_j', item: 'Louis Vuitton Speedy', price: '20p', value: '£820' },
-  { handle: '@dan.west', item: 'Air Jordan 4 Retro', price: '15p', value: '£340' },
-  { handle: '@soph_r', item: 'Chanel Classic Flap', price: '30p', value: '£2,400' },
+  { handle: '@chloe_j', item: 'Chanel Classic Flap', price: '25p', value: '£2,400', emoji: '👜' },
+  { handle: '@dan.west', item: 'Rolex Submariner', price: '50p', value: '£8,500', emoji: '⌚' },
+  { handle: '@soph_r', item: "Designer Closet Bundle", price: '40p', value: '£8,600', emoji: '👗' },
+  { handle: '@mike_j', item: 'MacBook Pro 16"', price: '30p', value: '£2,399', emoji: '💻' },
 ];
 
 export default function HomeScreen() {
@@ -38,6 +41,7 @@ export default function HomeScreen() {
 
   const tonightCount = draws.filter(d => d.status === 'closing_tonight').length;
   const myCount = draws.filter(d => d.myTickets > 0).length;
+  const featuredDraw = draws.find(d => d.status === 'closing_tonight' && !d.isBundle) ?? draws[0];
 
   // Fetch draws from Supabase
   useEffect(() => {
@@ -100,7 +104,46 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Recent winner banner */}
+        {/* HERO featured draw */}
+        {featuredDraw && (
+          <TouchableOpacity style={styles.heroCard} onPress={() => router.push(`/draw/${featuredDraw.id}` as any)} activeOpacity={0.92}>
+            <View style={styles.heroTop}>
+              <View style={styles.heroLiveBadge}>
+                <View style={styles.heroLiveDot} />
+                <Text style={styles.heroLiveText}>CLOSING TONIGHT</Text>
+              </View>
+              <View style={styles.heroViewers}>
+                <Ionicons name="eye-outline" size={10} color={Colors.textSecondary} />
+                <Text style={styles.heroViewersText}>1,247 watching</Text>
+              </View>
+            </View>
+
+            <View style={styles.heroBody}>
+              <Text style={styles.heroEmoji}>{featuredDraw.emoji}</Text>
+              <View style={styles.heroInfo}>
+                <Text style={styles.heroTitle}>{featuredDraw.title}</Text>
+                <Text style={styles.heroSeller}>{featuredDraw.seller}</Text>
+                <View style={styles.heroValueRow}>
+                  <Text style={styles.heroTicketPrice}>from {featuredDraw.ticketPrice}p</Text>
+                  <Text style={styles.heroArrow}>→</Text>
+                  <Text style={styles.heroValue}>£{featuredDraw.retailValue.toLocaleString()} prize</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.heroFooter}>
+              <View style={styles.heroProgressWrap}>
+                <View style={[styles.heroProgressBar, { width: `${Math.round(featuredDraw.ticketsSold / featuredDraw.totalTickets * 100)}%` as any }]} />
+              </View>
+              <View style={styles.heroFooterRow}>
+                <Text style={styles.heroSoldText}>{Math.round(featuredDraw.ticketsSold / featuredDraw.totalTickets * 100)}% sold · {(featuredDraw.totalTickets - featuredDraw.ticketsSold).toLocaleString()} left</Text>
+                <Text style={styles.heroEnterBtn}>Enter draw →</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {/* Recent winner rotating banner */}
         <View style={styles.winnerBanner}>
           <View style={styles.winnerLeft}>
             <Text style={styles.winnerKicker}>🏆 JUST WON</Text>
@@ -110,29 +153,21 @@ export default function HomeScreen() {
             <Text style={styles.winnerItem} numberOfLines={1}>{winner.item}</Text>
           </View>
           <View style={styles.winnerRight}>
+            <Text style={styles.winnerEmoji}>{winner.emoji}</Text>
             <Text style={styles.winnerPrice}>{winner.price} ticket</Text>
-            <Text style={styles.winnerValue}>{winner.value} value</Text>
+            <Text style={styles.winnerValue}>{winner.value}</Text>
           </View>
         </View>
 
-        {/* Tonight banner */}
-        <View style={styles.tonightBanner}>
-          <View style={styles.tonightTop}>
-            <View style={styles.liveRow}>
-              <View style={[styles.dot, { backgroundColor: Colors.pink }]} />
-              <Text style={styles.liveText}>LIVE TONIGHT 9PM</Text>
-            </View>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/live')} style={styles.watchBtn}>
-              <Ionicons name="radio" size={11} color={Colors.white} style={{ marginRight: 3 }} />
-              <Text style={styles.watchText}>Watch</Text>
-            </TouchableOpacity>
+        {/* Tonight info strip */}
+        <View style={styles.tonightStrip}>
+          <View style={styles.tonightStripLeft}>
+            <View style={[styles.dot, { backgroundColor: Colors.pink }]} />
+            <Text style={styles.tonightStripText}>{tonightCount} draws tonight at 9pm · You're in {myCount}</Text>
           </View>
-          <Text style={styles.tonightTitle}>{tonightCount} draws resolve at 9pm</Text>
-          <Text style={styles.tonightSub}>You're entered in {myCount} — don't miss the reveal</Text>
-          <View style={styles.socialProofRow}>
-            <Ionicons name="people" size={11} color={Colors.gold} />
-            <Text style={styles.socialProofText}>1,247 people watching tonight</Text>
-          </View>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/live')} style={styles.watchBtn}>
+            <Text style={styles.watchText}>Watch live →</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Filter chips */}
@@ -224,39 +259,67 @@ const styles = StyleSheet.create({
   tickerDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
   tickerText: { fontSize: FontSizes.xs, color: Colors.textSecondary, flex: 1 },
 
+  heroCard: {
+    margin: Spacing.md, marginBottom: Spacing.sm,
+    backgroundColor: '#1A0D42', borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)',
+    overflow: 'hidden',
+  },
+  heroTop: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: Spacing.md, paddingTop: Spacing.md, paddingBottom: 6,
+  },
+  heroLiveBadge: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  heroLiveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
+  heroLiveText: { fontSize: 9, fontWeight: '800', color: Colors.pink, letterSpacing: 0.8 },
+  heroViewers: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  heroViewersText: { fontSize: 9, color: Colors.textSecondary },
+  heroBody: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.md, paddingBottom: Spacing.md, gap: 14 },
+  heroEmoji: { fontSize: 64 },
+  heroInfo: { flex: 1, gap: 3 },
+  heroTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, lineHeight: 24 },
+  heroSeller: { fontSize: FontSizes.xs, color: Colors.textSecondary },
+  heroValueRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
+  heroTicketPrice: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '600' },
+  heroArrow: { fontSize: FontSizes.xs, color: Colors.textTertiary },
+  heroValue: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '800' },
+  heroFooter: { borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)', paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, gap: 6 },
+  heroProgressWrap: { height: 4, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' },
+  heroProgressBar: { height: 4, backgroundColor: Colors.pink, borderRadius: 2 },
+  heroFooterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  heroSoldText: { fontSize: 9, color: Colors.textSecondary },
+  heroEnterBtn: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '700' },
+
   winnerBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: Colors.darkCard, marginHorizontal: Spacing.md, marginTop: Spacing.md,
+    backgroundColor: Colors.darkCard, marginHorizontal: Spacing.md, marginBottom: Spacing.sm,
     borderRadius: Radius.md, padding: Spacing.md,
-    borderWidth: 1, borderColor: 'rgba(249,200,70,0.2)',
-    overflow: 'hidden',
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.18)',
   },
   winnerLeft: { flex: 1 },
   winnerKicker: { fontSize: 9, fontWeight: '700', color: Colors.gold, letterSpacing: 0.5, marginBottom: 3 },
   winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.md, color: Colors.white, lineHeight: 18 },
   winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
-  winnerRight: { alignItems: 'flex-end', paddingLeft: 10 },
-  winnerPrice: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '700' },
-  winnerValue: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+  winnerRight: { alignItems: 'flex-end', paddingLeft: 10, gap: 2 },
+  winnerEmoji: { fontSize: 22 },
+  winnerPrice: { fontSize: 9, color: Colors.textSecondary },
+  winnerValue: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '800' },
 
-  tonightBanner: {
-    backgroundColor: Colors.royal, margin: Spacing.md, marginTop: Spacing.sm,
-    borderRadius: Radius.md, padding: Spacing.md,
+  tonightStrip: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginHorizontal: Spacing.md, marginBottom: Spacing.sm,
+    backgroundColor: 'rgba(244,114,182,0.08)', borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md, paddingVertical: 10,
+    borderWidth: 1, borderColor: 'rgba(244,114,182,0.15)',
   },
-  tonightTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  liveRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  tonightStripLeft: { flexDirection: 'row', alignItems: 'center', gap: 7, flex: 1 },
+  tonightStripText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '600', flex: 1 },
   dot: { width: 7, height: 7, borderRadius: 99 },
-  liveText: { fontSize: 9, fontWeight: '700', color: Colors.white, letterSpacing: 0.6 },
-  watchBtn: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: Colors.pink, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4,
-  },
-  watchText: { fontSize: 9, fontWeight: '600', color: Colors.white },
-  tonightTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700' },
-  tonightSub: { fontSize: FontSizes.xs, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
-  socialProofRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 },
-  socialProofText: { fontSize: 9, color: Colors.gold, fontWeight: '600' },
+  watchBtn: { backgroundColor: Colors.pink, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5 },
+  watchText: { fontSize: 9, fontWeight: '700', color: Colors.white },
 
+  liveRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  liveText: { fontSize: 9, fontWeight: '700', color: Colors.white, letterSpacing: 0.6 },
   filterRow: { paddingHorizontal: Spacing.md, gap: 8, paddingBottom: 4, paddingTop: 4 },
   chip: { borderRadius: Radius.pill, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: Colors.darkCard, borderWidth: 1, borderColor: Colors.darkBorder },
   chipOn: { backgroundColor: Colors.lilac, borderColor: Colors.lilac },

@@ -17,7 +17,8 @@ const MENU = [
 ];
 
 const RECENT_WINS = [
-  { emoji: '👟', item: 'Jordan 1 Chicago', value: '£280', date: 'Last week' },
+  { emoji: '⌚', item: 'Rolex Submariner', value: '£8,500', date: 'Last month', ticketCost: '50p' },
+  { emoji: '👟', item: 'Jordan 1 Chicago', value: '£280', date: 'Last week', ticketCost: '10p' },
 ];
 
 export default function AccountScreen() {
@@ -37,6 +38,9 @@ export default function AccountScreen() {
             </View>
           </View>
           <Text style={styles.handle}>{handle}</Text>
+          <View style={styles.memberBadge}>
+            <Text style={styles.memberBadgeText}>✦ FOUNDING MEMBER</Text>
+          </View>
           <View style={styles.balancePill}>
             <Ionicons name="wallet" size={12} color={Colors.gold} />
             <Text style={styles.balanceText}>{formatTicketPrice(walletBalance)}</Text>
@@ -46,22 +50,22 @@ export default function AccountScreen() {
         {/* Stats */}
         <View style={styles.statsRow}>
           <View style={styles.stat}>
-            <Text style={styles.statVal}>3</Text>
-            <Text style={styles.statLabel}>Draws entered</Text>
+            <Text style={styles.statVal}>4</Text>
+            <Text style={styles.statLabel}>Active draws</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.stat}>
-            <Text style={styles.statVal}>23</Text>
-            <Text style={styles.statLabel}>Tickets held</Text>
+            <Text style={styles.statVal}>28</Text>
+            <Text style={styles.statLabel}>Tickets</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={[styles.stat]}>
-            <Text style={[styles.statVal, { color: Colors.gold }]}>1</Text>
+            <Text style={[styles.statVal, { color: Colors.gold }]}>2</Text>
             <Text style={styles.statLabel}>Won 🏆</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.stat}>
-            <Text style={[styles.statVal, { color: Colors.lilac }]}>£280</Text>
+            <Text style={[styles.statVal, { color: Colors.lilac }]}>£8,780</Text>
             <Text style={styles.statLabel}>Won total</Text>
           </View>
         </View>
@@ -75,7 +79,7 @@ export default function AccountScreen() {
                 <Text style={styles.winEmoji}>{w.emoji}</Text>
                 <View style={styles.winInfo}>
                   <Text style={styles.winItem}>{w.item}</Text>
-                  <Text style={styles.winDate}>{w.date}</Text>
+                  <Text style={styles.winDate}>{w.ticketCost} ticket · {w.date}</Text>
                 </View>
                 <View style={styles.winValueBadge}>
                   <Text style={styles.winValue}>{w.value}</Text>
@@ -144,7 +148,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.royal, alignItems: 'center', justifyContent: 'center',
   },
   avatarText: { fontSize: 26, color: Colors.white, fontWeight: '700' },
-  handle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: 8 },
+  handle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: 4 },
+  memberBadge: {
+    backgroundColor: 'rgba(249,200,70,0.12)', borderRadius: Radius.pill,
+    paddingHorizontal: 10, paddingVertical: 3, marginBottom: 8,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)',
+  },
+  memberBadgeText: { fontSize: 8, color: Colors.gold, fontWeight: '800', letterSpacing: 1 },
   balancePill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: Colors.darkCard, borderRadius: Radius.pill,

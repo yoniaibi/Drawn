@@ -8,24 +8,23 @@ import TicketLogo from '../../src/components/TicketLogo';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import GhostButton from '../../src/components/GhostButton';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
-import { useAuthStore } from '../../src/store';
 
 const RECENT_WINS = [
-  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: '30p', value: '£2,400', emoji: '👜', timeAgo: '3 mins ago', multiple: '80×' },
-  { handle: '@dan.west', item: 'Air Jordan 4 Retro', ticketPrice: '15p', value: '£340', emoji: '👟', timeAgo: '12 mins ago', multiple: '22×' },
-  { handle: '@chloe_j', item: 'Louis Vuitton Speedy', ticketPrice: '20p', value: '£820', emoji: '👛', timeAgo: '27 mins ago', multiple: '41×' },
+  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: '25p', value: '£2,400', emoji: '👜', timeAgo: '3 mins ago', multiple: '96×' },
+  { handle: '@dan.west', item: 'Rolex Submariner', ticketPrice: '50p', value: '£8,500', emoji: '⌚', timeAgo: '12 mins ago', multiple: '170×' },
+  { handle: '@chloe_j', item: "Designer Closet Bundle", ticketPrice: '40p', value: '£8,600', emoji: '👗', timeAgo: '27 mins ago', multiple: '215×' },
 ];
 
 const SOCIAL_PROOF = [
   '🎉 1,247 people watching tonight',
   '🏆 23 winners this week',
-  '💜 £48,000 in prizes drawn so far',
-  '⚡ Payouts in 24 hours',
+  '💜 £127,000 in prizes drawn so far',
+  '⚡ Seller payouts within 24 hours',
+  '👜 Chanel Flap won for 25p tonight',
 ];
 
 export default function SplashScreen() {
   const router = useRouter();
-  const login = useAuthStore(s => s.login);
   const { width: screenW, height: screenH } = useWindowDimensions();
   const [time, setTime] = useState(getCountdownTo9pm());
   const [winnerIdx, setWinnerIdx] = useState(0);
