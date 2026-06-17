@@ -159,6 +159,38 @@ export async function fetchMyTickets(userId: string): Promise<Draw[]> {
   }
 }
 
+export interface WinResult {
+  drawId: string;
+  drawTitle: string;
+  drawEmoji: string;
+  retailValue: number;
+  completedAt: string;
+}
+
+export async function checkForWins(userId: string): Promise<WinResult[]> {
+  try {
+    const { data, error } = await supabase
+      .from('draws')
+      .select('id, title, emoji, retail_value, completed_at')
+      .eq('winner_user_id', userId)
+      .eq('status', 'completed')
+      .order('completed_at', { ascending: false })
+      .limit(5);
+
+    if (error || !data) return [];
+
+    return data.map(d => ({
+      drawId: d.id,
+      drawTitle: d.title,
+      drawEmoji: d.emoji,
+      retailValue: d.retail_value,
+      completedAt: d.completed_at ?? '',
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchWalletTransactions(userId: string): Promise<WalletTransaction[]> {
   try {
     const { data, error } = await supabase

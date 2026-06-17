@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Animated as RNAnimated, ActivityIndicator, Modal, Pressable,
+  Animated as RNAnimated, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,13 +10,14 @@ import Animated2, {
 } from 'react-native-reanimated';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { Draw, MOCK_DRAWS } from '../../src/mocks';
-import { fetchDraws } from '../../src/services/draws';
+import { fetchDraws, checkForWins, WinResult } from '../../src/services/draws';
 import TicketLogo from '../../src/components/TicketLogo';
 import DrawCard from '../../src/components/DrawCard';
 import WalletBadge from '../../src/components/WalletBadge';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import { useStreak } from '../../src/hooks/useStreak';
 import { formatTicketPrice } from '../../src/utils/countdown';
+import { useAuthStore } from '../../src/store';
 
 const FILTERS = ['Tonight 🔥', 'Hot', 'High value', 'Bundles', 'Just listed'];
 
@@ -51,9 +52,11 @@ export default function HomeScreen() {
   const [filter, setFilter] = useState('Tonight 🔥');
   const [tickerIdx, setTickerIdx] = useState(0);
   const [winnerIdx, setWinnerIdx] = useState(0);
+  const { user } = useAuthStore();
   const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
   const [loadingDraws, setLoadingDraws] = useState(true);
-  const [showDailyReward, setShowDailyReward] = useState(false);
+  const [wins, setWins] = useState<WinResult[]>([]);
+  const [dailyRewardVisible, setDailyRewardVisible] = useState(false);
   const [dailyReward] = useState(DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)]);
   // Local sold-count state for live ticking
   const [liveSold, setLiveSold] = useState<Record<string, number>>({});
@@ -77,18 +80,21 @@ export default function HomeScreen() {
   const myCount = draws.filter(d => d.myTickets > 0).length;
   const featuredDraw = draws.find(d => d.status === 'closing_tonight' && !d.isBundle) ?? draws[0];
 
-  // Fetch draws
+  // Fetch draws + check for wins
   useEffect(() => {
     fetchDraws().then(result => {
       setDraws(result);
       setLoadingDraws(false);
     });
-  }, []);
+    if (user?.id) {
+      checkForWins(user.id).then(setWins);
+    }
+  }, [user?.id]);
 
-  // Show daily reward modal on new day
+  // Show daily reward banner on new day (subtle — not a blocking modal)
   useEffect(() => {
     if (isNewDay) {
-      const t = setTimeout(() => setShowDailyReward(true), 2000);
+      const t = setTimeout(() => setDailyRewardVisible(true), 1500);
       return () => clearTimeout(t);
     }
   }, [isNewDay]);
@@ -171,6 +177,36 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+
+        {/* YOU WON banner — highest priority, appears top of feed */}
+        {wins.length > 0 && (
+          <TouchableOpacity
+            style={styles.winBanner}
+            onPress={() => router.push(`/live/winner/${wins[0].drawId}` as any)}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.winBannerEmoji}>{wins[0].drawEmoji}</Text>
+            <View style={styles.winBannerInfo}>
+              <Text style={styles.winBannerTitle}>🏆 You won!</Text>
+              <Text style={styles.winBannerSub}>{wins[0].drawTitle} · tap to celebrate</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={Colors.gold} />
+          </TouchableOpacity>
+        )}
+
+        {/* Daily reward banner — subtle, dismissible */}
+        {dailyRewardVisible && (
+          <View style={styles.dailyBanner}>
+            <Text style={styles.dailyBannerEmoji}>{dailyReward.emoji}</Text>
+            <View style={styles.dailyBannerInfo}>
+              <Text style={styles.dailyBannerTitle}>{dailyReward.title}</Text>
+              {streak >= 2 && <Text style={styles.dailyBannerStreak}>🔥 {streak} day streak</Text>}
+            </View>
+            <TouchableOpacity onPress={() => setDailyRewardVisible(false)} style={styles.dailyBannerClose}>
+              <Ionicons name="close" size={14} color={Colors.textTertiary} />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* HERO featured draw */}
         {featuredDraw && (
@@ -347,31 +383,6 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      {/* Daily reward modal */}
-      <Modal
-        visible={showDailyReward}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowDailyReward(false)}
-      >
-        <Pressable style={styles.modalOverlay} onPress={() => setShowDailyReward(false)}>
-          <Pressable style={styles.rewardSheet} onPress={() => {}}>
-            <View style={styles.rewardHandle} />
-            <Text style={styles.rewardEmoji}>{dailyReward.emoji}</Text>
-            <Text style={styles.rewardTitle}>{dailyReward.title}</Text>
-            <Text style={styles.rewardBody}>{dailyReward.body}</Text>
-            {streak > 1 && (
-              <View style={styles.streakRow}>
-                <Text style={styles.streakRowText}>🔥 {streak} day streak — keep it up!</Text>
-              </View>
-            )}
-            <TouchableOpacity style={styles.rewardBtn} onPress={() => setShowDailyReward(false)}>
-              <Text style={styles.rewardBtnText}>Claim bonus 🎉</Text>
-            </TouchableOpacity>
-            <Text style={styles.rewardSmall}>Bonus applied to your account automatically</Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </ScreenWrapper>
   );
 }
@@ -514,37 +525,30 @@ const styles = StyleSheet.create({
   bottomProof: { paddingHorizontal: Spacing.lg, paddingBottom: 24, alignItems: 'center' },
   bottomProofText: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', lineHeight: 14 },
 
-  // Daily reward modal
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  rewardSheet: {
-    backgroundColor: Colors.darkCard,
-    borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
-    padding: Spacing.xl, paddingBottom: 48, alignItems: 'center',
-    borderTopWidth: 1, borderTopColor: 'rgba(139,92,246,0.3)',
+  // Win banner
+  winBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    marginHorizontal: Spacing.md, marginBottom: Spacing.sm,
+    backgroundColor: 'rgba(249,200,70,0.12)', borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md, paddingVertical: 14,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.4)',
   },
-  rewardHandle: {
-    width: 36, height: 4, borderRadius: 2,
-    backgroundColor: Colors.darkBorder, marginBottom: Spacing.xl,
+  winBannerEmoji: { fontSize: 28 },
+  winBannerInfo: { flex: 1 },
+  winBannerTitle: { fontSize: FontSizes.base, color: Colors.gold, fontWeight: '800' },
+  winBannerSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+
+  // Daily reward banner (subtle, dismissible strip)
+  dailyBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    marginHorizontal: Spacing.md, marginBottom: Spacing.sm,
+    backgroundColor: 'rgba(139,92,246,0.1)', borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md, paddingVertical: 10,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
   },
-  rewardEmoji: { fontSize: 52, marginBottom: 12 },
-  rewardTitle: {
-    fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white,
-    textAlign: 'center', marginBottom: 8,
-  },
-  rewardBody: {
-    fontSize: FontSizes.sm, color: Colors.textSecondary,
-    textAlign: 'center', lineHeight: 20, marginBottom: 16,
-  },
-  streakRow: {
-    backgroundColor: 'rgba(249,200,70,0.1)', borderRadius: Radius.md,
-    paddingHorizontal: Spacing.lg, paddingVertical: 8, marginBottom: 16,
-    borderWidth: 1, borderColor: 'rgba(249,200,70,0.2)',
-  },
-  streakRowText: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '700' },
-  rewardBtn: {
-    width: '100%', backgroundColor: Colors.lilac, borderRadius: Radius.md,
-    padding: 15, alignItems: 'center', marginBottom: 10,
-  },
-  rewardBtnText: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
-  rewardSmall: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center' },
+  dailyBannerEmoji: { fontSize: 20 },
+  dailyBannerInfo: { flex: 1 },
+  dailyBannerTitle: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
+  dailyBannerStreak: { fontSize: 9, color: Colors.gold, marginTop: 1 },
+  dailyBannerClose: { padding: 4 },
 });

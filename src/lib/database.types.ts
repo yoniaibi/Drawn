@@ -29,6 +29,9 @@ export interface Draw {
   is_bundle: boolean;
   draw_date: string;
   created_at: string;
+  winner_user_id?: string | null;
+  winner_handle?: string | null;
+  completed_at?: string | null;
 }
 
 export interface BundleItem {
@@ -52,7 +55,7 @@ export interface WalletTransaction {
   id: string;
   user_id: string;
   amount: number; // pence, positive = credit, negative = debit
-  type: 'topup' | 'purchase' | 'refund' | 'win';
+  type: 'topup' | 'purchase' | 'refund' | 'win' | 'payout';
   description: string;
   created_at: string;
 }
