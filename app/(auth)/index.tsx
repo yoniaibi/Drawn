@@ -8,12 +8,15 @@ import TicketLogo from '../../src/components/TicketLogo';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import GhostButton from '../../src/components/GhostButton';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
+import { fetchRecentWinners, RecentWinner } from '../../src/services/draws';
 
-const RECENT_WINS = [
-  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: '25p', value: '£2,400', emoji: '👜', timeAgo: '3 mins ago', multiple: '96×' },
-  { handle: '@dan.west', item: 'Rolex Submariner', ticketPrice: '50p', value: '£8,500', emoji: '⌚', timeAgo: '12 mins ago', multiple: '170×' },
-  { handle: '@chloe_j', item: "Designer Closet Bundle", ticketPrice: '40p', value: '£8,600', emoji: '👗', timeAgo: '27 mins ago', multiple: '215×' },
+const FALLBACK_WINS = [
+  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: 25, retailValue: 2400, emoji: '👜' },
+  { handle: '@dan.west', item: 'Rolex Submariner', ticketPrice: 50, retailValue: 8500, emoji: '⌚' },
+  { handle: '@chloe_j', item: 'Designer Closet Bundle', ticketPrice: 40, retailValue: 8600, emoji: '👗' },
 ];
+
+type SplashWin = { handle: string; item: string; ticketPrice: number; retailValue: number; emoji: string; };
 
 const SOCIAL_PROOF = [
   '🎉 1,247 people watching tonight',
@@ -31,6 +34,13 @@ export default function SplashScreen() {
   const [proofIdx, setProofIdx] = useState(0);
   const winnerOpacity = useRef(new RNAnimated.Value(1)).current;
   const proofOpacity = useRef(new RNAnimated.Value(1)).current;
+  const [recentWins, setRecentWins] = useState<SplashWin[]>(FALLBACK_WINS);
+
+  useEffect(() => {
+    fetchRecentWinners().then(winners => {
+      if (winners.length > 0) setRecentWins(winners.slice(0, 3));
+    });
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setTime(getCountdownTo9pm()), 1000);
@@ -41,12 +51,12 @@ export default function SplashScreen() {
   useEffect(() => {
     const id = setInterval(() => {
       RNAnimated.timing(winnerOpacity, { toValue: 0, duration: 350, useNativeDriver: true }).start(() => {
-        setWinnerIdx(i => (i + 1) % RECENT_WINS.length);
+        setWinnerIdx(i => (i + 1) % recentWins.length);
         RNAnimated.timing(winnerOpacity, { toValue: 1, duration: 350, useNativeDriver: true }).start();
       });
     }, 3500);
     return () => clearInterval(id);
-  }, []);
+  }, [recentWins.length]);
 
   // Rotate social proof
   useEffect(() => {
@@ -67,7 +77,7 @@ export default function SplashScreen() {
     router.push('/(auth)/log-in');
   }
 
-  const currentWin = RECENT_WINS[winnerIdx];
+  const currentWin = recentWins[winnerIdx % recentWins.length];
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} bounces={false} showsVerticalScrollIndicator={false}>
@@ -107,7 +117,7 @@ export default function SplashScreen() {
           <View style={styles.winnerDot} />
           <Text style={styles.winnerShowcaseLabel}>LATEST WIN</Text>
           <Text style={styles.winnerDots}>
-            {RECENT_WINS.map((_, i) => i === winnerIdx ? '●' : '○').join(' ')}
+            {recentWins.map((_, i) => i === winnerIdx % recentWins.length ? '●' : '○').join(' ')}
           </Text>
         </View>
 
@@ -119,10 +129,9 @@ export default function SplashScreen() {
             <View style={styles.winnerInfo}>
               <Text style={styles.winnerHandle}>{currentWin.handle}</Text>
               <Text style={styles.winnerItem}>{currentWin.item}</Text>
-              <Text style={styles.winnerTime}>{currentWin.timeAgo}</Text>
             </View>
             <View style={styles.winnerRight}>
-              <Text style={styles.winnerMultiple}>{currentWin.multiple}</Text>
+              <Text style={styles.winnerMultiple}>{Math.round(currentWin.retailValue / currentWin.ticketPrice)}×</Text>
               <Text style={styles.winnerMultipleSub}>return</Text>
             </View>
           </View>
@@ -131,14 +140,14 @@ export default function SplashScreen() {
 
           <View style={styles.winnerValueRow}>
             <View style={styles.winnerValueStat}>
-              <Text style={styles.winnerValueStatVal}>{currentWin.ticketPrice}</Text>
+              <Text style={styles.winnerValueStatVal}>{currentWin.ticketPrice}p</Text>
               <Text style={styles.winnerValueStatLabel}>ticket price</Text>
             </View>
             <View style={styles.winnerValueArrowBox}>
               <Text style={styles.winnerValueArrow}>→</Text>
             </View>
             <View style={styles.winnerValueStat}>
-              <Text style={[styles.winnerValueStatVal, { color: Colors.gold }]}>{currentWin.value}</Text>
+              <Text style={[styles.winnerValueStatVal, { color: Colors.gold }]}>£{currentWin.retailValue.toLocaleString()}</Text>
               <Text style={styles.winnerValueStatLabel}>retail value</Text>
             </View>
           </View>
