@@ -9,7 +9,7 @@ import type { Draw } from '../../src/mocks';
 import ProgressBar from '../../src/components/ProgressBar';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../src/utils/countdown';
-import { fetchDrawById } from '../../src/services/draws';
+import { fetchDrawById, fetchDraws } from '../../src/services/draws';
 
 const BUYER_TICKERS = [
   '@sophie_k just bought 5 tickets',
@@ -19,17 +19,21 @@ const BUYER_TICKERS = [
   '@chloe just joined the draw',
 ];
 
-const VIEWER_COUNTS = [84, 91, 88, 97, 103, 89];
 
 export default function DrawDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
   const [draw, setDraw] = useState<Draw | null>(MOCK_DRAWS.find(d => d.id === id) ?? null);
+  const [similarDraws, setSimilarDraws] = useState<Draw[]>([]);
 
   useEffect(() => {
     if (!id) return;
     fetchDrawById(id).then(d => { if (d) setDraw(d); });
+    fetchDraws().then(all => {
+      const others = all.filter(d => d.id !== id && d.status !== 'completed').slice(0, 5);
+      setSimilarDraws(others);
+    });
   }, [id]);
 
   if (!draw) {
@@ -56,7 +60,6 @@ export default function DrawDetailScreen() {
     : '#1A0D42';
 
   const [buyerIdx, setBuyerIdx] = useState(0);
-  const [viewers, setViewers] = useState(VIEWER_COUNTS[0]);
   const [trustVisible, setTrustVisible] = useState(false);
   const buyerOpacity = useRef(new RNAnimated.Value(1)).current;
 
@@ -83,15 +86,7 @@ export default function DrawDetailScreen() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Rotate viewer count
-  useEffect(() => {
-    let i = 0;
-    const intervalId = setInterval(() => {
-      i = (i + 1) % VIEWER_COUNTS.length;
-      setViewers(VIEWER_COUNTS[i]);
-    }, 5000);
-    return () => clearInterval(intervalId);
-  }, []);
+  const viewers = Math.round(draw.ticketsSold * 0.08 + 12);
 
   const myOdds = draw.myTickets > 0
     ? ((draw.myTickets / draw.totalTickets) * 100).toFixed(2)
@@ -238,6 +233,23 @@ export default function DrawDetailScreen() {
                 <Text style={styles.bundleVal}>£{item.retailValue.toLocaleString()}</Text>
               </View>
             ))}
+          </View>
+        )}
+
+        {/* Similar draws */}
+        {similarDraws.length > 0 && (
+          <View style={styles.similarSection}>
+            <Text style={styles.similarTitle}>More draws you might like</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.similarRow}>
+              {similarDraws.map(d => (
+                <TouchableOpacity key={d.id} style={styles.similarCard} onPress={() => router.push(`/draw/${d.id}` as any)}>
+                  <Text style={styles.similarEmoji}>{d.emoji}</Text>
+                  <Text style={styles.similarName} numberOfLines={2}>{d.title}</Text>
+                  <Text style={styles.similarPrice}>{d.ticketPrice}p → £{d.retailValue.toLocaleString()}</Text>
+                  <View style={[styles.similarStatusDot, { backgroundColor: d.status === 'closing_tonight' ? Colors.pink : Colors.lilac }]} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )}
       </ScrollView>
@@ -401,6 +413,18 @@ const styles = StyleSheet.create({
   bundleEmoji: { fontSize: 18 },
   bundleName: { flex: 1, fontSize: FontSizes.xs, color: Colors.textSecondary },
   bundleVal: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '700' },
+
+  similarSection: { marginTop: 4 },
+  similarTitle: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 10 },
+  similarRow: { gap: 10, paddingBottom: 4 },
+  similarCard: {
+    width: 130, backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    padding: Spacing.sm, borderWidth: 1, borderColor: Colors.darkBorder, position: 'relative',
+  },
+  similarEmoji: { fontSize: 28, marginBottom: 6 },
+  similarName: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '600', lineHeight: 15, marginBottom: 4 },
+  similarPrice: { fontSize: 9, color: Colors.gold, fontWeight: '600' },
+  similarStatusDot: { position: 'absolute', top: 8, right: 8, width: 6, height: 6, borderRadius: 3 },
 
   cta: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
