@@ -79,6 +79,7 @@ export default function DrawDetailScreen() {
 
   const [buyerIdx, setBuyerIdx] = useState(0);
   const [trustVisible, setTrustVisible] = useState(false);
+  const [postalVisible, setPostalVisible] = useState(false);
   const [watching, setWatching] = useState(false);
   const buyerOpacity = useRef(new RNAnimated.Value(1)).current;
   const { user, handle } = useAuthStore();
@@ -347,8 +348,63 @@ export default function DrawDetailScreen() {
         <View style={styles.shareCallout}>
           <Text style={styles.shareCalloutText}>🎁 Share this draw with a friend — when they sign up, you both get 1 free ticket</Text>
         </View>
-        <Text style={styles.ctaSub}>Free postal entry also available</Text>
+        <TouchableOpacity onPress={() => setPostalVisible(true)} activeOpacity={0.7}>
+          <Text style={styles.ctaSub}>Enter for free by post — tap for instructions</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Postal entry modal */}
+      <Modal visible={postalVisible} transparent animationType="slide" onRequestClose={() => setPostalVisible(false)}>
+        <Pressable style={styles.trustOverlay} onPress={() => setPostalVisible(false)}>
+          <Pressable style={styles.trustSheet} onPress={() => {}}>
+            <View style={styles.trustHandle} />
+            <Text style={styles.trustTitle}>Free Postal Entry</Text>
+            <Text style={styles.postalIntro}>
+              No purchase needed. Every draw has a free entry route — here's how to use it.
+            </Text>
+
+            {[
+              {
+                num: '1',
+                title: 'Write a postcard',
+                desc: `Include your full name, email address, the draw name ("${draw.title}"), and the draw date.`,
+              },
+              {
+                num: '2',
+                title: 'Post it to us',
+                desc: 'DRAWN, PO Box 1000, London, EC1A 1BB\n\nA standard UK stamp is all you need.',
+              },
+              {
+                num: '3',
+                title: 'Must arrive by 5pm on draw day',
+                desc: "We register your entry manually before the draw closes. Late arrivals can't be included.",
+              },
+              {
+                num: '4',
+                title: 'Same odds as paid entries',
+                desc: 'One postcard = one entry. Your name goes into the same draw pool as ticket buyers.',
+              },
+            ].map(s => (
+              <View key={s.num} style={styles.postalStep}>
+                <View style={styles.postalNum}>
+                  <Text style={styles.postalNumText}>{s.num}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.trustStepTitle}>{s.title}</Text>
+                  <Text style={styles.trustStepDesc}>{s.desc}</Text>
+                </View>
+              </View>
+            ))}
+
+            <View style={styles.postalLegal}>
+              <Ionicons name="information-circle-outline" size={14} color={Colors.textTertiary} />
+              <Text style={styles.postalLegalText}>
+                Free entry is available on every DRAWN draw. This is what makes DRAWN a legal prize promotion under UK law, not a lottery.
+              </Text>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -507,4 +563,17 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
   },
   shareCalloutText: { fontSize: FontSizes.xs, color: Colors.lilac, textAlign: 'center', lineHeight: 17 },
+
+  postalIntro: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20, marginBottom: Spacing.lg, textAlign: 'center' },
+  postalStep: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: Spacing.md },
+  postalNum: {
+    width: 26, height: 26, borderRadius: 13,
+    backgroundColor: Colors.royal, alignItems: 'center', justifyContent: 'center', marginTop: 1,
+  },
+  postalNumText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '800' },
+  postalLegal: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: Spacing.md,
+    paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.darkBorder,
+  },
+  postalLegalText: { fontSize: 10, color: Colors.textTertiary, flex: 1, lineHeight: 15 },
 });
