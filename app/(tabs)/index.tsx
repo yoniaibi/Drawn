@@ -20,7 +20,7 @@ import { useStreak } from '../../src/hooks/useStreak';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { useAuthStore } from '../../src/store';
 
-const FILTERS = ['Tonight 🔥', 'Hot', 'High value', 'Bundles', 'Just listed'];
+const FILTERS = ['Tonight 🔥', 'Hot', 'High value', 'Bundles', 'Just listed', '♡ Saved'];
 
 const LIVE_TICKERS = [
   '@jade_m just bought 3 tickets · Chanel Flap',
@@ -47,6 +47,7 @@ export default function HomeScreen() {
   const [filter, setFilter] = useState('Tonight 🔥');
   const [tickerIdx, setTickerIdx] = useState(0);
   const [winnerIdx, setWinnerIdx] = useState(0);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const { user } = useAuthStore();
   const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
   const [loadingDraws, setLoadingDraws] = useState(true);
@@ -139,11 +140,11 @@ export default function HomeScreen() {
   // Rotate live ticker
   useEffect(() => {
     const interval = setInterval(() => {
-      RNAnimated.timing(tickerOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+      RNAnimated.timing(tickerOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
         setTickerIdx(i => (i + 1) % LIVE_TICKERS.length);
-        RNAnimated.timing(tickerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+        RNAnimated.timing(tickerOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
       });
-    }, 2800);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -152,10 +153,10 @@ export default function HomeScreen() {
     const pool = recentWinners.length > 0 ? recentWinners : [{}];
     const interval = setInterval(() => {
       RNAnimated.sequence([
-        RNAnimated.timing(winnerSlide, { toValue: -20, duration: 250, useNativeDriver: true }),
+        RNAnimated.timing(winnerSlide, { toValue: -20, duration: 300, useNativeDriver: true }),
         RNAnimated.timing(winnerSlide, { toValue: 0, duration: 0, useNativeDriver: true }),
       ]).start(() => setWinnerIdx(i => (i + 1) % pool.length));
-    }, 3500);
+    }, 5500);
     return () => clearInterval(interval);
   }, [recentWinners]);
 
@@ -164,6 +165,7 @@ export default function HomeScreen() {
     if (filter === 'Hot') return (d.ticketsSold / d.totalTickets) >= 0.75;
     if (filter === 'Bundles') return d.isBundle;
     if (filter === 'High value') return d.retailValue >= 1000;
+    if (filter === '♡ Saved') return savedIds.has(d.id);
     return true;
   });
 
@@ -366,10 +368,18 @@ export default function HomeScreen() {
             </View>
           )}
           {!loadingDraws && filtered.map((draw, i) => {
+            const saveProps = {
+              saved: savedIds.has(draw.id),
+              onSave: (id: string) => setSavedIds(prev => {
+                const next = new Set(prev);
+                next.has(id) ? next.delete(id) : next.add(id);
+                return next;
+              }),
+            };
             if (draw.isBundle) {
               return (
                 <View key={draw.id} style={styles.wideCard}>
-                  <DrawCard draw={draw} wide />
+                  <DrawCard draw={draw} wide {...saveProps} />
                 </View>
               );
             }
@@ -378,15 +388,17 @@ export default function HomeScreen() {
               if (!next || next.isBundle) {
                 return (
                   <View key={draw.id} style={styles.wideCard}>
-                    <DrawCard draw={draw} />
+                    <DrawCard draw={draw} {...saveProps} />
                   </View>
                 );
               }
               return (
                 <View key={draw.id} style={styles.row}>
-                  <View style={styles.halfCard}><DrawCard draw={draw} /></View>
+                  <View style={styles.halfCard}><DrawCard draw={draw} {...saveProps} /></View>
                   {next && !next.isBundle && (
-                    <View style={styles.halfCard}><DrawCard draw={next} /></View>
+                    <View style={styles.halfCard}>
+                      <DrawCard draw={next} saved={savedIds.has(next.id)} onSave={saveProps.onSave} />
+                    </View>
                   )}
                 </View>
               );
@@ -394,7 +406,7 @@ export default function HomeScreen() {
             if (filtered[i - 1] && !filtered[i - 1].isBundle) return null;
             return (
               <View key={draw.id} style={styles.wideCard}>
-                <DrawCard draw={draw} />
+                <DrawCard draw={draw} {...saveProps} />
               </View>
             );
           })}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, Modal, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, Modal, Pressable, Clipboard, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -9,10 +9,13 @@ import { formatTicketPrice } from '../../src/utils/countdown';
 import { useStreak } from '../../src/hooks/useStreak';
 import { fetchUserStats, checkForWins, UserStats, WinResult } from '../../src/services/draws';
 import { supabase } from '../../src/lib/supabase';
+import ProgressBar from '../../src/components/ProgressBar';
 
 const AVATAR_EMOJIS = [
   '🦋','🌸','⭐','🔥','💜','🎯','🏆','💎','🦄','🌊',
   '🎸','🐆','🍀','🦅','🌙','🎭','🦁','🌺','💫','🎪',
+  '🐉','🌈','⚡','🎀','🦊','🐺','🍉','🎵','🌟','🎃',
+  '🦋','🐬','🎨','🏄','🧿','🌴','🦩','🎯','🔮','🌙',
 ];
 
 const MENU = [
@@ -43,6 +46,13 @@ export default function AccountScreen() {
   }, [user]);
 
   const referralCode = 'DRAWN-' + (handle ?? 'YOU').replace('@', '').toUpperCase().slice(0, 5);
+  const [copied, setCopied] = useState(false);
+
+  function copyReferral() {
+    Clipboard.setString(referralCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   async function saveAvatar() {
     if (!user) return;
@@ -122,17 +132,27 @@ export default function AccountScreen() {
             <Text style={styles.sectionTitle}>Achievements</Text>
             <View style={[styles.badgesGrid, { marginTop: 8 }]}>
               {[
-                { emoji: '✦', label: 'Founding Member', unlocked: true, color: Colors.gold },
-                { emoji: '🎟️', label: 'First Entry', unlocked: (stats.totalTickets ?? 0) >= 1, color: Colors.lilac },
-                { emoji: '🔥', label: '3-Day Streak', unlocked: streak >= 3, color: Colors.pink },
-                { emoji: '🏆', label: 'First Win', unlocked: (stats.wins ?? 0) >= 1, color: Colors.gold },
-                { emoji: '🎯', label: '25 Tickets', unlocked: (stats.totalTickets ?? 0) >= 25, color: Colors.lilac },
-                { emoji: '💎', label: 'Big Winner', unlocked: (stats.totalWon ?? 0) >= 100000, color: Colors.gold },
+                { emoji: '✦', label: 'Founding Member', unlocked: true, color: Colors.gold, progress: 1, max: 1, unit: '' },
+                { emoji: '🎟️', label: 'First Entry', unlocked: (stats.totalTickets ?? 0) >= 1, color: Colors.lilac, progress: Math.min(stats.totalTickets ?? 0, 1), max: 1, unit: 'ticket' },
+                { emoji: '🔥', label: '3-Day Streak', unlocked: streak >= 3, color: Colors.pink, progress: Math.min(streak, 3), max: 3, unit: 'days' },
+                { emoji: '🏆', label: 'First Win', unlocked: (stats.wins ?? 0) >= 1, color: Colors.gold, progress: Math.min(stats.wins ?? 0, 1), max: 1, unit: 'win' },
+                { emoji: '🎯', label: '25 Tickets', unlocked: (stats.totalTickets ?? 0) >= 25, color: Colors.lilac, progress: Math.min(stats.totalTickets ?? 0, 25), max: 25, unit: 'tickets' },
+                { emoji: '💎', label: 'Big Winner', unlocked: (stats.totalWon ?? 0) >= 100000, color: Colors.gold, progress: Math.min(stats.totalWon ?? 0, 100000), max: 100000, unit: '' },
               ].map(b => (
                 <View key={b.label} style={[styles.badge, !b.unlocked && styles.badgeLocked]}>
                   <Text style={[styles.badgeEmoji, !b.unlocked && { opacity: 0.3 }]}>{b.emoji}</Text>
                   <Text style={[styles.badgeLabel, !b.unlocked && { color: Colors.textTertiary }]} numberOfLines={1}>{b.label}</Text>
-                  {!b.unlocked && <View style={styles.badgeLockIcon}><Text style={styles.badgeLockText}>🔒</Text></View>}
+                  {!b.unlocked && (
+                    <View style={{ width: '100%', marginTop: 4 }}>
+                      <ProgressBar progress={b.progress / b.max} height={3} color={b.color} />
+                      <Text style={styles.badgeProgress}>{b.progress}/{b.max} {b.unit}</Text>
+                    </View>
+                  )}
+                  {b.unlocked && (
+                    <View style={[styles.badgeCheck, { backgroundColor: b.color + '22' }]}>
+                      <Ionicons name="checkmark" size={10} color={b.color} />
+                    </View>
+                  )}
                 </View>
               ))}
             </View>
@@ -177,18 +197,26 @@ export default function AccountScreen() {
         )}
 
         {/* Referral CTA */}
-        <TouchableOpacity style={styles.referralCard} onPress={() => Share.share({ message: `Join DRAWN and win designer pieces from 10p! Use my code ${referralCode} · drawn.app` })}>
+        <View style={styles.referralCard}>
           <View style={styles.referralLeft}>
             <Text style={styles.referralTitle}>Invite friends, earn tickets 🎫</Text>
             <Text style={styles.referralSub}>
               Share your code and get <Text style={styles.referralBold}>£1 credit</Text> for every friend who joins
             </Text>
-            <View style={styles.referralCodeBox}>
-              <Text style={styles.referralCode}>{referralCode}</Text>
+            <View style={styles.referralCodeRow}>
+              <View style={styles.referralCodeBox}>
+                <Text style={styles.referralCode}>{referralCode}</Text>
+              </View>
+              <TouchableOpacity style={[styles.copyBtn, copied && styles.copyBtnDone]} onPress={copyReferral}>
+                <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={12} color={copied ? Colors.success : Colors.lilac} />
+                <Text style={[styles.copyBtnText, copied && { color: Colors.success }]}>{copied ? 'Copied!' : 'Copy'}</Text>
+              </TouchableOpacity>
             </View>
           </View>
-          <Ionicons name="share-social" size={22} color={Colors.lilac} />
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => Share.share({ message: `Join DRAWN and win designer pieces from 10p! Use my code ${referralCode} · drawn.app` })}>
+            <Ionicons name="share-social" size={22} color={Colors.lilac} />
+          </TouchableOpacity>
+        </View>
 
         {/* Menu */}
         <View style={styles.menu}>
@@ -331,13 +359,20 @@ const styles = StyleSheet.create({
   referralTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700', marginBottom: 4 },
   referralSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, lineHeight: 16 },
   referralBold: { color: Colors.gold, fontWeight: '700' },
+  referralCodeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   referralCodeBox: {
-    alignSelf: 'flex-start', marginTop: 8,
     backgroundColor: Colors.darkCard, borderRadius: Radius.sm,
     paddingHorizontal: 10, paddingVertical: 4,
     borderWidth: 1, borderColor: Colors.darkBorder,
   },
   referralCode: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '700', letterSpacing: 1 },
+  copyBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    borderRadius: Radius.sm, paddingHorizontal: 8, paddingVertical: 4,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.4)', backgroundColor: 'rgba(139,92,246,0.1)',
+  },
+  copyBtnDone: { borderColor: 'rgba(16,185,129,0.4)', backgroundColor: 'rgba(16,185,129,0.1)' },
+  copyBtnText: { fontSize: 9, color: Colors.lilac, fontWeight: '700' },
 
   badgesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   badge: {
@@ -350,6 +385,8 @@ const styles = StyleSheet.create({
   badgeLabel: { fontSize: 9, color: Colors.white, fontWeight: '700', textAlign: 'center', letterSpacing: 0.2 },
   badgeLockIcon: { position: 'absolute', top: 4, right: 4 },
   badgeLockText: { fontSize: 8 },
+  badgeProgress: { fontSize: 7, color: Colors.textTertiary, marginTop: 2, textAlign: 'center' },
+  badgeCheck: { borderRadius: 10, padding: 3, marginTop: 2 },
 
   menu: { backgroundColor: Colors.darkCard, borderRadius: Radius.lg, overflow: 'hidden', marginBottom: Spacing.lg },
   menuRow: {

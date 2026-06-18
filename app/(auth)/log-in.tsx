@@ -30,7 +30,7 @@ export default function LogInScreen() {
     setLoading(false);
 
     if (signInError) {
-      setError('Incorrect email or password.');
+      setError('Incorrect email or password. Try again or reset your password.');
       return;
     }
     // Auth listener in _layout.tsx redirects to /(tabs) automatically
@@ -44,17 +44,12 @@ export default function LogInScreen() {
         </TouchableOpacity>
 
         <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.sub}>Log in to check your tickets and tonight's draw.</Text>
+        <Text style={styles.sub}>Tonight's draw closes at 9pm — log in to check your tickets.</Text>
 
-        <TouchableOpacity style={styles.appleBt}>
-          <Ionicons name="logo-apple" size={16} color={Colors.white} />
-          <Text style={styles.appleText}>Continue with Apple</Text>
-        </TouchableOpacity>
-
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerOr}>or</Text>
-          <View style={styles.dividerLine} />
+        {/* Social proof strip */}
+        <View style={styles.proofStrip}>
+          <View style={styles.proofDot} />
+          <Text style={styles.proofText}>Join 12,000+ people watching tonight</Text>
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -69,9 +64,15 @@ export default function LogInScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          autoComplete="email"
         />
 
-        <Text style={styles.label}>PASSWORD</Text>
+        <View style={styles.passwordHeader}>
+          <Text style={styles.label}>PASSWORD</Text>
+          <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password')}>
+            <Text style={styles.forgotText}>Forgot password?</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.pwWrap}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
@@ -80,25 +81,31 @@ export default function LogInScreen() {
             value={password}
             onChangeText={t => { setPassword(t); setError(''); }}
             secureTextEntry={!showPw}
+            autoComplete="password"
           />
           <TouchableOpacity style={styles.eye} onPress={() => setShowPw(v => !v)}>
             <Ionicons name={showPw ? 'eye-off' : 'eye'} size={16} color={Colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.forgotRow} onPress={() => router.push('/(auth)/forgot-password')}>
-          <Text style={styles.forgotText}>Forgot password?</Text>
-        </TouchableOpacity>
-
         <PrimaryButton
           label={loading ? 'Logging in…' : 'Log in'}
           onPress={handleLogin}
           disabled={loading}
-          style={{ marginTop: Spacing.md }}
+          style={{ marginTop: Spacing.lg }}
         />
 
-        <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')} style={styles.signUpRow}>
-          <Text style={styles.signUpText}>Don't have an account? <Text style={styles.signUpLink}>Sign up</Text></Text>
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerOr}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TouchableOpacity
+          style={styles.signUpBtn}
+          onPress={() => router.replace('/(auth)/sign-up')}
+        >
+          <Text style={styles.signUpBtnText}>Create an account →</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -109,26 +116,40 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.lg, paddingBottom: 40 },
   back: { marginBottom: 20, alignSelf: 'flex-start' },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 4 },
-  sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 20 },
-  appleBt: {
-    backgroundColor: '#000', borderRadius: Radius.md, padding: 13,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16,
+  sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 16, lineHeight: 18 },
+
+  proofStrip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: 'rgba(139,92,246,0.1)', borderRadius: Radius.sm,
+    paddingHorizontal: 12, paddingVertical: 8,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', marginBottom: 20,
   },
-  appleText: { color: Colors.white, fontSize: FontSizes.sm, fontWeight: '600' },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.darkBorder },
-  dividerOr: { fontSize: FontSizes.xs, color: Colors.textTertiary },
-  error: { fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12, backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm },
-  label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 14 },
+  proofDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
+  proofText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
+
+  error: {
+    fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12,
+    backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm,
+    lineHeight: 16,
+  },
+  passwordHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 },
+  label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4 },
+  forgotText: { fontSize: FontSizes.xs, color: Colors.lilac },
   input: {
     backgroundColor: Colors.darkBorder, borderRadius: Radius.sm,
     padding: 10, fontSize: 11, color: Colors.white, marginBottom: 2,
   },
   pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   eye: { padding: 8 },
-  forgotRow: { alignSelf: 'flex-end', marginTop: 8 },
-  forgotText: { fontSize: FontSizes.xs, color: Colors.lilac },
-  signUpRow: { marginTop: 20, alignItems: 'center' },
-  signUpText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
-  signUpLink: { color: Colors.pink, fontWeight: '600' },
+
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 18 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.darkBorder },
+  dividerOr: { fontSize: FontSizes.xs, color: Colors.textTertiary },
+
+  signUpBtn: {
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.35)',
+    borderRadius: Radius.md, padding: 13, alignItems: 'center',
+  },
+  signUpBtnText: { fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '600' },
 });
+
