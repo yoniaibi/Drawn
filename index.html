@@ -938,6 +938,20 @@
 </head>
 <body>
 
+<!-- ============ COOKIE BANNER ============ -->
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1A1040;border-top:1px solid rgba(139,92,246,0.4);padding:16px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <p style="flex:1;min-width:220px;font-size:13px;color:rgba(255,255,255,0.75);margin:0;line-height:1.5;">
+      We use essential cookies to keep DRAWN working, and optional analytics cookies to improve the experience.
+      <a href="cookies.html" style="color:#8B5CF6;text-decoration:underline;">Cookie policy</a>
+    </p>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button onclick="setCookieChoice('essential')" style="background:transparent;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;cursor:pointer;">Essential only</button>
+      <button onclick="setCookieChoice('all')" style="background:#8B5CF6;border:none;color:#fff;font-size:13px;font-weight:700;padding:8px 18px;border-radius:8px;cursor:pointer;">Accept all</button>
+    </div>
+  </div>
+</div>
+
   <!-- ============ NAV ============ -->
   <nav class="nav">
     <div class="container nav-inner">
@@ -2414,7 +2428,7 @@
         <input type="email" placeholder="Your email" required aria-label="Email address">
         <button type="submit" class="btn btn-pink">Join the waitlist</button>
       </form>
-      <p class="hero-trust" style="text-align:center;">By joining you agree to our <a href="#" style="color:var(--lilac);text-decoration:underline;">Privacy Policy</a>.</p>
+      <p class="hero-trust" style="text-align:center;">By joining you agree to our <a href="privacy.html" style="color:var(--lilac);text-decoration:underline;">Privacy Policy</a> and <a href="terms.html" style="color:var(--lilac);text-decoration:underline;">Terms of Service</a>.</p>
     </div>
   </section>
 
@@ -2471,9 +2485,11 @@
           <div class="footer-col">
             <h4>Company</h4>
             <a href="#">About</a>
-            <a href="#">Contact</a>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
+            <a href="mailto:hello@drawn.app">Contact</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="cookies.html">Cookie Policy</a>
+            <a href="#" onclick="resetCookieConsent();return false;" style="color:var(--muted-v);">Cookie settings</a>
           </div>
         </div>
       </div>
@@ -2803,6 +2819,26 @@
       links.style.padding = '20px 24px';
       links.style.gap = '18px';
     });
+
+    /* ---- Cookie consent ---- */
+    function setCookieChoice(choice) {
+      localStorage.setItem('drawn-cookie-consent', choice);
+      document.getElementById('cookie-banner').style.display = 'none';
+    }
+
+    function resetCookieConsent() {
+      localStorage.removeItem('drawn-cookie-consent');
+      document.getElementById('cookie-banner').style.display = 'block';
+    }
+
+    (function() {
+      var consent = localStorage.getItem('drawn-cookie-consent');
+      if (!consent) {
+        setTimeout(function() {
+          document.getElementById('cookie-banner').style.display = 'block';
+        }, 1500);
+      }
+    })();
   </script>
 
   <!-- sticky mobile CTA -->
