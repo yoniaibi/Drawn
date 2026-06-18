@@ -382,25 +382,35 @@
      =================================================================== */
   .share { background: var(--violet); color: #fff; }
   .share-inner { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 56px; align-items: center; }
-  .share-card-vis {
-    width: 280px; aspect-ratio: 9/16; margin: 0 auto;
-    background: linear-gradient(160deg, var(--royal), var(--violet));
-    border-radius: 22px; padding: 24px 22px; display: flex; flex-direction: column;
-    box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+  /* Instagram post mockup */
+  .ig-post {
+    width: 290px; margin: 0 auto;
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+    overflow: hidden; color: #111;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
-  .share-card-vis .scl { display: inline-flex; align-items: stretch; height: 30px; align-self: flex-start; }
-  .share-card-vis .scl .m { background: var(--ink); border-radius: 6px 0 0 6px; display: flex; align-items: center; padding: 0 10px; }
-  .share-card-vis .scl .m span { font-family: var(--serif); font-weight: 800; font-style: italic; font-size: 15px; color: #fff; }
-  .share-card-vis .scl .s { background: var(--lilac); border-radius: 0 6px 6px 0; display: flex; align-items: center; padding: 0 7px; }
-  .share-card-vis .scl .s span { font-size: 7px; font-weight: 800; color: var(--gold); }
-  .share-card-vis .kick { margin-top: auto; font-size: 12px; font-weight: 800; letter-spacing: 0.15em; color: #E9D5FF; }
-  .share-card-vis .head { font-family: var(--serif); font-style: italic; font-weight: 800; font-size: 30px; line-height: 1.05; margin-top: 8px; }
-  .share-card-vis .head em { color: var(--gold); font-style: italic; }
-  .share-card-vis .emoji { font-size: 56px; margin-top: 16px; }
-  .share-card-vis .item { font-size: 14px; font-weight: 700; margin-top: 12px; }
-  .share-card-vis .vs { font-size: 12px; color: #c9b3ef; margin-top: 4px; }
-  .share-card-vis .foot { margin-top: 14px; font-size: 11px; color: #E9D5FF; display: flex; align-items: center; gap: 6px; }
-  .share-card-vis .foot i { width: 7px; height: 7px; border-radius: 50%; background: var(--pink); display: inline-block; }
+  .ig-post .ig-header { display: flex; align-items: center; gap: 9px; padding: 10px 12px; }
+  .ig-post .ig-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888) border-box; }
+  .ig-post .ig-user { flex: 1; }
+  .ig-post .ig-username { font-size: 12.5px; font-weight: 700; line-height: 1; }
+  .ig-post .ig-location { font-size: 10px; color: #888; margin-top: 2px; }
+  .ig-post .ig-more { font-size: 18px; color: #555; letter-spacing: 1px; line-height: 1; }
+  .ig-post .ig-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; position: relative; }
+  .ig-post .ig-img-wrap { position: relative; }
+  .ig-post .ig-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(30,10,80,0.88)); padding: 28px 14px 14px; }
+  .ig-post .ig-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--gold); color: #1a0a3c; font-size: 9px; font-weight: 800; letter-spacing: .08em; padding: 3px 8px; border-radius: 20px; margin-bottom: 6px; }
+  .ig-post .ig-won-title { font-size: 17px; font-weight: 900; color: #fff; line-height: 1.15; }
+  .ig-post .ig-won-sub { font-size: 11px; color: #E9D5FF; margin-top: 3px; }
+  .ig-post .ig-actions { display: flex; align-items: center; gap: 14px; padding: 9px 12px 4px; }
+  .ig-post .ig-actions svg { width: 22px; height: 22px; fill: none; stroke: #111; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ig-post .ig-heart { stroke: #E1306C !important; fill: #E1306C !important; }
+  .ig-post .ig-save { margin-left: auto; }
+  .ig-post .ig-likes { font-size: 12.5px; font-weight: 700; padding: 0 12px; }
+  .ig-post .ig-caption { padding: 3px 12px 12px; font-size: 12px; line-height: 1.45; color: #333; }
+  .ig-post .ig-caption strong { font-weight: 700; color: #111; }
+  .ig-post .ig-caption .ig-tag { color: #0095f6; }
+  .ig-post .ig-comments { padding: 0 12px 12px; font-size: 11px; color: #888; }
   .share-points { display: flex; flex-direction: column; gap: 18px; }
   .share-point { display: flex; gap: 16px; align-items: flex-start; }
   .share-point .ico { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
@@ -606,6 +616,7 @@
     .hero-inner { grid-template-columns: 1fr; gap: 48px; }
     .hero-phone-wrap { order: -1; }
     .share-inner { grid-template-columns: 1fr; gap: 40px; }
+    .ig-post { width: 100%; max-width: 340px; }
     .feat-grid { grid-template-columns: repeat(2, 1fr); }
     .steps-row { grid-template-columns: repeat(2, 1fr); }
     .flow-track { grid-template-columns: 1fr; gap: 12px; }
@@ -1312,36 +1323,58 @@
     </div>
   </section>
 
-  <!-- ============ SHARE CARD ============ -->
+  <!-- ============ SHARE / SOCIAL PROOF ============ -->
   <section class="section share">
     <div class="container share-inner">
-      <div class="share-card-vis">
-        <span class="scl"><span class="m"><span>drawn</span></span><span class="s"><span>9PM</span></span></span>
-        <div class="kick">I JUST WON</div>
-        <div class="head">a &pound;2,400 bag<br><em>for 30p</em></div>
-        <div class="emoji">&#128092;</div>
-        <div class="item">Chanel Classic Flap</div>
-        <div class="vs">1 ticket · worth &pound;2,400</div>
-        <div class="foot"><i></i>win designer pieces from 10p · drawn.app</div>
+
+      <!-- Instagram post mockup -->
+      <div class="ig-post">
+        <div class="ig-header">
+          <img class="ig-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=68&h=68&fit=crop&crop=face" alt="Sophie">
+          <div class="ig-user">
+            <div class="ig-username">sophiestyle_</div>
+            <div class="ig-location">London, UK</div>
+          </div>
+          <div class="ig-more">···</div>
+        </div>
+        <div class="ig-img-wrap">
+          <img class="ig-img" src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=580&h=580&fit=crop" alt="Chanel Classic Flap win">
+          <div class="ig-overlay">
+            <div class="ig-badge">🏆 I just won on DRAWN</div>
+            <div class="ig-won-title">Chanel Classic Flap<br>for <span style="color:#F9C846;">30p</span></div>
+            <div class="ig-won-sub">1 ticket · retail £2,400</div>
+          </div>
+        </div>
+        <div class="ig-actions">
+          <svg class="ig-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          <svg class="ig-save" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="ig-likes">3,241 likes</div>
+        <div class="ig-caption"><strong>sophiestyle_</strong> Cannot believe this actually happened 😭 won a Chanel bag for literally 30p on <span class="ig-tag">@drawn.app</span> — link in bio if you want in, my referral gets you a free ticket <span class="ig-tag">#drawn #designerfinds #win #chanelbag</span></div>
+        <div class="ig-comments">View all 184 comments</div>
       </div>
+
       <div>
-        <div class="eyebrow">The growth engine</div>
-        <h2 class="section-title on-dark">Every win is a TikTok.</h2>
+        <div class="eyebrow">People are talking</div>
+        <h2 class="section-title on-dark">Every win becomes a moment.</h2>
         <div class="share-points" style="margin-top:32px;">
           <div class="share-point">
-            <div class="ico">&#128293;</div>
-            <div><h3>Auto-generated every night</h3><p>Every 9pm winner gets a share card pre-made — their item, price paid, value. Zero effort to post.</p></div>
+            <div class="ico">🏆</div>
+            <div><h3>Real winners, every night</h3><p>Someone wins at 9pm. They post. Their followers see "30p → £2,400" and can't scroll past. That's your ad.</p></div>
           </div>
           <div class="share-point">
-            <div class="ico">&#9889;</div>
-            <div><h3>The hook is the ratio</h3><p>"30p &rarr; &pound;2,400" stops every scroll. A real winner, every night, and the numbers are true.</p></div>
+            <div class="ico">🔗</div>
+            <div><h3>Share a draw, get a free ticket</h3><p>Every winner gets a referral link. Every friend who joins earns them another entry. Winning spreads itself.</p></div>
           </div>
           <div class="share-point">
-            <div class="ico">&#128279;</div>
-            <div><h3>Built-in referral loop</h3><p>Share a draw, get a free ticket. Every buyer becomes a distributor. The product markets itself.</p></div>
+            <div class="ico">📲</div>
+            <div><h3>No effort needed</h3><p>Your win card is auto-generated the moment the draw closes — name, item, price paid. One tap to post it anywhere.</p></div>
           </div>
         </div>
       </div>
+
     </div>
   </section>
 
