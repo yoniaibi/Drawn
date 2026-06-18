@@ -2733,12 +2733,45 @@
     })();
 
     /* ---- Waitlist form ---- */
+    var SUPA_URL  = 'https://eqaltlwngsmomlwbkqzu.supabase.co';
+    var SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxYWx0bHduZ3Ntb21sd2JrcXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MTA2NzUsImV4cCI6MjA5NzI4NjY3NX0.zcwgXht0vKkkQcu3cVHe4v3q5xv-37BV1GFnwXOGBQY';
+
     function handleWaitlist(e) {
       e.preventDefault();
       var form = e.target;
-      var email = form.querySelector('input').value;
-      form.innerHTML = '<div style="padding:14px 18px;background:rgba(249,200,70,0.15);border-radius:12px;color:#F9C846;font-weight:700;width:100%;text-align:center;">You\'re on the list. See you at 9pm.</div>';
-      console.log('Waitlist signup:', email);
+      var input = form.querySelector('input');
+      var email = input.value.trim();
+      if (!email) return false;
+
+      var btn = form.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Joining…';
+
+      fetch(SUPA_URL + '/rest/v1/waitlist', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + SUPA_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ email: email })
+      }).then(function(res) {
+        if (res.ok || res.status === 409) {
+          form.innerHTML = '<div style="padding:14px 18px;background:rgba(249,200,70,0.15);border-radius:12px;color:#F9C846;font-weight:700;width:100%;text-align:center;">You\'re on the list. See you at 9pm. 🎟</div>';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Join the waitlist';
+          input.style.borderColor = '#F472B6';
+          input.placeholder = 'Something went wrong — try again';
+        }
+      }).catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Join the waitlist';
+        input.style.borderColor = '#F472B6';
+        input.placeholder = 'Something went wrong — try again';
+      });
+
       return false;
     }
 
