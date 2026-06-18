@@ -11,6 +11,7 @@ import PrimaryButton from '../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { fetchDrawById, fetchDraws } from '../../src/services/draws';
 import { supabase } from '../../src/lib/supabase';
+import { useAuthStore } from '../../src/store';
 
 const BUYER_TICKERS = [
   '@sophie_k just bought 5 tickets',
@@ -78,7 +79,9 @@ export default function DrawDetailScreen() {
 
   const [buyerIdx, setBuyerIdx] = useState(0);
   const [trustVisible, setTrustVisible] = useState(false);
+  const [watching, setWatching] = useState(false);
   const buyerOpacity = useRef(new RNAnimated.Value(1)).current;
+  const { user, handle } = useAuthStore();
 
   // Pulse for scarcity
   const pulseOpacity = useSharedValue(1);
@@ -108,6 +111,17 @@ export default function DrawDetailScreen() {
   const myOdds = draw.myTickets > 0
     ? ((draw.myTickets / draw.totalTickets) * 100).toFixed(2)
     : null;
+
+  async function toggleWatch() {
+    if (!user) return;
+    const next = !watching;
+    setWatching(next);
+    if (next) {
+      await supabase.from('draw_watches').upsert({ user_id: user.id, draw_id: id }, { onConflict: 'user_id,draw_id' });
+    } else {
+      await supabase.from('draw_watches').delete().eq('user_id', user.id).eq('draw_id', id);
+    }
+  }
 
   return (
     <View style={styles.screen}>
@@ -151,6 +165,17 @@ export default function DrawDetailScreen() {
 
         <View style={styles.titleRow}>
           <Text style={styles.title}>{draw.title}</Text>
+          <TouchableOpacity
+            onPress={toggleWatch}
+            style={[styles.watchBtn, watching && styles.watchBtnOn]}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={watching ? 'notifications' : 'notifications-outline'}
+              size={18}
+              color={watching ? Colors.gold : Colors.textSecondary}
+            />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.sellerRow}>
@@ -384,8 +409,14 @@ const styles = StyleSheet.create({
   buyerDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.lilac },
   buyerTickerText: { fontSize: FontSizes.xs, color: Colors.textSecondary, flex: 1 },
 
-  titleRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
+  titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, flex: 1, lineHeight: 30 },
+  watchBtn: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: Colors.darkCard, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Colors.darkBorder, marginTop: 2,
+  },
+  watchBtnOn: { borderColor: 'rgba(249,200,70,0.4)', backgroundColor: 'rgba(249,200,70,0.1)' },
 
   sellerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sellerAvatar: { width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.royal, alignItems: 'center', justifyContent: 'center' },
