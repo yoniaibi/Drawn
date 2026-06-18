@@ -10,6 +10,7 @@ import ProgressBar from '../../src/components/ProgressBar';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { fetchDrawById, fetchDraws } from '../../src/services/draws';
+import { supabase } from '../../src/lib/supabase';
 
 const BUYER_TICKERS = [
   '@sophie_k just bought 5 tickets',
@@ -34,6 +35,22 @@ export default function DrawDetailScreen() {
       const others = all.filter(d => d.id !== id && d.status !== 'completed').slice(0, 5);
       setSimilarDraws(others);
     });
+
+    // Real-time ticket count via Supabase Realtime postgres changes
+    const channel = supabase
+      .channel(`draw-detail-${id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'draws', filter: `id=eq.${id}` },
+        (payload) => {
+          if (payload.new && typeof payload.new.tickets_sold === 'number') {
+            setDraw(prev => prev ? { ...prev, ticketsSold: payload.new.tickets_sold } : prev);
+          }
+        },
+      )
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
   }, [id]);
 
   if (!draw) {
