@@ -237,6 +237,14 @@
   .wheel-rotor { animation: none; }
   .wheel-pointer-wrap { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); z-index: 10; }
   .wheel-pointer-wrap svg { filter: drop-shadow(0 3px 8px rgba(249,200,70,0.6)); transition: transform .08s cubic-bezier(.36,.07,.19,.97); transform-origin: 50% 0; }
+  .wheel-winner-overlay { position: absolute; inset: 0; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; pointer-events: none; opacity: 0; transition: opacity .3s; }
+  .wheel-winner-overlay.show { opacity: 1; }
+  .wheel-winner-overlay .ww-bg { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(30,10,80,0.92) 60%, rgba(109,40,217,0.7) 100%); }
+  .wheel-winner-overlay .ww-label { position: relative; z-index: 2; font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #F9C846; text-transform: uppercase; margin-bottom: 4px; }
+  .wheel-winner-overlay .ww-name { position: relative; z-index: 2; font-size: 18px; font-weight: 900; color: #fff; text-align: center; text-shadow: 0 0 20px rgba(249,200,70,0.8), 0 2px 4px rgba(0,0,0,0.6); line-height: 1.1; padding: 0 12px; animation: ww-pop .4s cubic-bezier(.17,.67,.35,1.4) both; }
+  .wheel-winner-overlay .ww-emoji { position: relative; z-index: 2; font-size: 22px; margin-top: 4px; animation: ww-pop .4s .1s cubic-bezier(.17,.67,.35,1.4) both; }
+  @keyframes ww-pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .ww-confetti-canvas { position: absolute; inset: 0; border-radius: 50%; z-index: 1; pointer-events: none; }
   @media (prefers-reduced-motion: reduce) { .wheel-rotor { animation: none; } }
   .draw-prize { margin: 6px 14px 0; background: rgba(109,40,217,0.5); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
   .draw-prize .pic { width: 38px; height: 38px; border-radius: 8px; background: #F3EFFB; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; flex-shrink: 0; }
@@ -703,6 +711,13 @@
             <div class="wheel-wrap">
               <div class="wheel-stage">
                 <canvas id="wheel-hero" class="wheel-canvas" width="210" height="210" aria-label="Live draw wheel"></canvas>
+                <div class="wheel-winner-overlay" id="win-hero">
+                  <canvas class="ww-confetti-canvas" id="win-conf-hero" width="210" height="210"></canvas>
+                  <div class="ww-bg"></div>
+                  <div class="ww-label">Winner!</div>
+                  <div class="ww-name" id="win-name-hero"></div>
+                  <div class="ww-emoji">🎉</div>
+                </div>
                 <div class="wheel-pointer-wrap" id="ptr-hero">
                   <svg width="32" height="44" viewBox="0 0 32 44">
                     <defs><linearGradient id="ptr-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></linearGradient></defs>
@@ -932,6 +947,13 @@
               <div class="wheel-wrap">
                 <div class="wheel-stage">
                   <canvas id="wheel-screen" class="wheel-canvas" width="210" height="210" aria-label="Live draw wheel"></canvas>
+                  <div class="wheel-winner-overlay" id="win-screen">
+                    <canvas class="ww-confetti-canvas" id="win-conf-screen" width="210" height="210"></canvas>
+                    <div class="ww-bg"></div>
+                    <div class="ww-label">Winner!</div>
+                    <div class="ww-name" id="win-name-screen"></div>
+                    <div class="ww-emoji">🎉</div>
+                  </div>
                   <div class="wheel-pointer-wrap" id="ptr-screen">
                     <svg width="32" height="44" viewBox="0 0 32 44">
                       <defs><linearGradient id="ptr-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></linearGradient></defs>
@@ -1655,9 +1677,12 @@
       var COLA = '#3a2480';
       var COLB = '#5a3fa8';
 
-      function initWheel(canvasId, ptrEl) {
+      function initWheel(canvasId, ptrEl, winOverlayId, winNameId, winConfId) {
         var cv  = document.getElementById(canvasId);
         var ptr = ptrEl;
+        var winOverlay = document.getElementById(winOverlayId);
+        var winName    = document.getElementById(winNameId);
+        var winConfCv  = document.getElementById(winConfId);
         if (!cv) return;
         var PX = 210; cv.width = PX; cv.height = PX;
         cv.style.width = '210px'; cv.style.height = '210px';
@@ -1730,7 +1755,29 @@
           particles=particles.filter(function(p){return p.life>0;});
           draw();
           if(t<1||particles.length){requestAnimationFrame(frame);}else{spinning=false;}
-          if(t===1&&winGlow===0){winGlow=1;burst();var iv=setInterval(function(){winGlow=Math.max(0,winGlow-0.03);if(winGlow<=0)clearInterval(iv);},40);}
+          if(t===1&&winGlow===0){winGlow=1;burst();showWinner();var iv=setInterval(function(){winGlow=Math.max(0,winGlow-0.03);if(winGlow<=0)clearInterval(iv);},40);}
+        }
+
+        function showWinner(){
+          if(!winOverlay||!winName) return;
+          winName.textContent = NAMES[WIN_IDX];
+          winOverlay.classList.add('show');
+          // confetti on overlay canvas
+          if(winConfCv){
+            var wctx=winConfCv.getContext('2d');
+            var cols=['#F9C846','#F472B6','#A78BFA','#fff','#34D399','#60A5FA'];
+            var pts=[]; for(var i=0;i<60;i++){var a=Math.random()*Math.PI*2,sp=1.5+Math.random()*3; pts.push({x:105,y:105,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,rot:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.2,w:5+Math.random()*5,h:2+Math.random()*3,col:cols[i%cols.length],life:1});}
+            function confFrame(){
+              wctx.clearRect(0,0,210,210);
+              pts.forEach(function(p){wctx.save();wctx.globalAlpha=Math.max(0,p.life);wctx.translate(p.x,p.y);wctx.rotate(p.rot);wctx.fillStyle=p.col;wctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);wctx.restore();});
+              pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.vr;p.life-=0.014;});
+              pts=pts.filter(function(p){return p.life>0;});
+              if(pts.length) requestAnimationFrame(confFrame); else wctx.clearRect(0,0,210,210);
+            }
+            requestAnimationFrame(confFrame);
+          }
+          // hide after 2.8s so next spin can show again
+          setTimeout(function(){ winOverlay.classList.remove('show'); }, 2800);
         }
 
         function spin(){
@@ -1747,8 +1794,8 @@
         setTimeout(function loop(){spin();setTimeout(loop,11000);},800);
       }
 
-      initWheel('wheel-hero',   document.getElementById('ptr-hero'));
-      initWheel('wheel-screen', document.getElementById('ptr-screen'));
+      initWheel('wheel-hero',   document.getElementById('ptr-hero'),   'win-hero',   'win-name-hero',   'win-conf-hero');
+      initWheel('wheel-screen', document.getElementById('ptr-screen'), 'win-screen', 'win-name-screen', 'win-conf-screen');
     })();
 
     /* ---- Animated stats counter ---- */
