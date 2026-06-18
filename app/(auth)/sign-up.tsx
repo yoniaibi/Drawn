@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -12,6 +12,7 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,6 +23,10 @@ export default function SignUpScreen() {
     }
     if (password.length < 6) {
       setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (!agreedToTerms) {
+      setError('Please agree to the Terms of Service and Privacy Policy to continue.');
       return;
     }
     setError('');
@@ -44,7 +49,6 @@ export default function SignUpScreen() {
       return;
     }
 
-    // Auth listener in _layout.tsx will handle redirect
     router.replace('/(auth)/interests');
   }
 
@@ -57,17 +61,6 @@ export default function SignUpScreen() {
 
         <Text style={styles.title}>Join DRAWN</Text>
         <Text style={styles.sub}>Win designer things for pennies.</Text>
-
-        <TouchableOpacity style={styles.appleBt}>
-          <Ionicons name="logo-apple" size={16} color={Colors.white} />
-          <Text style={styles.appleText}>Continue with Apple</Text>
-        </TouchableOpacity>
-
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerOr}>or</Text>
-          <View style={styles.dividerLine} />
-        </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -97,18 +90,43 @@ export default function SignUpScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* T&Cs checkbox */}
+        <TouchableOpacity
+          style={styles.termsRow}
+          onPress={() => { setAgreedToTerms(v => !v); setError(''); }}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.checkbox, agreedToTerms && styles.checkboxOn]}>
+            {agreedToTerms && <Ionicons name="checkmark" size={13} color={Colors.white} />}
+          </View>
+          <Text style={styles.termsText}>
+            I agree to DRAWN's{' '}
+            <Text
+              style={styles.termsLink}
+              onPress={() => Linking.openURL('https://yoniaibi.github.io/Drawn/terms.html')}
+            >
+              Terms of Service
+            </Text>
+            {' '}and{' '}
+            <Text
+              style={styles.termsLink}
+              onPress={() => Linking.openURL('https://yoniaibi.github.io/Drawn/privacy.html')}
+            >
+              Privacy Policy
+            </Text>
+          </Text>
+        </TouchableOpacity>
+
         <PrimaryButton
           label={loading ? 'Creating account…' : 'Create my account'}
           onPress={handleCreate}
           disabled={loading}
-          style={{ marginTop: Spacing.lg }}
+          style={{ marginTop: Spacing.lg, opacity: agreedToTerms ? 1 : 0.5 }}
         />
 
         <TouchableOpacity onPress={() => router.replace('/(auth)/log-in')} style={styles.loginRow}>
           <Text style={styles.loginText}>Already have an account? <Text style={styles.loginLink}>Log in</Text></Text>
         </TouchableOpacity>
-
-        <Text style={styles.legal}>By creating an account you agree to our{'\n'}Terms of Service and Privacy Policy</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -119,15 +137,10 @@ const styles = StyleSheet.create({
   back: { marginBottom: 20, alignSelf: 'flex-start' },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 4 },
   sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 20 },
-  appleBt: {
-    backgroundColor: '#000', borderRadius: Radius.md, padding: 13,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16,
+  error: {
+    fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12,
+    backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm,
   },
-  appleText: { color: Colors.white, fontSize: FontSizes.sm, fontWeight: '600' },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.darkBorder },
-  dividerOr: { fontSize: FontSizes.xs, color: Colors.textTertiary },
-  error: { fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12, backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 10 },
   input: {
     backgroundColor: Colors.darkBorder, borderRadius: Radius.sm,
@@ -135,8 +148,21 @@ const styles = StyleSheet.create({
   },
   pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   eye: { padding: 8 },
+  termsRow: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    marginTop: Spacing.md, padding: Spacing.sm,
+    backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.sm,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
+  },
+  checkbox: {
+    width: 20, height: 20, borderRadius: 5, marginTop: 1,
+    borderWidth: 2, borderColor: Colors.lilac,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  checkboxOn: { backgroundColor: Colors.lilac, borderColor: Colors.lilac },
+  termsText: { flex: 1, fontSize: FontSizes.xs, color: Colors.textSecondary, lineHeight: 18 },
+  termsLink: { color: Colors.lilac, fontWeight: '600' },
   loginRow: { marginTop: 14, alignItems: 'center' },
   loginText: { fontSize: FontSizes.xs, color: Colors.lilac },
   loginLink: { color: Colors.pink, fontWeight: '600' },
-  legal: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', marginTop: 14, lineHeight: 15 },
 });
