@@ -501,6 +501,75 @@
   .community-post img.post-item { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
 
   /* ===================================================================
+     LIVE STATS BAR
+     =================================================================== */
+  .stats-bar { background: var(--violet); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 22px 0; }
+  .stats-bar-inner { display: flex; justify-content: center; align-items: center; gap: 0; flex-wrap: wrap; }
+  .stat-item { flex: 1; min-width: 160px; text-align: center; padding: 10px 24px; border-right: 1px solid rgba(255,255,255,0.1); }
+  .stat-item:last-child { border-right: none; }
+  .stat-item .sv { font-family: var(--serif); font-weight: 800; font-style: italic; font-size: clamp(26px, 3vw, 38px); color: var(--gold); line-height: 1; }
+  .stat-item .sl { font-size: 13px; color: var(--muted-v); margin-top: 4px; letter-spacing: 0.02em; }
+
+  /* ===================================================================
+     TONIGHT'S DRAWS
+     =================================================================== */
+  .tonight { background: var(--ink); color: #fff; }
+  .tonight-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 16px; }
+  .tonight-header .section-title { margin-bottom: 0; color: #fff; }
+  .tonight-countdown { background: rgba(244,114,182,0.12); border: 1px solid rgba(244,114,182,0.25); border-radius: 12px; padding: 10px 18px; text-align: center; }
+  .tonight-countdown .tc-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--pink); display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .tonight-countdown .tc-time { font-family: var(--serif); font-weight: 800; font-size: 28px; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tonight-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .tonight-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px; overflow: hidden; transition: transform .2s, border-color .2s;
+    cursor: pointer;
+  }
+  .tonight-card:hover { transform: translateY(-4px); border-color: rgba(139,92,246,0.5); }
+  .tonight-card .tc-img { position: relative; height: 160px; overflow: hidden; }
+  .tonight-card .tc-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+  .tonight-card:hover .tc-img img { transform: scale(1.06); }
+  .tonight-card .tc-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: var(--pink); color: #fff; font-size: 10px; font-weight: 800;
+    padding: 3px 9px; border-radius: 20px; letter-spacing: 0.04em;
+  }
+  .tonight-card .tc-badge.hot { background: var(--gold); color: var(--ink); }
+  .tonight-card .tc-body { padding: 14px; }
+  .tonight-card .tc-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .tonight-card .tc-seller { font-size: 12px; color: var(--muted-v); margin-bottom: 10px; }
+  .tonight-card .tc-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-bottom: 10px; overflow: hidden; }
+  .tonight-card .tc-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--lilac), var(--pink)); }
+  .tonight-card .tc-foot { display: flex; justify-content: space-between; align-items: center; }
+  .tonight-card .tc-price { font-size: 13px; font-weight: 800; color: #fff; background: var(--lilac); padding: 4px 12px; border-radius: 20px; }
+  .tonight-card .tc-val { font-size: 12px; color: var(--gold); font-weight: 700; }
+  .tonight-cta { text-align: center; margin-top: 36px; }
+  .tonight-cta p { font-size: 15px; color: var(--muted-v); margin-bottom: 16px; }
+
+  /* ===================================================================
+     FAQ
+     =================================================================== */
+  .faq { background: var(--paper); }
+  .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 48px; }
+  .faq-item {
+    background: #fff; border: 1px solid #ECE6F7; border-radius: 16px; overflow: hidden;
+  }
+  .faq-q {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 18px 20px; cursor: pointer; user-select: none;
+    font-size: 15px; font-weight: 700; color: var(--violet); line-height: 1.35;
+  }
+  .faq-q .faq-icon { font-size: 20px; font-weight: 300; color: var(--lilac); flex-shrink: 0; transition: transform .25s; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-a {
+    padding: 0 20px; max-height: 0; overflow: hidden;
+    transition: max-height .3s ease, padding .3s ease;
+    font-size: 14.5px; color: var(--body); line-height: 1.6;
+  }
+  .faq-item.open .faq-a { max-height: 300px; padding: 0 20px 18px; }
+  .faq-a a { color: var(--lilac); text-decoration: underline; }
+
+  /* ===================================================================
      LIFESTYLE STRIP (between steps and bundles)
      =================================================================== */
   .lifestyle-strip { background: var(--ink); padding: 0; overflow: hidden; }
@@ -535,6 +604,9 @@
     .ward-card-wrap { order: -1; }
     .community-inner { grid-template-columns: 1fr; gap: 40px; }
     .lifestyle-photos { height: 200px; }
+    .tonight-grid { grid-template-columns: repeat(2, 1fr); }
+    .faq-grid { grid-template-columns: 1fr; }
+    .stat-item { min-width: 140px; padding: 10px 16px; }
   }
   @media (max-width: 680px) {
     .nav-links { display: none; }
@@ -552,6 +624,10 @@
     .lifestyle-photos { height: 160px; }
     .community-mosaic { grid-template-rows: 160px 120px; }
     .community-mosaic .tall { height: 290px; }
+    .tonight-grid { grid-template-columns: 1fr; }
+    .tonight-header { flex-direction: column; align-items: flex-start; }
+    .stat-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .stat-item:last-child { border-bottom: none; }
   }
 </style>
 </head>
@@ -759,6 +835,28 @@
         <div class="wc-text"><strong>@jay_99</strong> won Off-White x Nike AF1</div>
         <span class="wc-price">15p ticket</span>
         <img class="wc-item" src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=64&h=64&fit=crop" alt="Off-White Nike">
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LIVE STATS BAR ============ -->
+  <div class="stats-bar">
+    <div class="container stats-bar-inner">
+      <div class="stat-item">
+        <div class="sv" data-target="24817" data-prefix="£" id="stat-paid">£0</div>
+        <div class="sl">paid out to sellers</div>
+      </div>
+      <div class="stat-item">
+        <div class="sv" data-target="847" id="stat-draws">0</div>
+        <div class="sl">draws run so far</div>
+      </div>
+      <div class="stat-item">
+        <div class="sv" data-target="3241" id="stat-winners">0</div>
+        <div class="sl">winners &amp; counting</div>
+      </div>
+      <div class="stat-item">
+        <div class="sv" data-target="22" data-suffix="p" id="stat-avg">0p</div>
+        <div class="sl">average winning ticket</div>
       </div>
     </div>
   </div>
@@ -1212,6 +1310,168 @@
     </div>
   </section>
 
+  <!-- ============ TONIGHT'S DRAWS ============ -->
+  <section class="section tonight" id="tonight">
+    <div class="container">
+      <div class="tonight-header">
+        <div>
+          <div class="eyebrow">Live tonight</div>
+          <h2 class="section-title on-dark">What's drawing at 9pm.</h2>
+        </div>
+        <div class="tonight-countdown">
+          <div class="tc-label"><span class="live-dot"></span> Closes in</div>
+          <div class="tc-time" id="tc-time">00:00:00</div>
+        </div>
+      </div>
+
+      <div class="tonight-grid">
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=320&fit=crop" alt="Chanel Classic Flap" loading="lazy">
+            <span class="tc-badge hot">🔥 78% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Chanel Classic Flap</div>
+            <div class="tc-seller">@sophiestyle · Verified seller</div>
+            <div class="tc-bar"><i style="width:78%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 25p</span>
+              <span class="tc-val">£2,400 retail</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=320&fit=crop" alt="Jordan 1 Retro High Chicago" loading="lazy">
+            <span class="tc-badge">54% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Jordan 1 Retro High Chicago</div>
+            <div class="tc-seller">@kicks_leeds · Verified seller</div>
+            <div class="tc-bar"><i style="width:54%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 10p</span>
+              <span class="tc-val">£380 retail</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=320&fit=crop" alt="Tag Heuer Aquaracer" loading="lazy">
+            <span class="tc-badge hot">🔥 91% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Tag Heuer Aquaracer</div>
+            <div class="tc-seller">@marcus_t · Verified seller</div>
+            <div class="tc-bar"><i style="width:91%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 50p</span>
+              <span class="tc-val">£1,200 retail</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=320&fit=crop" alt="Bottega Veneta Pouch" loading="lazy">
+            <span class="tc-badge">62% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Bottega Veneta Pouch</div>
+            <div class="tc-seller">@em_wardrobe · Verified seller</div>
+            <div class="tc-bar"><i style="width:62%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 20p</span>
+              <span class="tc-val">£680 retail</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tonight-cta">
+        <p>Sign up to grab tickets before tonight's draw closes at 9pm.</p>
+        <a href="#waitlist" class="btn btn-pink">Join the waitlist &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section faq" id="faq">
+    <div class="container center">
+      <div class="eyebrow">Questions</div>
+      <h2 class="section-title">Everything you want to know.</h2>
+      <p class="section-sub">No hidden catches. Here's exactly how DRAWN works.</p>
+
+      <div class="faq-grid" style="text-align:left;">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            Is this gambling? Do I need to be 18+?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">DRAWN is a prize draw, not gambling. Every draw has a free entry route (no purchase necessary), which is what legally distinguishes it from a lottery or raffle. This is the same structure used by large charity draws and competitions across the UK. No gambling licence is required, and there's no age restriction — though we recommend 18+ for financial transactions.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            What if a draw doesn't sell enough tickets?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">If a draw closes without reaching its minimum ticket threshold, all buyers are automatically refunded in full. The draw is cancelled and the seller keeps their item. No one loses out. Funds are held in escrow until the draw resolves — we never touch your money directly.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How do I collect if I win?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Winning is handled entirely in the app. Once the wheel picks your name at 9pm, you get an instant notification and your item ships free within 2 business days. All items are held by DRAWN before going live — we verify them and dispatch directly. You never deal with the seller.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How are sellers paid?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Sellers are paid within 24 hours of the winner confirming delivery. Payment goes directly to the bank account you link during onboarding. DRAWN takes a 12% platform fee — the rest is yours. For a £200 item at 25p/ticket with 2,000 tickets sold, a seller receives approximately £423.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            Is the draw actually random?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Yes — draws use a cryptographically secure random number generator, seeded at draw time. The outcome is provably fair and cannot be influenced by DRAWN, sellers, or any party. We're building a public audit log so anyone can verify past draws. The live wheel is purely visual entertainment — the winner is determined by the algorithm, not where the animation stops.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            What can I sell on DRAWN?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Anything fashion-adjacent that you no longer want: bags, shoes, watches, clothes, jewellery, accessories. Items must be authentic (we verify them), in the condition described, and worth at least £50 retail. Designer and luxury items work best — the bigger the prize, the more tickets sell and the more you earn.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How many tickets can I buy?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Any single buyer can hold up to 25% of the tickets in any draw. This keeps draws fair — no one can dominate. If a draw has 2,000 tickets, the maximum you can buy is 500. At 10p each, that's £50 for a 25% shot at the prize.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            When does the draw happen?
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Every night at 9pm UK time. All draws close simultaneously and resolve live in the app. You can watch the wheel spin for each draw in sequence — there's a live chat and reaction stream so the whole community watches together. Results and winner notifications go out by 9:15pm.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ COMPARISON ============ -->
   <section class="section compare" id="compare">
     <div class="container center">
@@ -1367,6 +1627,60 @@
         screen.appendChild(c);
       }
     })();
+
+    /* ---- Animated stats counter ---- */
+    (function () {
+      var stats = [
+        { el: document.getElementById('stat-paid'),    target: 24817, prefix: '£', suffix: '' },
+        { el: document.getElementById('stat-draws'),   target: 847,   prefix: '',  suffix: '' },
+        { el: document.getElementById('stat-winners'), target: 3241,  prefix: '',  suffix: '' },
+        { el: document.getElementById('stat-avg'),     target: 22,    prefix: '',  suffix: 'p' },
+      ];
+      function animateStat(s) {
+        var start = 0, duration = 1800, startTime = null;
+        function step(ts) {
+          if (!startTime) startTime = ts;
+          var prog = Math.min((ts - startTime) / duration, 1);
+          var val = Math.round(prog * prog * s.target);
+          s.el.textContent = s.prefix + val.toLocaleString() + s.suffix;
+          if (prog < 1) requestAnimationFrame(step);
+          else s.el.textContent = s.prefix + s.target.toLocaleString() + s.suffix;
+        }
+        requestAnimationFrame(step);
+      }
+      var observed = false;
+      var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !observed) {
+          observed = true;
+          stats.forEach(function(s) { animateStat(s); });
+        }
+      }, { threshold: 0.4 });
+      var bar = document.querySelector('.stats-bar');
+      if (bar) observer.observe(bar);
+    })();
+
+    /* ---- Tonight's draws countdown (mirrors hero countdown but targets 21:00) ---- */
+    (function () {
+      var el = document.getElementById('tc-time');
+      if (!el) return;
+      function update() {
+        var now = new Date(), target = new Date();
+        target.setHours(21, 0, 0, 0);
+        if (now >= target) target.setDate(target.getDate() + 1);
+        var diff = Math.max(0, Math.floor((target - now) / 1000));
+        var h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
+        el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      }
+      update(); setInterval(update, 1000);
+    })();
+
+    /* ---- FAQ accordion ---- */
+    function toggleFaq(qEl) {
+      var item = qEl.parentElement;
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
+      if (!isOpen) item.classList.add('open');
+    }
 
     /* ---- Waitlist form ---- */
     function handleWaitlist(e) {
