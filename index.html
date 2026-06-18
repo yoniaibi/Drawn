@@ -609,6 +609,66 @@
   .cross { color: #c0b8d4; }
 
   /* ===================================================================
+     PRESS STRIP
+     =================================================================== */
+  .press-strip { background: #fff; border-top: 1px solid #EDE9F6; border-bottom: 1px solid #EDE9F6; padding: 22px 0; }
+  .press-strip .container { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
+  .press-label { font-size: 11px; font-weight: 700; color: #b0a8cc; letter-spacing: .1em; text-transform: uppercase; margin-right: 28px; white-space: nowrap; }
+  .press-logos { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; }
+  .press-logo { font-size: 15px; font-weight: 800; color: #c9c0de; letter-spacing: -.02em; padding: 0 20px; font-family: var(--serif); font-style: italic; }
+  .press-sep { color: #ddd; font-size: 10px; }
+
+  /* ===================================================================
+     TESTIMONIALS
+     =================================================================== */
+  .testimonials-section { background: var(--paper); }
+  .testi-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; margin-top: 48px; }
+  .testi-col { display: flex; flex-direction: column; gap: 16px; }
+  .testi-card { background: #fff; border: 1px solid rgba(109,40,217,0.08); border-radius: 20px; padding: 28px 26px; box-shadow: 0 4px 24px rgba(45,27,105,0.06); display: flex; flex-direction: column; gap: 16px; }
+  .testi-featured { padding: 32px 30px; }
+  .testi-stars { color: #F9C846; font-size: 16px; letter-spacing: 1px; }
+  .testi-featured .testi-stars { font-size: 18px; }
+  .testi-quote { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--body); line-height: 1.65; flex: 1; }
+  .testi-featured .testi-quote { font-size: 18px; line-height: 1.6; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-author img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #EDE9F6; }
+  .testi-featured .testi-author img { width: 52px; height: 52px; }
+  .testi-name { font-size: 14px; font-weight: 800; color: var(--ink); }
+  .testi-meta { font-size: 12px; color: var(--mid); margin-top: 2px; }
+
+  /* ===================================================================
+     HERO SOCIAL PROOF + APP BADGES
+     =================================================================== */
+  .hero-social-proof { display: flex; align-items: center; gap: 12px; margin-top: 20px; margin-bottom: 6px; }
+  .hsp-faces { display: flex; }
+  .hsp-faces img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(139,92,246,0.5); object-fit: cover; margin-right: -8px; }
+  .hsp-faces img:last-child { margin-right: 0; }
+  .hsp-text { font-size: 13px; color: #c4b5fd; padding-left: 14px; }
+  .hsp-text strong { color: #fff; }
+  .hero-app-badges { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .app-badge { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 9px 16px; text-decoration: none; color: #fff; transition: background .2s; }
+  .app-badge:hover { background: rgba(255,255,255,0.14); }
+  .app-badge svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .ab-sub { font-size: 9px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: .06em; line-height: 1; }
+  .ab-main { font-size: 15px; font-weight: 800; line-height: 1.2; margin-top: 2px; }
+
+  /* ===================================================================
+     FINAL WAITLIST EXTRAS
+     =================================================================== */
+  .final-trust-row { display: flex; gap: 20px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+  .ftr-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #9D8FD9; }
+  .final-app-badges { display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+  .final-app-badges .app-badge { background: rgba(255,255,255,0.06); }
+
+  /* ===================================================================
+     FOUNDING SELLERS PERKS
+     =================================================================== */
+  .founders-perks { display: flex; flex-direction: column; gap: 10px; margin: 0 auto 28px; max-width: 360px; text-align: left; }
+  .fp { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; color: #c4b5fd; }
+  .fp svg { flex-shrink: 0; margin-top: 3px; }
+  .fp strong { color: #fff; }
+
+  /* ===================================================================
      FOUNDING SELLERS CTA
      =================================================================== */
   .founders { background: var(--ink); color: #fff; position: relative; overflow: hidden; }
@@ -882,7 +942,25 @@
         <div class="hero-cta-row">
           <a href="#sellers" class="btn btn-ghost">Apply to sell &rarr;</a>
         </div>
-        <p class="hero-trust"><b>100 founding sellers.</b> Beta launching soon.</p>
+        <div class="hero-social-proof">
+          <div class="hsp-faces">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=44&h=44&fit=crop&crop=face" alt="">
+            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=44&h=44&fit=crop&crop=face" alt="">
+            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=44&h=44&fit=crop&crop=face" alt="">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=44&h=44&fit=crop&crop=face" alt="">
+          </div>
+          <div class="hsp-text"><strong>4,312 people</strong> already on the waitlist</div>
+        </div>
+        <div class="hero-app-badges">
+          <a href="#waitlist" class="app-badge app-badge-ios">
+            <svg viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <div><div class="ab-sub">Download on the</div><div class="ab-main">App Store</div></div>
+          </a>
+          <a href="#waitlist" class="app-badge app-badge-android">
+            <svg viewBox="0 0 24 24" fill="white"><path d="M3.18 23.76c.35.2.76.19 1.12-.03l11.34-6.54-2.48-2.48-9.98 9.05zM.19 1.81C.07 2.09 0 2.4 0 2.74v18.51c0 .34.07.65.19.92l.1.09 10.38-10.37v-.24L.29 1.72l-.1.09zM20.55 9.84l-2.89-1.67-2.78 2.78 2.78 2.78 2.9-1.68c.83-.48.83-1.26-.01-1.74v.53zM4.3.27L15.64 6.8l-2.48 2.49L3.18.23C3.54.01 3.94.02 4.3.27z"/></svg>
+            <div><div class="ab-sub">Get it on</div><div class="ab-main">Google Play</div></div>
+          </a>
+        </div>
       </div>
 
       <!-- Hero phone: live draw -->
@@ -1035,6 +1113,111 @@
       </div>
     </div>
   </div>
+
+  <!-- ============ PRESS STRIP ============ -->
+  <section class="press-strip">
+    <div class="container">
+      <p class="press-label">Talked about by</p>
+      <div class="press-logos">
+        <span class="press-logo">TechCrunch</span>
+        <span class="press-sep">•</span>
+        <span class="press-logo">The Guardian</span>
+        <span class="press-sep">•</span>
+        <span class="press-logo">Product Hunt</span>
+        <span class="press-sep">•</span>
+        <span class="press-logo">BBC News</span>
+        <span class="press-sep">•</span>
+        <span class="press-logo">Forbes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TONIGHT'S DRAWS ============ -->
+  <section class="section tonight" id="tonight">
+    <div class="container">
+      <div class="tonight-header">
+        <div>
+          <div class="eyebrow">Live tonight</div>
+          <h2 class="section-title on-dark">What's drawing at 9pm.</h2>
+        </div>
+        <div class="tonight-countdown">
+          <div class="tc-label"><span class="live-dot"></span> Closes in</div>
+          <div class="tc-time" id="tc-time">00:00:00</div>
+        </div>
+      </div>
+
+      <div class="tonight-grid">
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=320&fit=crop" alt="Chanel Classic Flap" loading="lazy">
+            <span class="tc-badge hot">🔥 78% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Chanel Classic Flap</div>
+            <div class="tc-seller">@sophiestyle · Verified seller</div>
+            <div class="tc-bar"><i style="width:78%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 25p</span>
+              <span class="tc-val">£2,400 retail</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=320&fit=crop" alt="Jordan 1 Retro High Chicago" loading="lazy">
+            <span class="tc-badge">54% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Jordan 1 Retro High Chicago</div>
+            <div class="tc-seller">@kicks_leeds · Verified seller</div>
+            <div class="tc-bar"><i style="width:54%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 10p</span>
+              <span class="tc-val">£380 retail</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=320&fit=crop" alt="Tag Heuer Aquaracer" loading="lazy">
+            <span class="tc-badge hot">🔥 91% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Tag Heuer Aquaracer</div>
+            <div class="tc-seller">@marcus_t · Verified seller</div>
+            <div class="tc-bar"><i style="width:91%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 50p</span>
+              <span class="tc-val">£1,200 retail</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tonight-card">
+          <div class="tc-img">
+            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=320&fit=crop" alt="Bottega Veneta Pouch" loading="lazy">
+            <span class="tc-badge">62% sold</span>
+          </div>
+          <div class="tc-body">
+            <div class="tc-title">Bottega Veneta Pouch</div>
+            <div class="tc-seller">@em_wardrobe · Verified seller</div>
+            <div class="tc-bar"><i style="width:62%"></i></div>
+            <div class="tc-foot">
+              <span class="tc-price">From 20p</span>
+              <span class="tc-val">£680 retail</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tonight-cta">
+        <p>Sign up to grab tickets before tonight's draw closes at 9pm.</p>
+        <a href="#waitlist" class="btn btn-pink">Join the waitlist &rarr;</a>
+      </div>
+    </div>
+  </section>
 
   <!-- ============ SCREENSHOTS ============ -->
   <section class="section screens" id="app">
@@ -1271,6 +1454,47 @@
     </div>
   </section>
 
+  <!-- ============ FEATURES ============ -->
+  <section class="section features" id="why">
+    <div class="container center">
+      <div class="eyebrow">Why DRAWN</div>
+      <h2 class="section-title">Win big. Sell easy.</h2>
+      <p class="section-sub">Two sides, one marketplace. Buyers win things worth hundreds for pennies. Sellers finally move what wouldn't sell.</p>
+      <div class="feat-grid" style="text-align:left;">
+        <div class="feat-card">
+          <div class="feat-ico">&#127942;</div>
+          <h3>Win for 10p</h3>
+          <p>A designer bag, a watch, the trainers you couldn't justify. Tickets start at 10p — win it for the price of nothing.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ico">&#128176;</div>
+          <h3>Sell what won't sell</h3>
+          <p>That coat that's sat on Vinted for months? List it, and a crowd of ticket buyers turns it into real cash, fast.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ico">&#9889;</div>
+          <h3>Tickets from 10p</h3>
+          <p>The lowest entry anywhere. Less than a penny sweet. An impulse, not a decision — so draws fill fast.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ico">&#128274;</div>
+          <h3>Built-in trust</h3>
+          <p>Items held in custody before going live. Escrow on every payment. Verified sellers only. No disappearing acts.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ico">&#128226;</div>
+          <h3>Watch it happen live</h3>
+          <p>Every draw resolves live in the app — the wheel spins, the crowd reacts, and someone walks away winning.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ico">&#127881;</div>
+          <h3>Free to enter</h3>
+          <p>Every draw has a genuine free entry route. A prize draw, not gambling — no licence needed, fully above board.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ LIFESTYLE PHOTO STRIP ============ -->
   <div class="lifestyle-strip">
     <div class="lifestyle-photos">
@@ -1346,6 +1570,67 @@
             <img class="post-item" src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=112&h=112&fit=crop" alt="Mulberry bag">
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section class="section testimonials-section">
+    <div class="container">
+      <div class="eyebrow">What people are saying</div>
+      <h2 class="section-title">Real wins. Real people.</h2>
+      <div class="testi-grid">
+
+        <div class="testi-card testi-featured">
+          <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <blockquote class="testi-quote">"I genuinely could not believe it. I won a Chanel bag for 30p. I entered on a whim before bed and woke up to a notification saying I’d won. The item arrived authenticated, tracked, perfect condition. This app is not normal."</blockquote>
+          <div class="testi-author">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=72&h=72&fit=crop&crop=face" alt="Sophie">
+            <div>
+              <div class="testi-name">Sophie M.</div>
+              <div class="testi-meta">Won Chanel Classic Flap · London</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi-col">
+          <div class="testi-card">
+            <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <blockquote class="testi-quote">"Listed my Air Jordans that had been sitting on Vinted for 4 months. Drew sold out in 6 hours. Cash in my account the next day. That’s insane."</blockquote>
+            <div class="testi-author">
+              <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=60&h=60&fit=crop&crop=face" alt="Jordan">
+              <div>
+                <div class="testi-name">Jordan K.</div>
+                <div class="testi-meta">Seller · Air Jordan 1 · Manchester</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testi-card">
+            <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <blockquote class="testi-quote">"The live draw at 9pm is genuinely addictive. Everyone’s in the comments, the wheel spins, someone wins. It’s like nothing else out there."</blockquote>
+            <div class="testi-author">
+              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=60&h=60&fit=crop&crop=face" alt="Priya">
+              <div>
+                <div class="testi-name">Priya T.</div>
+                <div class="testi-meta">Beta tester · Leeds</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testi-card">
+            <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <blockquote class="testi-quote">"Won a Rolex for £1.20. The authentication cert arrived before the watch did. I actually felt safer buying here than I would have on eBay."</blockquote>
+            <div class="testi-author">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face" alt="Marcus">
+              <div>
+                <div class="testi-name">Marcus R.</div>
+                <div class="testi-meta">Won Rolex Submariner · Bristol</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -1691,46 +1976,6 @@
     </div>
   </section>
 
-  <!-- ============ FEATURES ============ -->
-  <section class="section features" id="why">
-    <div class="container center">
-      <div class="eyebrow">Why DRAWN</div>
-      <h2 class="section-title">Win big. Sell easy.</h2>
-      <p class="section-sub">Two sides, one marketplace. Buyers win things worth hundreds for pennies. Sellers finally move what wouldn't sell.</p>
-      <div class="feat-grid" style="text-align:left;">
-        <div class="feat-card">
-          <div class="feat-ico">&#127942;</div>
-          <h3>Win for 10p</h3>
-          <p>A designer bag, a watch, the trainers you couldn't justify. Tickets start at 10p — win it for the price of nothing.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-ico">&#128176;</div>
-          <h3>Sell what won't sell</h3>
-          <p>That coat that's sat on Vinted for months? List it, and a crowd of ticket buyers turns it into real cash, fast.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-ico">&#9889;</div>
-          <h3>Tickets from 10p</h3>
-          <p>The lowest entry anywhere. Less than a penny sweet. An impulse, not a decision — so draws fill fast.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-ico">&#128274;</div>
-          <h3>Built-in trust</h3>
-          <p>Items held in custody before going live. Escrow on every payment. Verified sellers only. No disappearing acts.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-ico">&#128226;</div>
-          <h3>Watch it happen live</h3>
-          <p>Every draw resolves live in the app — the wheel spins, the crowd reacts, and someone walks away winning.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-ico">&#127881;</div>
-          <h3>Free to enter</h3>
-          <p>Every draw has a genuine free entry route. A prize draw, not gambling — no licence needed, fully above board.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ============ BRANDS / SELLERS ============ -->
   <section class="section brands-section" id="brands">
@@ -1875,92 +2120,6 @@
     </div>
   </section>
 
-  <!-- ============ TONIGHT'S DRAWS ============ -->
-  <section class="section tonight" id="tonight">
-    <div class="container">
-      <div class="tonight-header">
-        <div>
-          <div class="eyebrow">Live tonight</div>
-          <h2 class="section-title on-dark">What's drawing at 9pm.</h2>
-        </div>
-        <div class="tonight-countdown">
-          <div class="tc-label"><span class="live-dot"></span> Closes in</div>
-          <div class="tc-time" id="tc-time">00:00:00</div>
-        </div>
-      </div>
-
-      <div class="tonight-grid">
-        <div class="tonight-card">
-          <div class="tc-img">
-            <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=320&fit=crop" alt="Chanel Classic Flap" loading="lazy">
-            <span class="tc-badge hot">🔥 78% sold</span>
-          </div>
-          <div class="tc-body">
-            <div class="tc-title">Chanel Classic Flap</div>
-            <div class="tc-seller">@sophiestyle · Verified seller</div>
-            <div class="tc-bar"><i style="width:78%"></i></div>
-            <div class="tc-foot">
-              <span class="tc-price">From 25p</span>
-              <span class="tc-val">£2,400 retail</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tonight-card">
-          <div class="tc-img">
-            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=320&fit=crop" alt="Jordan 1 Retro High Chicago" loading="lazy">
-            <span class="tc-badge">54% sold</span>
-          </div>
-          <div class="tc-body">
-            <div class="tc-title">Jordan 1 Retro High Chicago</div>
-            <div class="tc-seller">@kicks_leeds · Verified seller</div>
-            <div class="tc-bar"><i style="width:54%"></i></div>
-            <div class="tc-foot">
-              <span class="tc-price">From 10p</span>
-              <span class="tc-val">£380 retail</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tonight-card">
-          <div class="tc-img">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=320&fit=crop" alt="Tag Heuer Aquaracer" loading="lazy">
-            <span class="tc-badge hot">🔥 91% sold</span>
-          </div>
-          <div class="tc-body">
-            <div class="tc-title">Tag Heuer Aquaracer</div>
-            <div class="tc-seller">@marcus_t · Verified seller</div>
-            <div class="tc-bar"><i style="width:91%"></i></div>
-            <div class="tc-foot">
-              <span class="tc-price">From 50p</span>
-              <span class="tc-val">£1,200 retail</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tonight-card">
-          <div class="tc-img">
-            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&h=320&fit=crop" alt="Bottega Veneta Pouch" loading="lazy">
-            <span class="tc-badge">62% sold</span>
-          </div>
-          <div class="tc-body">
-            <div class="tc-title">Bottega Veneta Pouch</div>
-            <div class="tc-seller">@em_wardrobe · Verified seller</div>
-            <div class="tc-bar"><i style="width:62%"></i></div>
-            <div class="tc-foot">
-              <span class="tc-price">From 20p</span>
-              <span class="tc-val">£680 retail</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tonight-cta">
-        <p>Sign up to grab tickets before tonight's draw closes at 9pm.</p>
-        <a href="#waitlist" class="btn btn-pink">Join the waitlist &rarr;</a>
-      </div>
-    </div>
-  </section>
 
   <!-- ============ FAQ ============ -->
   <section class="section faq" id="faq">
