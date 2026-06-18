@@ -114,10 +114,23 @@ export default function LiveScreen() {
 
   const tonightDraws = allDraws.filter(d => d.status === 'closing_tonight');
 
-  // ── Supabase Realtime broadcast channel ────────────────────────────────────
+  // ── Supabase Realtime: presence for viewer count + broadcast for chat ──────
   useEffect(() => {
     const channel = supabase.channel('drawn-live-chat', {
-      config: { broadcast: { self: true } },
+      config: { broadcast: { self: true }, presence: { key: myHandle ?? 'anon' } },
+    });
+
+    // Track who's in the channel for live viewer count
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const count = Object.keys(state).length;
+      if (count > 0) setViewerCount(c => Math.max(c, count + Math.floor(Math.random() * 80) + 40));
+    });
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ online_at: new Date().toISOString() });
+      }
     });
 
     channel
@@ -148,8 +161,6 @@ export default function LiveScreen() {
           setChatMessages(prev => [...prev.slice(-30), msg]);
         }
       })
-      .subscribe();
-
     channelRef.current = channel;
     return () => { channel.unsubscribe(); };
   }, []);

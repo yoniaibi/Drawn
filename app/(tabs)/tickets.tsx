@@ -6,6 +6,7 @@ import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { Draw, MOCK_MY_TICKETS } from '../../src/mocks';
 import { fetchMyTickets } from '../../src/services/draws';
 import { useAuthStore } from '../../src/store';
+import { supabase } from '../../src/lib/supabase';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
@@ -32,6 +33,28 @@ export default function TicketsScreen() {
       setMyTickets(result);
       setLoading(false);
     });
+
+    // Real-time tickets_sold updates so "your odds" stays live
+    const channel = supabase
+      .channel('tickets-draws-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'draws' },
+        (payload) => {
+          if (payload.new && typeof payload.new.tickets_sold === 'number') {
+            setMyTickets(prev =>
+              prev.map(d =>
+                d.id === payload.new.id
+                  ? { ...d, ticketsSold: payload.new.tickets_sold }
+                  : d
+              )
+            );
+          }
+        },
+      )
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
   }, [user?.id]);
 
   const totalTickets = myTickets.reduce((s, d) => s + d.myTickets, 0);
