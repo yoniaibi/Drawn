@@ -418,8 +418,51 @@
   .share-point p { font-size: 14.5px; color: var(--muted-v); line-height: 1.5; }
 
   /* ===================================================================
-     COMPARISON
+     BRANDS SECTION
      =================================================================== */
+  .brands-section { background: var(--ink); color: #fff; }
+  .brands-inner { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 64px; align-items: center; }
+  .brand-dash {
+    background: #120830; border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.1);
+  }
+  .brand-dash-header {
+    background: rgba(109,40,217,0.3); border-bottom: 1px solid rgba(139,92,246,0.2);
+    padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .brand-dash-header .blogo { font-family: var(--serif); font-style: italic; font-weight: 800; font-size: 15px; color: #fff; }
+  .brand-dash-header .btag { font-size: 9px; font-weight: 700; background: var(--gold); color: #1a0a3c; padding: 2px 7px; border-radius: 20px; margin-left: auto; }
+  .brand-dash-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .brand-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .brand-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(139,92,246,0.15); border-radius: 10px; padding: 12px 10px; text-align: center; }
+  .brand-stat .bsv { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+  .brand-stat .bsv span { color: var(--gold); }
+  .brand-stat .bsl { font-size: 9px; color: #9D8FD9; margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+  .brand-drop-list { display: flex; flex-direction: column; gap: 8px; }
+  .brand-drop { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(139,92,246,0.12); border-radius: 10px; padding: 9px 12px; }
+  .brand-drop img { width: 38px; height: 38px; border-radius: 7px; object-fit: cover; flex-shrink: 0; }
+  .brand-drop .bd-info { flex: 1; }
+  .brand-drop .bd-name { font-size: 12px; font-weight: 700; color: #fff; }
+  .brand-drop .bd-sub { font-size: 10px; color: #9D8FD9; margin-top: 2px; }
+  .brand-drop .bd-pill { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+  .bd-live { background: rgba(244,114,182,0.15); color: #F472B6; border: 1px solid rgba(244,114,182,0.3); }
+  .bd-sched { background: rgba(249,200,70,0.12); color: #F9C846; border: 1px solid rgba(249,200,70,0.25); }
+  .bd-closed { background: rgba(52,211,153,0.12); color: #34D399; border: 1px solid rgba(52,211,153,0.25); }
+  .brand-dash-footer { padding: 0 18px 16px; }
+  .brand-dash-footer .bdf-btn { display: block; background: linear-gradient(135deg, var(--royal), var(--lilac)); color: #fff; font-size: 12px; font-weight: 700; text-align: center; padding: 10px; border-radius: 10px; text-decoration: none; }
+  .brand-perks { display: flex; flex-direction: column; gap: 22px; margin-top: 36px; }
+  .brand-perk { display: flex; gap: 14px; align-items: flex-start; }
+  .brand-perk .bp-ico { width: 44px; height: 44px; border-radius: 11px; background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.25); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .brand-perk h3 { font-family: var(--serif); font-style: italic; font-size: 19px; color: #fff; margin-bottom: 3px; }
+  .brand-perk p { font-size: 14px; color: #9D8FD9; line-height: 1.5; }
+  .brand-cta-row { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+  .brand-cta-row .btn-brand-primary { background: var(--gold); color: var(--ink); font-size: 14px; font-weight: 800; padding: 13px 26px; border-radius: 50px; text-decoration: none; display: inline-block; }
+  .brand-cta-row .btn-brand-ghost { border: 1.5px solid rgba(139,92,246,0.5); color: #c4b5fd; font-size: 14px; font-weight: 600; padding: 12px 22px; border-radius: 50px; text-decoration: none; display: inline-block; }
+  @media (max-width: 700px) {
+    .brands-inner { grid-template-columns: 1fr; gap: 40px; }
+    .brand-stat-row { grid-template-columns: repeat(3,1fr); }
+  }
   .compare { background: var(--paper); }
   .compare-table { margin-top: 48px; border: 1px solid #ECE6F7; border-radius: 18px; overflow: hidden; background: #fff; }
   .compare-table table { width: 100%; border-collapse: collapse; }
@@ -1320,6 +1363,94 @@
           <p>Every draw has a genuine free entry route. A prize draw, not gambling — no licence needed, fully above board.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ BRANDS / SELLERS ============ -->
+  <section class="section brands-section" id="brands">
+    <div class="container brands-inner">
+
+      <!-- Brand seller dashboard mockup -->
+      <div class="brand-dash">
+        <div class="brand-dash-header">
+          <span class="blogo">drawn</span>
+          <span style="font-size:11px;color:#9D8FD9;">Brand Dashboard</span>
+          <span class="btag">✓ Verified Brand</span>
+        </div>
+        <div class="brand-dash-body">
+          <div class="brand-stat-row">
+            <div class="brand-stat"><div class="bsv"><span>£</span>18,400</div><div class="bsl">Revenue this month</div></div>
+            <div class="brand-stat"><div class="bsv">3,241</div><div class="bsl">New customers</div></div>
+            <div class="brand-stat"><div class="bsv"><span>4.8×</span></div><div class="bsl">Avg ticket sellout</div></div>
+          </div>
+          <div class="brand-drop-list">
+            <div class="brand-drop">
+              <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=76&h=76&fit=crop" alt="Nike Air Max 95">
+              <div class="bd-info">
+                <div class="bd-name">Nike Air Max 95 — Neon</div>
+                <div class="bd-sub">642 / 700 tickets sold · closes 9pm</div>
+              </div>
+              <span class="bd-pill bd-live">🔴 Live</span>
+            </div>
+            <div class="brand-drop">
+              <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=76&h=76&fit=crop" alt="Rolex Submariner">
+              <div class="bd-info">
+                <div class="bd-name">Rolex Submariner Drop</div>
+                <div class="bd-sub">Scheduled · Friday 9pm · 0 sold</div>
+              </div>
+              <span class="bd-pill bd-sched">⏳ Scheduled</span>
+            </div>
+            <div class="brand-drop">
+              <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=76&h=76&fit=crop" alt="Chanel bag">
+              <div class="bd-info">
+                <div class="bd-name">Chanel Classic Flap</div>
+                <div class="bd-sub">700 / 700 sold · winner: @sophiestyle_</div>
+              </div>
+              <span class="bd-pill bd-closed">✓ Sold out</span>
+            </div>
+          </div>
+        </div>
+        <div class="brand-dash-footer">
+          <a href="#" class="bdf-btn">+ List a new drop</a>
+        </div>
+      </div>
+
+      <!-- Copy -->
+      <div>
+        <div class="eyebrow">For brands &amp; sellers</div>
+        <h2 class="section-title on-dark">Drop it. Draw it.<br>Sell out overnight.</h2>
+        <p style="color:#9D8FD9;font-size:15px;line-height:1.6;margin-top:16px;">
+          List a new product, a limited colourway, or last season's carry-over. DRAWN turns your launch into an event — a crowd of buyers competes for it with tickets from 10p, you get paid at sellout, and the buzz is the marketing.
+        </p>
+        <div class="brand-perks">
+          <div class="brand-perk">
+            <div class="bp-ico">⚡</div>
+            <div>
+              <h3>Sell out, not markdown</h3>
+              <p>Every ticket sold is revenue. You set the ticket price and the total pool — DRAWN handles payments, draws, and fulfilment notification.</p>
+            </div>
+          </div>
+          <div class="brand-perk">
+            <div class="bp-ico">📣</div>
+            <div>
+              <h3>Built-in hype for your drop</h3>
+              <p>Your product goes live at 9pm with a countdown. Buyers watch the wheel spin on your item. The winner posts about it. Free reach, every time.</p>
+            </div>
+          </div>
+          <div class="brand-perk">
+            <div class="bp-ico">📊</div>
+            <div>
+              <h3>Real buyers, real data</h3>
+              <p>See who's buying your tickets, what converts, and which items fly. A new customer acquisition channel with margins better than ads.</p>
+            </div>
+          </div>
+        </div>
+        <div class="brand-cta-row">
+          <a href="#waitlist" class="btn-brand-primary">Apply as a brand seller</a>
+          <a href="#" class="btn-brand-ghost">See how it works →</a>
+        </div>
+      </div>
+
     </div>
   </section>
 
