@@ -1642,322 +1642,112 @@
     })();
 
     /* ================================================================
-       CANVAS WHEEL ENGINE
-       High-quality prize wheel with:
-       - 12 segments, metallic gold rim, LED glow ring
-       - JS-driven deceleration (8+ rotations, prolonged crawl)
-       - Pointer bounce on each segment tick
-       - Winner segment spotlight + confetti burst
-       - Auto-restarts every ~9s for demo loop
+       CANVAS WHEEL ENGINE — clean rewrite
+       Canvas physical: 420×420px, CSS display: 210×210px (retina 2×)
+       All drawing coordinates in physical pixels (420 space).
        ================================================================ */
     (function () {
-      var NAMES  = ['sophie_k','you','marcus','em.w','jay_99','priya','alex_b','nina','chloe','tom_d','rosa','luca'];
-      var WIN_IDX = 1; // "you"
-      var SEG    = NAMES.length;
-      var SEG_ANG = (Math.PI * 2) / SEG;
+      var NAMES   = ['sophie_k','you','marcus','em.w','jay_99','priya','alex_b','nina','chloe','tom_d','rosa','luca'];
+      var WIN_IDX = 1; // "you" wins
+      var N       = NAMES.length;
+      var SEG_ANG = (Math.PI * 2) / N;
 
-      // Colour palette — alternating deep violet / royal purple, winner = gold flash
-      var COLS = ['#3a2480','#5223a8','#3a2480','#5223a8','#3a2480','#5223a8',
-                  '#3a2480','#5223a8','#3a2480','#5223a8','#3a2480','#5223a8'];
+      var COLA = '#3a2480';
+      var COLB = '#5a3fa8';
 
-      function buildWheel(canvasId, ptrId, size) {
-        var canvas = document.getElementById(canvasId);
-        var ptrEl  = document.getElementById(ptrId);
-        if (!canvas) return;
-        var ctx = canvas.getContext('2d');
-        var R   = size / 2;         // logical radius (canvas is 2× for retina)
-        var cx  = R, cy = R;
-        var rimW  = R * 0.09;
-        var ledW  = R * 0.045;
-        var innerR = R - rimW - ledW;
+      function initWheel(canvasId, ptrEl) {
+        var cv  = document.getElementById(canvasId);
+        var ptr = ptrEl;
+        if (!cv) return;
+        var PX = 420; cv.width = PX; cv.height = PX;
+        var ctx = cv.getContext('2d'), cx = PX/2, cy = PX/2;
+        var R = PX/2 - 4, RIM = 22, INNER = R - RIM;
+        var rot = 0, lastSeg = -1, particles = [], winGlow = 0;
 
-        var angle    = 0;          // current rotation angle (radians)
-        var spinning = false;
-        var lastSeg  = -1;
-        var glowAlpha = 0;         // rim glow intensity
-        var confetti = [];
-        var winFlash = 0;
-
-        function segAtPointer(a) {
-          // pointer is at top (π*1.5 = 270°). Which segment is at top?
-          var norm = ((a % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-          var seg  = Math.floor(((Math.PI*1.5 - norm + Math.PI*2) % (Math.PI*2)) / SEG_ANG);
-          return ((seg % SEG) + SEG) % SEG;
-        }
-
-        function drawFrame() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          // -- Outer glow ring (LED) --
-          var glow = ctx.createRadialGradient(cx,cy,innerR+ledW*0.3, cx,cy,R);
-          var ga = Math.min(1, glowAlpha);
-          glow.addColorStop(0, 'rgba(249,200,70,' + (0.12 + ga*0.45) + ')');
-          glow.addColorStop(0.5, 'rgba(249,200,70,' + (0.04 + ga*0.2) + ')');
-          glow.addColorStop(1, 'rgba(249,200,70,0)');
-          ctx.beginPath();
-          ctx.arc(cx, cy, R, 0, Math.PI*2);
-          ctx.fillStyle = glow;
-          ctx.fill();
-
-          // -- Metallic gold rim --
-          var rimGrad = ctx.createLinearGradient(cx-R, cy-R, cx+R, cy+R);
-          rimGrad.addColorStop(0,    '#FCE08A');
-          rimGrad.addColorStop(0.25, '#F9C846');
-          rimGrad.addColorStop(0.5,  '#D99A1C');
-          rimGrad.addColorStop(0.75, '#F9C846');
-          rimGrad.addColorStop(1,    '#FCE08A');
-          ctx.beginPath();
-          ctx.arc(cx, cy, R - ledW*0.5, 0, Math.PI*2);
-          ctx.strokeStyle = rimGrad;
-          ctx.lineWidth = rimW;
-          ctx.stroke();
-
-          // -- LED dots on rim (12 positions) --
-          for (var d = 0; d < 12; d++) {
-            var da = (d / 12) * Math.PI * 2 - Math.PI/2;
-            var dr = R - ledW * 0.5 - rimW * 0.5;
-            var dx = cx + Math.cos(da) * dr;
-            var dy = cy + Math.sin(da) * dr;
-            ctx.beginPath();
-            ctx.arc(dx, dy, ledW * 0.38, 0, Math.PI*2);
-            var lit = (glowAlpha > 0.1 && d % 2 === 0) || (d % 3 === 0 && glowAlpha < 0.1);
-            ctx.fillStyle = lit ? '#FFF9E0' : '#B8860B';
-            if (lit) {
-              ctx.shadowColor = '#F9C846';
-              ctx.shadowBlur  = ledW * 3;
-            }
-            ctx.fill();
-            ctx.shadowBlur = 0;
+        function draw() {
+          ctx.clearRect(0,0,PX,PX);
+          ctx.beginPath(); ctx.arc(cx,cy,R+2,0,Math.PI*2); ctx.fillStyle='#0D0820'; ctx.fill();
+          // Rim
+          ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.arc(cx,cy,INNER,0,Math.PI*2,true);
+          var rg=ctx.createLinearGradient(cx-R,cy,cx+R,cy);
+          rg.addColorStop(0,'#FCE08A'); rg.addColorStop(0.25,'#F9C846'); rg.addColorStop(0.5,'#B8860B'); rg.addColorStop(0.75,'#F9C846'); rg.addColorStop(1,'#FCE08A');
+          ctx.fillStyle=rg; ctx.fill('evenodd');
+          // LEDs
+          for(var d=0;d<16;d++){
+            var da=(d/16)*Math.PI*2, lr=R-RIM/2;
+            ctx.beginPath(); ctx.arc(cx+Math.cos(da)*lr,cy+Math.sin(da)*lr,4,0,Math.PI*2);
+            if(d%2===0){ctx.shadowColor='#F9C846';ctx.shadowBlur=8;}
+            ctx.fillStyle=d%2===0?'#FFF9E0':'#8B6914'; ctx.fill(); ctx.shadowBlur=0;
           }
-
-          // -- Segments --
-          var borderR = innerR + ledW * 0.3;
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(cx, cy, borderR, 0, Math.PI*2);
-          ctx.clip();
-
-          for (var i = 0; i < SEG; i++) {
-            var start = angle + i * SEG_ANG - Math.PI/2;
-            var end   = start + SEG_ANG;
-            var isWin = (i === WIN_IDX) && winFlash > 0;
-
-            // Segment fill
-            var segGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, innerR);
-            var baseCol = COLS[i % COLS.length];
-            var lightCol = isWin ? '#FEF9C3' : (i % 2 === 0 ? '#5a3fa8' : '#7C4DDC');
-            segGrad.addColorStop(0.3, lightCol);
-            segGrad.addColorStop(1,   baseCol);
-
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, borderR, start, end);
-            ctx.closePath();
-            if (isWin) {
-              ctx.shadowColor = '#F9C846';
-              ctx.shadowBlur  = 18;
-            }
-            ctx.fillStyle = segGrad;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Segment border
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, borderR, start, end);
-            ctx.closePath();
-            ctx.strokeStyle = 'rgba(249,200,70,0.35)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            // Pegs at rim
-            var pegAngle = start + SEG_ANG / 2;
-            var px = cx + Math.cos(pegAngle) * (borderR - 6);
-            var py = cy + Math.sin(pegAngle) * (borderR - 6);
-            ctx.beginPath();
-            ctx.arc(px, py, 4, 0, Math.PI*2);
-            var pg = ctx.createRadialGradient(px-1,py-1,0, px,py,4);
-            pg.addColorStop(0, '#fff');
-            pg.addColorStop(0.4, '#FCE08A');
-            pg.addColorStop(1,  '#D99A1C');
-            ctx.fillStyle = pg;
-            ctx.fill();
-
-            // Name label
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.rotate(start + SEG_ANG / 2);
-            ctx.textAlign = 'right';
-            ctx.font = 'italic bold ' + Math.round(innerR * 0.11) + 'px Georgia, serif';
-            ctx.fillStyle = (i === WIN_IDX) ? '#F9C846' : 'rgba(255,255,255,0.9)';
-            if (i === WIN_IDX) {
-              ctx.shadowColor = '#F9C846';
-              ctx.shadowBlur = 6;
-            }
-            ctx.fillText(NAMES[i], innerR * 0.88, 4);
-            ctx.shadowBlur = 0;
-            ctx.restore();
+          // Segments
+          ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,INNER,0,Math.PI*2); ctx.clip();
+          for(var i=0;i<N;i++){
+            var a0=rot+i*SEG_ANG-Math.PI/2, a1=a0+SEG_ANG, iw=(i===WIN_IDX&&winGlow>0);
+            ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,INNER,a0,a1); ctx.closePath();
+            if(iw){ctx.shadowColor='#F9C846';ctx.shadowBlur=30;}
+            ctx.fillStyle=iw?'#6D28D9':(i%2===0?COLA:COLB); ctx.fill(); ctx.shadowBlur=0;
+            ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,INNER,a0,a1); ctx.closePath();
+            ctx.strokeStyle='rgba(249,200,70,0.3)'; ctx.lineWidth=1.5; ctx.stroke();
+            ctx.save(); ctx.translate(cx,cy); ctx.rotate(a0+SEG_ANG/2);
+            ctx.textAlign='right'; ctx.textBaseline='middle';
+            ctx.font='italic bold 17px Georgia,serif';
+            ctx.fillStyle=(i===WIN_IDX)?'#F9C846':'rgba(255,255,255,0.9)';
+            if(i===WIN_IDX){ctx.shadowColor='#F9C846';ctx.shadowBlur=8;}
+            ctx.fillText(NAMES[i],INNER-12,0); ctx.shadowBlur=0; ctx.restore();
           }
           ctx.restore();
-
-          // -- Hub --
-          var hubRing = ctx.createRadialGradient(cx,cy,0, cx,cy,innerR*0.14);
-          hubRing.addColorStop(0, '#FCE08A');
-          hubRing.addColorStop(1, '#D99A1C');
-          ctx.beginPath();
-          ctx.arc(cx, cy, innerR * 0.14, 0, Math.PI*2);
-          ctx.fillStyle = hubRing;
-          ctx.fill();
-
-          var hub = ctx.createRadialGradient(cx-2,cy-2,0, cx,cy,innerR*0.11);
-          hub.addColorStop(0, '#A78BFA');
-          hub.addColorStop(0.55, '#8B5CF6');
-          hub.addColorStop(1,   '#5223a8');
-          ctx.beginPath();
-          ctx.arc(cx, cy, innerR * 0.11, 0, Math.PI*2);
-          ctx.fillStyle = hub;
-          ctx.fill();
-
-          ctx.font = 'italic bold ' + Math.round(innerR*0.13) + 'px Georgia,serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#fff';
-          ctx.fillText('d.', cx, cy + 1);
-
-          // -- Gloss overlay --
-          var gloss = ctx.createRadialGradient(cx, cy - innerR*0.2, 0, cx, cy, innerR);
-          gloss.addColorStop(0,   'rgba(255,255,255,0.18)');
-          gloss.addColorStop(0.5, 'rgba(255,255,255,0)');
-          ctx.beginPath();
-          ctx.arc(cx, cy, innerR, 0, Math.PI*2);
-          ctx.fillStyle = gloss;
-          ctx.fill();
-
-          // -- Confetti --
-          confetti.forEach(function(p) {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rot);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = p.life;
-            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-            ctx.restore();
-          });
+          // Hub
+          ctx.beginPath(); ctx.arc(cx,cy,28,0,Math.PI*2);
+          var hr=ctx.createRadialGradient(cx,cy,0,cx,cy,28); hr.addColorStop(0,'#FCE08A'); hr.addColorStop(1,'#B8860B');
+          ctx.fillStyle=hr; ctx.fill();
+          ctx.beginPath(); ctx.arc(cx,cy,22,0,Math.PI*2);
+          var hc=ctx.createRadialGradient(cx-4,cy-4,0,cx,cy,22); hc.addColorStop(0,'#A78BFA'); hc.addColorStop(1,'#5223a8');
+          ctx.fillStyle=hc; ctx.fill();
+          ctx.font='italic bold 20px Georgia,serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#fff'; ctx.fillText('d.',cx,cy+1);
+          // Gloss
+          var gl=ctx.createRadialGradient(cx,cy-INNER*0.3,0,cx,cy,INNER); gl.addColorStop(0,'rgba(255,255,255,0.13)'); gl.addColorStop(0.5,'rgba(255,255,255,0)');
+          ctx.beginPath(); ctx.arc(cx,cy,INNER,0,Math.PI*2); ctx.fillStyle=gl; ctx.fill();
+          // Particles
+          particles.forEach(function(p){ ctx.save(); ctx.globalAlpha=Math.max(0,p.life); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); });
         }
 
-        function burstConfetti() {
-          confetti = [];
-          var cols = ['#F9C846','#F472B6','#8B5CF6','#fff','#FEF9C3'];
-          for (var i = 0; i < 36; i++) {
-            var a2 = Math.random() * Math.PI * 2;
-            var sp = 1.5 + Math.random() * 2.5;
-            confetti.push({
-              x: cx, y: cy,
-              vx: Math.cos(a2) * sp, vy: Math.sin(a2) * sp - 2,
-              rot: Math.random() * Math.PI,
-              vr: (Math.random() - 0.5) * 0.2,
-              w: 6 + Math.random()*6, h: 3 + Math.random()*3,
-              color: cols[i % cols.length],
-              life: 1
-            });
-          }
+        function burst(){
+          var cols=['#F9C846','#F472B6','#A78BFA','#fff','#34D399']; particles=[];
+          for(var i=0;i<48;i++){var a=Math.random()*Math.PI*2,sp=2+Math.random()*4; particles.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,rot:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.18,w:8+Math.random()*8,h:4+Math.random()*4,col:cols[i%cols.length],life:1});}
         }
 
-        var startTime, totalDur, startAngle, totalRot;
+        function ease(t){return 1-Math.pow(1-t,5);}
+        var spinning=false, t0, dur=7500, r0, rTarget;
 
-        function easeOut(t) {
-          // Quintic ease-out — fast start, prolonged crawl at end
-          return 1 - Math.pow(1 - t, 5);
+        function frame(now){
+          var t=Math.min((now-t0)/dur,1);
+          rot=r0+rTarget*ease(t);
+          var norm=((rot%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+          var seg=Math.floor(((Math.PI*1.5-norm+Math.PI*4)%(Math.PI*2))/SEG_ANG)%N;
+          if(seg!==lastSeg&&ptr){lastSeg=seg;ptr.style.transform='rotate(-20deg)';setTimeout(function(){if(ptr)ptr.style.transform='rotate(0deg)';},90);}
+          particles.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;p.rot+=p.vr;p.life-=0.016;});
+          particles=particles.filter(function(p){return p.life>0;});
+          draw();
+          if(t<1||particles.length){requestAnimationFrame(frame);}else{spinning=false;}
+          if(t===1&&winGlow===0){winGlow=1;burst();var iv=setInterval(function(){winGlow=Math.max(0,winGlow-0.03);if(winGlow<=0)clearInterval(iv);},40);}
         }
 
-        function spinTo(targetAngle, duration) {
-          startTime  = null;
-          totalDur   = duration;
-          startAngle = angle;
-          totalRot   = targetAngle - startAngle;
-          spinning   = true;
-          glowAlpha  = 0;
-          winFlash   = 0;
-          confetti   = [];
-          requestAnimationFrame(animStep);
+        function spin(){
+          if(spinning)return; spinning=true; winGlow=0; particles=[]; lastSeg=-1;
+          var wc=Math.PI*1.5-WIN_IDX*SEG_ANG-SEG_ANG/2;
+          var cn=((rot%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+          var wn=((wc%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+          var delta=((wn-cn)+Math.PI*2)%(Math.PI*2);
+          r0=rot; rTarget=Math.PI*2*9+delta; t0=performance.now();
+          requestAnimationFrame(frame);
         }
 
-        function animStep(ts) {
-          if (!startTime) startTime = ts;
-          var elapsed = ts - startTime;
-          var t = Math.min(elapsed / totalDur, 1);
-          var eased = easeOut(t);
-
-          angle = startAngle + totalRot * eased;
-
-          // Spinning speed proxy (derivative of easing)
-          var speed = (t < 1) ? (1 - eased) : 0;
-          glowAlpha = speed * 2.5;
-
-          // Detect segment tick → bounce pointer
-          var seg = segAtPointer(angle);
-          if (seg !== lastSeg && ptrEl) {
-            lastSeg = seg;
-            ptrEl.querySelector('svg').style.transform = 'rotate(-18deg)';
-            setTimeout(function() {
-              if (ptrEl) ptrEl.querySelector('svg').style.transform = 'rotate(0deg)';
-            }, 80);
-          }
-
-          // Confetti + win flash on landing
-          if (confetti.length > 0) {
-            confetti.forEach(function(p) {
-              p.x  += p.vx; p.y += p.vy;
-              p.vy += 0.12; // gravity
-              p.rot += p.vr;
-              p.life -= 0.018;
-            });
-            confetti = confetti.filter(function(p) { return p.life > 0; });
-          }
-
-          if (t === 1 && winFlash === 0) {
-            winFlash = 1;
-            burstConfetti();
-            // Fade winFlash
-            var wf = setInterval(function() {
-              winFlash = Math.max(0, winFlash - 0.04);
-              if (winFlash <= 0) clearInterval(wf);
-            }, 40);
-          }
-
-          drawFrame();
-
-          if (t < 1 || confetti.length > 0) {
-            requestAnimationFrame(animStep);
-          } else {
-            spinning = false;
-          }
-        }
-
-        function launchSpin() {
-          // Winner segment (WIN_IDX) should land at pointer (top).
-          // Current angle: pointer reads segAtPointer(angle) = WIN_IDX when:
-          // angle = π/2*3 - WIN_IDX*SEG_ANG - SEG_ANG/2  (centre of segment at top)
-          var targetSeg  = WIN_IDX;
-          var targetBase = Math.PI * 1.5 - targetSeg * SEG_ANG - SEG_ANG / 2;
-          // Add 8.5 full rotations
-          var fullRots   = Math.PI * 2 * 8.5;
-          var targetAngle = angle + fullRots + ((targetBase - angle) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
-          spinTo(targetAngle, 7800);
-        }
-
-        // Draw initial static frame
-        drawFrame();
-        // Start first spin after 1.5s, then loop
-        setTimeout(function loop() {
-          launchSpin();
-          setTimeout(loop, 12000);
-        }, 1500);
+        draw();
+        setTimeout(function loop(){spin();setTimeout(loop,11000);},800);
       }
 
-      // Size in CSS pixels (canvas is 2× for retina sharpness)
-      buildWheel('wheel-hero',   'ptr-hero',   210);
-      buildWheel('wheel-screen', 'ptr-screen', 210);
+      initWheel('wheel-hero',   document.getElementById('ptr-hero'));
+      initWheel('wheel-screen', document.getElementById('ptr-screen'));
     })();
 
     /* ---- Animated stats counter ---- */
