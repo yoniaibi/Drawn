@@ -702,7 +702,7 @@
             </div>
             <div class="wheel-wrap">
               <div class="wheel-stage">
-                <canvas id="wheel-hero" class="wheel-canvas" width="420" height="420" aria-label="Live draw wheel"></canvas>
+                <canvas id="wheel-hero" class="wheel-canvas" width="210" height="210" aria-label="Live draw wheel"></canvas>
                 <div class="wheel-pointer-wrap" id="ptr-hero">
                   <svg width="32" height="44" viewBox="0 0 32 44">
                     <defs><linearGradient id="ptr-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></linearGradient></defs>
@@ -931,7 +931,7 @@
               </div>
               <div class="wheel-wrap">
                 <div class="wheel-stage">
-                  <canvas id="wheel-screen" class="wheel-canvas" width="420" height="420" aria-label="Live draw wheel"></canvas>
+                  <canvas id="wheel-screen" class="wheel-canvas" width="210" height="210" aria-label="Live draw wheel"></canvas>
                   <div class="wheel-pointer-wrap" id="ptr-screen">
                     <svg width="32" height="44" viewBox="0 0 32 44">
                       <defs><linearGradient id="ptr-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></linearGradient></defs>
@@ -1659,9 +1659,10 @@
         var cv  = document.getElementById(canvasId);
         var ptr = ptrEl;
         if (!cv) return;
-        var PX = 420; cv.width = PX; cv.height = PX;
+        var PX = 210; cv.width = PX; cv.height = PX;
+        cv.style.width = '210px'; cv.style.height = '210px';
         var ctx = cv.getContext('2d'), cx = PX/2, cy = PX/2;
-        var R = PX/2 - 4, RIM = 22, INNER = R - RIM;
+        var R = PX/2 - 2, RIM = 11, INNER = R - RIM;
         var rot = 0, lastSeg = -1, particles = [], winGlow = 0;
 
         function draw() {
@@ -1675,8 +1676,8 @@
           // LEDs
           for(var d=0;d<16;d++){
             var da=(d/16)*Math.PI*2, lr=R-RIM/2;
-            ctx.beginPath(); ctx.arc(cx+Math.cos(da)*lr,cy+Math.sin(da)*lr,4,0,Math.PI*2);
-            if(d%2===0){ctx.shadowColor='#F9C846';ctx.shadowBlur=8;}
+            ctx.beginPath(); ctx.arc(cx+Math.cos(da)*lr,cy+Math.sin(da)*lr,2,0,Math.PI*2);
+            if(d%2===0){ctx.shadowColor='#F9C846';ctx.shadowBlur=4;}
             ctx.fillStyle=d%2===0?'#FFF9E0':'#8B6914'; ctx.fill(); ctx.shadowBlur=0;
           }
           // Segments
@@ -1690,20 +1691,20 @@
             ctx.strokeStyle='rgba(249,200,70,0.3)'; ctx.lineWidth=1.5; ctx.stroke();
             ctx.save(); ctx.translate(cx,cy); ctx.rotate(a0+SEG_ANG/2);
             ctx.textAlign='right'; ctx.textBaseline='middle';
-            ctx.font='italic bold 17px Georgia,serif';
+            ctx.font='italic bold 9px Georgia,serif';
             ctx.fillStyle=(i===WIN_IDX)?'#F9C846':'rgba(255,255,255,0.9)';
-            if(i===WIN_IDX){ctx.shadowColor='#F9C846';ctx.shadowBlur=8;}
-            ctx.fillText(NAMES[i],INNER-12,0); ctx.shadowBlur=0; ctx.restore();
+            if(i===WIN_IDX){ctx.shadowColor='#F9C846';ctx.shadowBlur=4;}
+            ctx.fillText(NAMES[i],INNER-6,0); ctx.shadowBlur=0; ctx.restore();
           }
           ctx.restore();
           // Hub
-          ctx.beginPath(); ctx.arc(cx,cy,28,0,Math.PI*2);
-          var hr=ctx.createRadialGradient(cx,cy,0,cx,cy,28); hr.addColorStop(0,'#FCE08A'); hr.addColorStop(1,'#B8860B');
+          ctx.beginPath(); ctx.arc(cx,cy,14,0,Math.PI*2);
+          var hr=ctx.createRadialGradient(cx,cy,0,cx,cy,14); hr.addColorStop(0,'#FCE08A'); hr.addColorStop(1,'#B8860B');
           ctx.fillStyle=hr; ctx.fill();
-          ctx.beginPath(); ctx.arc(cx,cy,22,0,Math.PI*2);
-          var hc=ctx.createRadialGradient(cx-4,cy-4,0,cx,cy,22); hc.addColorStop(0,'#A78BFA'); hc.addColorStop(1,'#5223a8');
+          ctx.beginPath(); ctx.arc(cx,cy,11,0,Math.PI*2);
+          var hc=ctx.createRadialGradient(cx-2,cy-2,0,cx,cy,11); hc.addColorStop(0,'#A78BFA'); hc.addColorStop(1,'#5223a8');
           ctx.fillStyle=hc; ctx.fill();
-          ctx.font='italic bold 20px Georgia,serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#fff'; ctx.fillText('d.',cx,cy+1);
+          ctx.font='italic bold 10px Georgia,serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#fff'; ctx.fillText('d.',cx,cy+1);
           // Gloss
           var gl=ctx.createRadialGradient(cx,cy-INNER*0.3,0,cx,cy,INNER); gl.addColorStop(0,'rgba(255,255,255,0.13)'); gl.addColorStop(0.5,'rgba(255,255,255,0)');
           ctx.beginPath(); ctx.arc(cx,cy,INNER,0,Math.PI*2); ctx.fillStyle=gl; ctx.fill();
@@ -1713,7 +1714,7 @@
 
         function burst(){
           var cols=['#F9C846','#F472B6','#A78BFA','#fff','#34D399']; particles=[];
-          for(var i=0;i<48;i++){var a=Math.random()*Math.PI*2,sp=2+Math.random()*4; particles.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,rot:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.18,w:8+Math.random()*8,h:4+Math.random()*4,col:cols[i%cols.length],life:1});}
+          for(var i=0;i<48;i++){var a=Math.random()*Math.PI*2,sp=1+Math.random()*3; particles.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,rot:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.18,w:4+Math.random()*4,h:2+Math.random()*2,col:cols[i%cols.length],life:1});}
         }
 
         function ease(t){return 1-Math.pow(1-t,5);}
