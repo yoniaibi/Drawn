@@ -206,10 +206,11 @@
   .ph-sec .r { color: var(--lilac); font-size: 9px; }
   .ph-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; padding: 0 14px; }
   .ph-item { background: linear-gradient(160deg, #221839, #19112e); border-radius: 13px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
-  .ph-item .img { height: 66px; display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; }
-  .ph-item .img::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.12), transparent 65%); }
-  .ph-item .img .val { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.45); color: var(--gold); font-size: 7px; font-weight: 800; padding: 2px 6px; border-radius: 8px; z-index: 2; }
-  .ph-item .img .bundle-badge { position: absolute; top: 6px; left: 6px; background: var(--gold); color: var(--violet); font-size: 6.5px; font-weight: 800; padding: 2px 6px; border-radius: 8px; z-index: 2; letter-spacing: 0.04em; }
+  .ph-item .img { height: 66px; display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; overflow: hidden; }
+  .ph-item .img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ph-item .img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(13,10,26,0.55) 100%); z-index: 1; pointer-events: none; }
+  .ph-item .img .val { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.55); color: var(--gold); font-size: 7px; font-weight: 800; padding: 2px 6px; border-radius: 8px; z-index: 3; }
+  .ph-item .img .bundle-badge { position: absolute; top: 5px; left: 5px; background: var(--gold); color: var(--violet); font-size: 6px; font-weight: 800; padding: 2px 5px; border-radius: 8px; z-index: 3; letter-spacing: 0.04em; }
   .ph-item .meta { padding: 8px 9px 10px; }
   .ph-item .nm { color: #fff; font-size: 10px; font-weight: 700; }
   .ph-item .sl { color: var(--muted-v); font-size: 7.5px; margin-top: 1px; }
@@ -235,7 +236,7 @@
   .wheel-pointer-svg { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); z-index: 10; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4)); }
   @media (prefers-reduced-motion: reduce) { .wheel-rotor { animation: none; } }
   .draw-prize { margin: 6px 14px 0; background: var(--royal); border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
-  .draw-prize .pic { width: 38px; height: 38px; border-radius: 8px; background: #F3EFFB; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .draw-prize .pic { width: 38px; height: 38px; border-radius: 8px; background: #F3EFFB; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; flex-shrink: 0; }
   .draw-prize .info { flex: 1; }
   .draw-prize .pn { color: #fff; font-size: 11px; font-weight: 700; }
   .draw-prize .ps { color: #b9a8e8; font-size: 9px; margin-top: 1px; }
@@ -257,7 +258,7 @@
   .winner-name .dot { color: var(--pink); }
   .winner-won { font-size: 12px; color: #E9D5FF; margin-top: 12px; }
   .winner-prize { margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: 16px; padding: 16px; }
-  .winner-prize .pic { font-size: 42px; }
+  .winner-prize .pic { font-size: 42px; overflow: hidden; }
   .winner-prize .pn { color: #fff; font-size: 15px; font-weight: 800; margin-top: 8px; }
   .winner-stats { display: flex; justify-content: center; gap: 22px; margin-top: 12px; }
   .winner-stats .v { color: #fff; font-size: 16px; font-weight: 800; }
@@ -869,14 +870,15 @@
       <p class="section-sub on-dark">Browse what people are clearing out, grab tickets from 10p, and watch the draw decide who takes it home.</p>
 
       <div class="screens-row">
-        <!-- Marketplace -->
+
+        <!-- ── Screen 1: Marketplace ── -->
         <div class="screen-col">
           <div class="phone">
             <div class="phone-screen scr-market">
               <div class="phone-status" style="color:#fff;"><span class="time">9:41</span><span class="icons">&#9679;&#9679;&#9679; &#9646;</span></div>
               <div class="ph-head">
                 <span class="ph-mini-logo"><span class="m"><span>drawn</span></span><span class="s"><span>9PM</span></span></span>
-                <span class="ph-avatar"></span>
+                <span class="ph-avatar" style="overflow:hidden;"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=52&h=52&fit=crop&crop=face" style="width:100%;height:100%;object-fit:cover;" alt=""></span>
               </div>
               <div class="ph-live-banner">
                 <div class="lb-top"><span class="lb-live"><i></i>LIVE TONIGHT</span><span class="lb-count">in 02:18:44</span></div>
@@ -885,17 +887,67 @@
               </div>
               <div class="ph-sec"><span class="l">Closing soon</span><span class="r">See all</span></div>
               <div class="ph-grid">
-                <div class="ph-item"><div class="img" style="background:#2a1216;">&#128092;</div><div class="meta"><div class="nm">Chanel Flap</div><div class="sl">@sophiestyle</div><div class="bar"><i style="width:78%"></i></div><div class="pr"><span class="pp">25p</span><span class="tl">2h left</span></div></div></div>
-                <div class="ph-item"><div class="img" style="background:#1a1f2a;">&#128095;</div><div class="meta"><div class="nm">Jordan 1</div><div class="sl">@kicks_leeds</div><div class="bar"><i style="width:54%"></i></div><div class="pr"><span class="pp">10p</span><span class="tl">5h left</span></div></div></div>
-                <div class="ph-item"><div class="img" style="background:#2a2410;">&#8986;</div><div class="meta"><div class="nm">Tag Heuer</div><div class="sl">@marcus_t</div><div class="bar"><i style="width:91%"></i></div><div class="pr"><span class="pp">50p</span><span class="tl">1h left</span></div></div></div>
-                <div class="ph-item"><div class="img" style="background:linear-gradient(135deg,#3a1f5e,#241a2a);"><span class="bundle-badge">28-PIECE BUNDLE</span>&#128084;</div><div class="meta"><div class="nm">Soph's whole closet</div><div class="sl">@sophiestyle</div><div class="bar"><i style="width:72%"></i></div><div class="pr"><span class="pp">40p</span><span class="tl">3h left</span></div></div></div>
+
+                <div class="ph-item">
+                  <div class="img" style="padding:0;">
+                    <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=160&h=132&fit=crop" style="width:100%;height:100%;object-fit:cover;" alt="Chanel Flap" loading="lazy">
+                    <span class="val">£2,400</span>
+                  </div>
+                  <div class="meta">
+                    <div class="nm">Chanel Flap</div>
+                    <div class="sl">@sophiestyle</div>
+                    <div class="bar"><i style="width:78%"></i></div>
+                    <div class="pr"><span class="pp">25p</span><span class="tl">2h left</span></div>
+                  </div>
+                </div>
+
+                <div class="ph-item">
+                  <div class="img" style="padding:0;">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=160&h=132&fit=crop" style="width:100%;height:100%;object-fit:cover;" alt="Jordan 1" loading="lazy">
+                    <span class="val">£380</span>
+                  </div>
+                  <div class="meta">
+                    <div class="nm">Jordan 1</div>
+                    <div class="sl">@kicks_leeds</div>
+                    <div class="bar"><i style="width:54%"></i></div>
+                    <div class="pr"><span class="pp">10p</span><span class="tl">5h left</span></div>
+                  </div>
+                </div>
+
+                <div class="ph-item">
+                  <div class="img" style="padding:0;">
+                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=160&h=132&fit=crop" style="width:100%;height:100%;object-fit:cover;" alt="Tag Heuer" loading="lazy">
+                    <span class="val">£1,200</span>
+                  </div>
+                  <div class="meta">
+                    <div class="nm">Tag Heuer</div>
+                    <div class="sl">@marcus_t</div>
+                    <div class="bar"><i style="width:91%"></i></div>
+                    <div class="pr"><span class="pp">50p</span><span class="tl">1h left</span></div>
+                  </div>
+                </div>
+
+                <div class="ph-item">
+                  <div class="img" style="padding:0;position:relative;">
+                    <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=160&h=132&fit=crop" style="width:100%;height:100%;object-fit:cover;" alt="Wardrobe bundle" loading="lazy">
+                    <span class="bundle-badge" style="z-index:3;">BUNDLE</span>
+                    <span class="val">£3,200</span>
+                  </div>
+                  <div class="meta">
+                    <div class="nm">Soph's closet</div>
+                    <div class="sl">@sophiestyle</div>
+                    <div class="bar"><i style="width:72%"></i></div>
+                    <div class="pr"><span class="pp">40p</span><span class="tl">3h left</span></div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
           <div class="cap">Browse &amp; buy tickets</div>
         </div>
 
-        <!-- Live draw -->
+        <!-- ── Screen 2: Live draw ── -->
         <div class="screen-col">
           <div class="phone">
             <div class="phone-screen scr-draw">
@@ -950,8 +1002,11 @@
                   </svg>
                 </div>
               </div>
+              <!-- Prize strip with real photo -->
               <div class="draw-prize">
-                <div class="pic">&#128095;</div>
+                <div class="pic" style="padding:0;overflow:hidden;">
+                  <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=76&h=76&fit=crop" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Jordan 1" loading="lazy">
+                </div>
                 <div class="info"><div class="pn">Jordan 1 Chicago</div><div class="ps">@kicks_leeds · 1,840 tickets</div></div>
                 <div class="you">You: 12</div>
               </div>
@@ -960,36 +1015,54 @@
                 <div class="ct"><div class="v">1,840</div><div class="l">tickets</div></div>
                 <div class="ct"><div class="v">11</div><div class="l">to go</div></div>
               </div>
-              <div class="draw-react"><span>&#128293;</span><span>&#128156;</span><span>&#128558;</span><span>&#128591;</span></div>
+              <!-- Live chat preview -->
+              <div style="margin:8px 14px 0;display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=28&h=28&fit=crop&crop=face" style="width:18px;height:18px;border-radius:50%;object-fit:cover;" alt="">
+                  <span style="font-size:9px;color:#b9a8e8;"><strong style="color:#fff;">@jess_m</strong> just bought 5 tickets 🔥</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=28&h=28&fit=crop&crop=face" style="width:18px;height:18px;border-radius:50%;object-fit:cover;" alt="">
+                  <span style="font-size:9px;color:#b9a8e8;"><strong style="color:#fff;">@marcus_t</strong> let's go!! 🏆</span>
+                </div>
+              </div>
             </div>
           </div>
           <div class="cap">Watch the 9pm draw live</div>
         </div>
 
-        <!-- Winner -->
+        <!-- ── Screen 3: Winner ── -->
         <div class="screen-col">
           <div class="phone">
             <div class="phone-screen scr-winner" id="winner-screen">
               <div class="phone-status"><span class="time" style="color:#fff;">21:02</span><span class="icons" style="color:#fff;">&#9679;&#9679;&#9679; &#9646;</span></div>
               <div class="winner-body">
                 <div class="winner-kicker">WINNER</div>
-                <div class="winner-name">sophie_k<span class="dot">.</span></div>
+                <!-- Winner avatar -->
+                <div style="margin:10px auto 0;width:60px;height:60px;border-radius:50%;overflow:hidden;border:3px solid var(--gold);box-shadow:0 0 0 4px rgba(249,200,70,0.2);">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face" style="width:100%;height:100%;object-fit:cover;" alt="Winner" loading="lazy">
+                </div>
+                <div class="winner-name" style="font-size:28px;margin-top:8px;">sophie_k<span class="dot">.</span></div>
                 <div class="winner-won">won tonight's 9pm draw</div>
                 <div class="winner-prize">
-                  <div class="pic">&#128092;</div>
+                  <!-- Real item photo replacing emoji -->
+                  <div class="pic" style="padding:0;overflow:hidden;width:52px;height:52px;border-radius:10px;">
+                    <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=104&h=104&fit=crop" style="width:100%;height:100%;object-fit:cover;" alt="Chanel bag" loading="lazy">
+                  </div>
                   <div class="pn">Chanel Classic Flap</div>
                   <div class="winner-stats">
                     <div><div class="v gold">30p</div><div class="l">her ticket</div></div>
                     <div><div class="v">&pound;2,400</div><div class="l">retail value</div></div>
                   </div>
                 </div>
-                <div class="winner-share">Share my win</div>
+                <div class="winner-share">📲 Share my win</div>
                 <div class="winner-note">@sophiestyle earned &pound;476 clearing her wardrobe</div>
               </div>
             </div>
           </div>
           <div class="cap">The winner reveal moment</div>
         </div>
+
       </div>
     </div>
   </section>
