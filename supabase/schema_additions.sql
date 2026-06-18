@@ -76,3 +76,20 @@ create policy "Users can insert their own applications"
 create policy "Users can read their own applications"
   on public.seller_applications for select
   using (auth.uid() = user_id);
+
+-- ============================================================
+-- DRAW WATCHES — bell/notify on draw detail screen
+-- ============================================================
+create table if not exists public.draw_watches (
+  user_id    uuid references auth.users on delete cascade,
+  draw_id    uuid references public.draws on delete cascade,
+  created_at timestamptz default now(),
+  primary key (user_id, draw_id)
+);
+
+alter table public.draw_watches enable row level security;
+
+create policy "Users manage their own watches"
+  on public.draw_watches
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
