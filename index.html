@@ -46,33 +46,7 @@
   .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
   /* ---------- Reusable: ticket logo ---------- */
-  .ticket-logo {
-    display: inline-flex; align-items: stretch; height: 38px;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
-  }
-  .ticket-logo .tl-main {
-    background: var(--ink); border-radius: 8px 0 0 8px;
-    display: flex; align-items: center; padding: 0 14px;
-  }
-  .ticket-logo .tl-word {
-    font-family: var(--serif); font-weight: 800; font-style: italic;
-    font-size: 22px; color: var(--white); letter-spacing: -0.04em; line-height: 1;
-  }
-  .ticket-logo .tl-perf {
-    background: var(--ink); display: flex; flex-direction: column;
-    justify-content: center; gap: 3px; padding: 0 2px;
-  }
-  .ticket-logo .tl-perf span { width: 5px; height: 5px; border-radius: 50%; background: var(--violet); display: block; }
-  .ticket-logo .tl-stub {
-    background: var(--lilac); border-radius: 0 8px 8px 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 0 11px; line-height: 1.15;
-  }
-  .ticket-logo .tl-stub .s1 { font-size: 9px; font-weight: 800; color: var(--white); letter-spacing: 0.06em; }
-  .ticket-logo .tl-stub .s2 { font-size: 9px; font-weight: 800; color: var(--gold); letter-spacing: 0.06em; }
-  /* light-bg variant: main becomes violet */
-  .ticket-logo.on-light .tl-main, .ticket-logo.on-light .tl-perf { background: var(--violet); }
-  .ticket-logo.on-light .tl-perf span { background: var(--paper); }
+  a.drawn-logo { display: inline-block; line-height: 0; }
 
   /* ---------- Buttons ---------- */
   .btn {
@@ -967,10 +941,33 @@
   <!-- ============ NAV ============ -->
   <nav class="nav">
     <div class="container nav-inner">
-      <a href="#top" class="ticket-logo" aria-label="DRAWN home">
-        <span class="tl-main"><span class="tl-word">drawn</span></span>
-        <span class="tl-perf"><span></span><span></span><span></span><span></span><span></span></span>
-        <span class="tl-stub"><span class="s1">9PM</span><span class="s2">LIVE</span></span>
+      <a href="#top" class="drawn-logo" aria-label="DRAWN home">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 140" width="160" height="56" aria-hidden="true">
+          <defs><clipPath id="ticket-nav"><rect x="20" y="10" width="360" height="120" rx="14"/></clipPath></defs>
+          <g clip-path="url(#ticket-nav)">
+            <rect x="20" y="10" width="360" height="120" fill="#F472B6"/>
+            <rect x="302" y="10" width="78" height="120" fill="#C43070"/>
+            <circle cx="56"  cy="10" r="11" fill="#1A1040"/>
+            <circle cx="97"  cy="10" r="11" fill="#1A1040"/>
+            <circle cx="138" cy="10" r="11" fill="#1A1040"/>
+            <circle cx="179" cy="10" r="11" fill="#1A1040"/>
+            <circle cx="220" cy="10" r="11" fill="#1A1040"/>
+            <circle cx="271" cy="10" r="11" fill="#1A1040"/>
+            <circle cx="312" cy="10" r="11" fill="#1A1040"/>
+            <circle cx="353" cy="10" r="11" fill="#1A1040"/>
+            <circle cx="56"  cy="130" r="11" fill="#1A1040"/>
+            <circle cx="97"  cy="130" r="11" fill="#1A1040"/>
+            <circle cx="138" cy="130" r="11" fill="#1A1040"/>
+            <circle cx="179" cy="130" r="11" fill="#1A1040"/>
+            <circle cx="220" cy="130" r="11" fill="#1A1040"/>
+            <circle cx="271" cy="130" r="11" fill="#1A1040"/>
+            <circle cx="312" cy="130" r="11" fill="#1A1040"/>
+            <circle cx="353" cy="130" r="11" fill="#1A1040"/>
+            <line x1="302" y1="10" x2="302" y2="130" stroke="#1A1040" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="round"/>
+            <text x="161" y="83" font-family="Georgia, 'Times New Roman', serif" font-size="52" font-weight="bold" font-style="italic" letter-spacing="-2" fill="#1A1040" text-anchor="middle">drawn</text>
+            <circle cx="341" cy="70" r="17" fill="#FAF9FE"/>
+          </g>
+        </svg>
       </a>
       <div class="nav-links">
         <a href="#how">How it works</a>
@@ -2412,10 +2409,33 @@
     <div class="container">
       <div class="footer-top">
         <div>
-          <a href="#top" class="ticket-logo" aria-label="DRAWN home">
-            <span class="tl-main"><span class="tl-word">drawn</span></span>
-            <span class="tl-perf"><span></span><span></span><span></span><span></span><span></span></span>
-            <span class="tl-stub"><span class="s1">9PM</span><span class="s2">LIVE</span></span>
+          <a href="#top" class="drawn-logo" aria-label="DRAWN home">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 140" width="160" height="56" aria-hidden="true">
+              <defs><clipPath id="ticket-footer"><rect x="20" y="10" width="360" height="120" rx="14"/></clipPath></defs>
+              <g clip-path="url(#ticket-footer)">
+                <rect x="20" y="10" width="360" height="120" fill="#F472B6"/>
+                <rect x="302" y="10" width="78" height="120" fill="#C43070"/>
+                <circle cx="56"  cy="10" r="11" fill="#1A1040"/>
+                <circle cx="97"  cy="10" r="11" fill="#1A1040"/>
+                <circle cx="138" cy="10" r="11" fill="#1A1040"/>
+                <circle cx="179" cy="10" r="11" fill="#1A1040"/>
+                <circle cx="220" cy="10" r="11" fill="#1A1040"/>
+                <circle cx="271" cy="10" r="11" fill="#1A1040"/>
+                <circle cx="312" cy="10" r="11" fill="#1A1040"/>
+                <circle cx="353" cy="10" r="11" fill="#1A1040"/>
+                <circle cx="56"  cy="130" r="11" fill="#1A1040"/>
+                <circle cx="97"  cy="130" r="11" fill="#1A1040"/>
+                <circle cx="138" cy="130" r="11" fill="#1A1040"/>
+                <circle cx="179" cy="130" r="11" fill="#1A1040"/>
+                <circle cx="220" cy="130" r="11" fill="#1A1040"/>
+                <circle cx="271" cy="130" r="11" fill="#1A1040"/>
+                <circle cx="312" cy="130" r="11" fill="#1A1040"/>
+                <circle cx="353" cy="130" r="11" fill="#1A1040"/>
+                <line x1="302" y1="10" x2="302" y2="130" stroke="#1A1040" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="round"/>
+                <text x="161" y="83" font-family="Georgia, 'Times New Roman', serif" font-size="52" font-weight="bold" font-style="italic" letter-spacing="-2" fill="#1A1040" text-anchor="middle">drawn</text>
+                <circle cx="341" cy="70" r="17" fill="#FAF9FE"/>
+              </g>
+            </svg>
           </a>
           <p class="footer-tag">The marketplace where people turn unworn things into cash — and you win them for as little as 10p a ticket.</p>
         </div>
