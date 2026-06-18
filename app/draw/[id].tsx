@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, Modal, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, Modal, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence } from 'react-native-reanimated';
@@ -335,6 +335,18 @@ export default function DrawDetailScreen() {
           label={`Enter from ${formatTicketPrice(draw.ticketPrice)}`}
           onPress={() => router.push(`/purchase/${draw.id}`)}
         />
+        <TouchableOpacity
+          style={styles.shareBtn}
+          onPress={() => Share.share({
+            message: `I'm entering to win ${draw.emoji} ${draw.title} on DRAWN for just ${draw.ticketPrice}p a ticket. Use my link to get a free entry: https://drawn.app/draw/${draw.id}?ref=${handle}`,
+          })}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.shareBtnText}>🎁 Share & get a free ticket</Text>
+        </TouchableOpacity>
+        <View style={styles.shareCallout}>
+          <Text style={styles.shareCalloutText}>🎁 Share this draw with a friend — when they sign up, you both get 1 free ticket</Text>
+        </View>
         <Text style={styles.ctaSub}>Free postal entry also available</Text>
       </View>
     </View>
@@ -483,4 +495,16 @@ const styles = StyleSheet.create({
   },
   ctaScarcity: { textAlign: 'center', fontSize: FontSizes.xs, color: Colors.danger, fontWeight: '700' },
   ctaSub: { textAlign: 'center', fontSize: 9, color: Colors.textTertiary },
+  shareBtn: {
+    backgroundColor: 'rgba(139,92,246,0.15)', borderRadius: Radius.md,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.35)',
+    paddingVertical: 11, alignItems: 'center',
+  },
+  shareBtnText: { fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '700' },
+  shareCallout: {
+    backgroundColor: 'rgba(139,92,246,0.1)', borderRadius: Radius.sm,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
+    padding: Spacing.sm,
+  },
+  shareCalloutText: { fontSize: FontSizes.xs, color: Colors.lilac, textAlign: 'center', lineHeight: 17 },
 });

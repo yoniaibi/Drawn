@@ -10,6 +10,7 @@ import { supabase } from '../../src/lib/supabase';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
+import { requestNotificationPermission, scheduleDailyDrawReminder } from '../../src/services/notifications';
 
 function getOddsColor(pct: number) {
   if (pct >= 1) return Colors.gold;
@@ -29,9 +30,20 @@ export default function TicketsScreen() {
       setLoading(false);
       return;
     }
-    fetchMyTickets(user.id).then(result => {
+    fetchMyTickets(user.id).then(async result => {
       setMyTickets(result);
       setLoading(false);
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        const highestValue = result.length > 0
+          ? result.reduce((max, d) => d.retailValue > max.retailValue ? d : max, result[0])
+          : null;
+        const totalCount = result.reduce((s, d) => s + d.myTickets, 0);
+        await scheduleDailyDrawReminder(
+          highestValue ? `£${highestValue.retailValue.toLocaleString()} ${highestValue.title}` : undefined,
+          totalCount > 0 ? totalCount : undefined,
+        );
+      }
     });
 
     // Real-time tickets_sold updates so "your odds" stays live

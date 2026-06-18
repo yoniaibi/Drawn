@@ -9,6 +9,7 @@ import PrimaryButton from '../../src/components/PrimaryButton';
 import GhostButton from '../../src/components/GhostButton';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
 import { fetchRecentWinners, RecentWinner } from '../../src/services/draws';
+import { requestNotificationPermission } from '../../src/services/notifications';
 
 const FALLBACK_WINS = [
   { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: 25, retailValue: 2400, emoji: '👜' },
@@ -69,7 +70,8 @@ export default function SplashScreen() {
     return () => clearInterval(id);
   }, []);
 
-  function handleGetStarted() {
+  async function handleGetStarted() {
+    await requestNotificationPermission();
     router.push('/(auth)/sign-up');
   }
 
