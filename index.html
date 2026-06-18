@@ -609,6 +609,27 @@
   .cross { color: #c0b8d4; }
 
   /* ===================================================================
+     NAV LOGIN
+     =================================================================== */
+  .nav-login { font-size: 14px; color: var(--muted-v); text-decoration: none; font-weight: 600; }
+  .nav-login:hover { color: var(--ink); }
+
+  /* ===================================================================
+     HERO INLINE TRUST
+     =================================================================== */
+  .hero-inline-trust { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 14px 0 10px; padding: 10px 14px; background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.18); border-radius: 10px; }
+  .hit-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #34D399; font-weight: 600; }
+  .hit-sep { color: rgba(52,211,153,0.3); font-size: 11px; }
+
+  /* ===================================================================
+     LIVE BAR
+     =================================================================== */
+  .live-bar { background: rgba(249,200,70,0.06); border-top: 1px solid rgba(249,200,70,0.12); border-bottom: 1px solid rgba(249,200,70,0.12); padding: 10px 0; font-size: 13px; }
+  .lb-live { display: inline-flex; align-items: center; color: var(--body); }
+  .lb-stat { color: var(--mid); font-size: 12px; }
+  @media (max-width: 600px) { .lb-stat { display: none; } }
+
+  /* ===================================================================
      HERO ODDS ROW
      =================================================================== */
   .hero-odds-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0 16px; }
@@ -959,6 +980,7 @@
         <a href="#sellers">Sell</a>
       </div>
       <div class="nav-cta">
+        <a href="#" class="nav-login">Log in</a>
         <a href="#waitlist" class="btn btn-pink btn-sm">Join the waitlist</a>
       </div>
       <button class="nav-toggle" aria-label="Menu">&#9776;</button>
@@ -1000,6 +1022,15 @@
           <input type="email" placeholder="Your email" required aria-label="Email address">
           <button type="submit" class="btn btn-pink">Join the waitlist</button>
         </form>
+        <div class="hero-inline-trust">
+          <span class="hit-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Independent auth</span>
+          <span class="hit-sep">·</span>
+          <span class="hit-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Stripe escrow</span>
+          <span class="hit-sep">·</span>
+          <span class="hit-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Free entry route</span>
+          <span class="hit-sep">·</span>
+          <span class="hit-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Cash if fake</span>
+        </div>
         <div class="hero-odds-row">
           <span class="hero-odds-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F9C846" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>From 10p a ticket</span>
           <span class="hero-odds-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F9C846" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Avg winner spends £1.20</span>
@@ -1070,6 +1101,12 @@
   </header>
 
   <!-- ============ WINNER TICKER ============ -->
+  <div class="live-bar">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <span class="lb-live"><span class="live-dot" style="margin-right:7px;"></span><strong id="live-count">312</strong> people watching right now</span>
+      <span class="lb-stat">🏆 <strong>Last win:</strong> Nike Air Max 95 — won by @jayden.kicks for <strong>80p</strong> · 4 min ago</span>
+    </div>
+  </div>
   <div class="win-ticker" aria-label="Recent winners">
     <div class="win-ticker-track" id="ticker-track">
       <!-- set 1 -->
@@ -2648,6 +2685,18 @@
       document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
       if (!isOpen) item.classList.add('open');
     }
+
+    /* ---- Live viewer count flicker ---- */
+    (function(){
+      var el = document.getElementById('live-count');
+      if(!el) return;
+      var base = 312;
+      setInterval(function(){
+        var delta = Math.floor(Math.random()*7)-3;
+        base = Math.max(280, Math.min(380, base+delta));
+        el.textContent = base;
+      }, 4000);
+    })();
 
     /* ---- Sticky mobile CTA ---- */
     (function(){
