@@ -11,6 +11,7 @@ import Animated2, {
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { Draw, MOCK_DRAWS } from '../../src/mocks';
 import { fetchDraws, checkForWins, fetchRecentWinners, WinResult, RecentWinner } from '../../src/services/draws';
+import { supabase } from '../../src/lib/supabase';
 import TicketLogo from '../../src/components/TicketLogo';
 import DrawCard from '../../src/components/DrawCard';
 import WalletBadge from '../../src/components/WalletBadge';
@@ -85,6 +86,28 @@ export default function HomeScreen() {
     if (user?.id) {
       checkForWins(user.id).then(setWins);
     }
+
+    // Real-time ticket count updates for all draws
+    const channel = supabase
+      .channel('home-draws-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'draws' },
+        (payload) => {
+          if (payload.new && typeof payload.new.tickets_sold === 'number') {
+            setDraws(prev =>
+              prev.map(d =>
+                d.id === payload.new.id
+                  ? { ...d, ticketsSold: payload.new.tickets_sold }
+                  : d
+              )
+            );
+          }
+        },
+      )
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
   }, [user?.id]);
 
   // Show daily reward banner on new day (subtle — not a blocking modal)

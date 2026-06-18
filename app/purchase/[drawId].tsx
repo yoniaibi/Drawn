@@ -141,6 +141,20 @@ export default function PurchaseScreen() {
     // 5. Deduct local state too so UI updates immediately
     deductFunds(total);
 
+    // 6. Broadcast purchase to live chat channel so everyone sees it
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const liveChannel = supabase.channel('drawn-live-chat');
+      liveChannel.send({
+        type: 'broadcast',
+        event: 'chat',
+        payload: {
+          handle: useAuthStore.getState().handle ?? '@you',
+          msg: `just bought ${qty} ticket${qty > 1 ? 's' : ''} on ${d.title} ${d.emoji}`,
+        },
+      });
+    }
+
     setFlow('success');
     successOpacity.setValue(1);
     setTimeout(() => {
