@@ -418,6 +418,59 @@
   .share-point p { font-size: 14.5px; color: var(--muted-v); line-height: 1.5; }
 
   /* ===================================================================
+     TRUST & AUTHENTICATION SECTION
+     =================================================================== */
+  .trust-section { background: var(--paper); }
+  .trust-intro { text-align: center; max-width: 680px; margin: 0 auto 52px; }
+  .trust-intro .section-sub { margin-top: 14px; font-size: 16px; line-height: 1.6; }
+  /* Three feature cards */
+  .trust-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 52px; }
+  .trust-card { background: #fff; border: 1px solid rgba(109,40,217,0.1); border-radius: 18px; padding: 28px 24px; box-shadow: 0 4px 20px rgba(45,27,105,0.06); transition: box-shadow .2s; }
+  .trust-card:hover { box-shadow: 0 8px 32px rgba(45,27,105,0.12); }
+  .trust-card .tc-ico { font-size: 32px; margin-bottom: 14px; }
+  .trust-card h3 { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink); margin-bottom: 8px; }
+  .trust-card p { font-size: 14px; color: var(--body); line-height: 1.6; }
+  /* Auth flow diagram */
+  .auth-flow { background: #fff; border: 1px solid rgba(109,40,217,0.1); border-radius: 20px; padding: 36px 40px; margin-bottom: 48px; box-shadow: 0 4px 20px rgba(45,27,105,0.06); }
+  .auth-flow-title { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .1em; color: var(--mid); text-transform: uppercase; margin-bottom: 32px; }
+  .auth-flow-diagram { display: flex; align-items: flex-start; justify-content: center; gap: 0; flex-wrap: wrap; }
+  .afd-node { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 100px; }
+  .afd-node .afd-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 8px; }
+  .afd-node .afd-label { font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+  .afd-node .afd-sub { font-size: 10px; color: var(--mid); margin-top: 3px; }
+  .afd-seller .afd-icon { background: rgba(139,92,246,0.1); }
+  .afd-auth .afd-icon { background: rgba(249,200,70,0.15); }
+  .afd-arrow { display: flex; align-items: center; padding: 0 8px; margin-top: -8px; color: var(--mid); font-size: 18px; }
+  .afd-split { display: flex; flex-direction: column; gap: 12px; margin-top: -8px; }
+  .afd-path { display: flex; align-items: center; gap: 6px; }
+  .afd-path-icon { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-right: 2px; }
+  .afd-pass .afd-path-icon { background: #34D399; }
+  .afd-fail .afd-path-icon { background: #F472B6; }
+  .afd-path-node { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .afd-path-node .afd-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 6px; }
+  .afd-pass .afd-icon { background: rgba(52,211,153,0.12); }
+  .afd-fail .afd-icon { background: rgba(244,114,182,0.12); }
+  .afd-path-node .afd-label { font-size: 11px; font-weight: 700; }
+  .afd-pass .afd-label { color: #059669; }
+  .afd-fail .afd-label { color: #e11d6a; }
+  .afd-path-node .afd-sub { font-size: 10px; color: var(--mid); margin-top: 2px; }
+  /* Tier badges */
+  .trust-badges { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; }
+  .trust-badge { display: inline-flex; align-items: center; gap: 7px; border-radius: 30px; padding: 8px 16px; font-size: 13px; font-weight: 700; border: 1.5px solid; }
+  .tb-t1 { background: rgba(120,113,108,0.07); border-color: rgba(120,113,108,0.25); color: #57534e; }
+  .tb-t2 { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.35); color: #6D28D9; }
+  .tb-t3 { background: rgba(249,200,70,0.12); border-color: rgba(249,200,70,0.5); color: #92600a; }
+  .trust-compare { background: var(--violet); color: #fff; border-radius: 16px; padding: 22px 28px; display: flex; align-items: center; gap: 16px; max-width: 680px; margin: 0 auto; }
+  .trust-compare .tc-quote { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.5; flex: 1; }
+  .trust-compare .tc-quote em { color: var(--gold); font-style: normal; font-weight: 700; }
+  @media (max-width: 700px) {
+    .trust-cards { grid-template-columns: 1fr; }
+    .auth-flow { padding: 24px 16px; }
+    .auth-flow-diagram { gap: 0; }
+    .trust-compare { flex-direction: column; text-align: center; }
+  }
+
+  /* ===================================================================
      BRANDS SECTION
      =================================================================== */
   .brands-section { background: var(--ink); color: #fff; }
@@ -1271,6 +1324,90 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ TRUST & AUTHENTICATION ============ -->
+  <section class="section trust-section" id="trust">
+    <div class="container">
+
+      <div class="trust-intro">
+        <div class="eyebrow">Trust &amp; Authentication</div>
+        <h2 class="section-title">Every item verified.<br>Every winner protected.</h2>
+        <p class="section-sub">Before your winnings ship, the item passes through an independent authentication expert. If it fails, you get the cash — and the seller gets nothing.</p>
+      </div>
+
+      <!-- Three feature cards -->
+      <div class="trust-cards">
+        <div class="trust-card">
+          <div class="tc-ico">🔍</div>
+          <h3>Independent experts</h3>
+          <p>We partner with specialist authentication services — Authenticate Plus for handbags, LEGIT APP for trainers and streetwear, WatchCertify for watches. Real specialists, not algorithms.</p>
+        </div>
+        <div class="trust-card">
+          <div class="tc-ico">💸</div>
+          <h3>Cash if it fails</h3>
+          <p>If an item doesn't pass inspection, you receive the full prize pool as cash — paid to your wallet within 24 hours. Not a refund. A payout. You still win something.</p>
+        </div>
+        <div class="trust-card">
+          <div class="tc-ico">🚫</div>
+          <h3>Fraudsters lose everything</h3>
+          <p>A seller who lists a fake walks away with zero payout, loses their deposit, pays return shipping, and is permanently banned. Every seller is ID-verified — fraud is traceable and financially irrational.</p>
+        </div>
+      </div>
+
+      <!-- Flow diagram -->
+      <div class="auth-flow">
+        <div class="auth-flow-title">How authentication works</div>
+        <div class="auth-flow-diagram">
+          <div class="afd-node afd-seller">
+            <div class="afd-icon">📦</div>
+            <div class="afd-label">Seller ships</div>
+            <div class="afd-sub">Within 48h of draw</div>
+          </div>
+          <div class="afd-arrow">→</div>
+          <div class="afd-node afd-auth">
+            <div class="afd-icon">🔐</div>
+            <div class="afd-label">Auth partner</div>
+            <div class="afd-sub">24–48h inspection</div>
+          </div>
+          <div class="afd-arrow">→</div>
+          <div class="afd-split">
+            <div class="afd-path afd-pass">
+              <div class="afd-path-icon"></div>
+              <div class="afd-arrow" style="font-size:14px;padding:0 4px 0 0;">✓ Pass</div>
+              <div class="afd-path-node afd-pass">
+                <div class="afd-icon">🏆</div>
+                <div class="afd-label">Winner gets item</div>
+                <div class="afd-sub">Shipped direct, tracked</div>
+              </div>
+            </div>
+            <div class="afd-path afd-fail">
+              <div class="afd-path-icon"></div>
+              <div class="afd-arrow" style="font-size:14px;padding:0 4px 0 0;">✗ Fail</div>
+              <div class="afd-path-node afd-fail">
+                <div class="afd-icon">💰</div>
+                <div class="afd-label">Winner gets cash</div>
+                <div class="afd-sub">Seller gets nothing</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier badges -->
+      <div class="trust-badges">
+        <span class="trust-badge tb-t1">✓ Condition Verified</span>
+        <span class="trust-badge tb-t2">🛡 Authenticated · Authenticate Plus</span>
+        <span class="trust-badge tb-t3">⭐ Premium Authenticated · AP-2026-004821</span>
+      </div>
+
+      <!-- Comparison callout -->
+      <div class="trust-compare">
+        <span style="font-size:32px;">💬</span>
+        <p class="tc-quote">"Vinted shows you a badge. We verify the item <em>before it reaches you</em> — by an independent specialist, every single time."</p>
+      </div>
+
     </div>
   </section>
 
