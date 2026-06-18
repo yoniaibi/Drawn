@@ -221,31 +221,33 @@
   .ph-item .tl { color: var(--muted-v); font-size: 7.5px; }
 
   /* screen: live draw */
-  .scr-draw { background: var(--violet); padding-bottom: 16px; }
+  .scr-draw { background: #0D0820; padding-bottom: 16px; }
   .scr-draw .ph-status .time, .scr-draw .ph-status .icons { color: #fff; }
   .draw-top { text-align: center; padding: 4px 0 6px; }
   .draw-live { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 0.12em; font-weight: 800; color: var(--pink); }
   .draw-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--pink); display: inline-block; animation: pulse 1.3s infinite; }
   .draw-title { color: #fff; font-size: 14px; font-weight: 700; margin-top: 6px; }
   .draw-sub { color: #b9a8e8; font-size: 11px; margin-top: 2px; }
-  .wheel-wrap { display: flex; justify-content: center; padding: 10px 0 6px; position: relative; }
+  .wheel-wrap { display: flex; justify-content: center; padding: 8px 0 4px; position: relative; }
   .wheel-stage { position: relative; width: 210px; height: 210px; }
-  .wheel-svg { width: 210px; height: 210px; display: block; }
-  .wheel-rotor { animation: spin 5s cubic-bezier(.17,.67,.32,1) infinite; transform-origin: 150px 150px; }
-  @keyframes spin { 0% { transform: rotate(0); } 70% { transform: rotate(1080deg); } 100% { transform: rotate(1080deg); } }
-  .wheel-pointer-svg { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); z-index: 10; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4)); }
+  /* canvas wheel replaces SVG */
+  .wheel-canvas { width: 210px; height: 210px; display: block; border-radius: 50%; }
+  /* keep SVG fallback hidden */
+  .wheel-svg { display: none; }
+  .wheel-rotor { animation: none; }
+  .wheel-pointer-wrap { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); z-index: 10; }
+  .wheel-pointer-wrap svg { filter: drop-shadow(0 3px 8px rgba(249,200,70,0.6)); transition: transform .08s cubic-bezier(.36,.07,.19,.97); transform-origin: 50% 0; }
   @media (prefers-reduced-motion: reduce) { .wheel-rotor { animation: none; } }
-  .draw-prize { margin: 6px 14px 0; background: var(--royal); border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+  .draw-prize { margin: 6px 14px 0; background: rgba(109,40,217,0.5); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
   .draw-prize .pic { width: 38px; height: 38px; border-radius: 8px; background: #F3EFFB; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; flex-shrink: 0; }
   .draw-prize .info { flex: 1; }
   .draw-prize .pn { color: #fff; font-size: 11px; font-weight: 700; }
   .draw-prize .ps { color: #b9a8e8; font-size: 9px; margin-top: 1px; }
   .draw-prize .you { background: var(--pink); color: #fff; font-size: 8px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
   .draw-counters { display: flex; gap: 8px; margin: 10px 14px 0; }
-  .draw-counters .ct { flex: 1; background: var(--ink); border-radius: 10px; padding: 8px; text-align: center; }
+  .draw-counters .ct { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 8px; text-align: center; }
   .draw-counters .ct .v { color: #fff; font-size: 15px; font-weight: 800; }
   .draw-counters .ct .l { color: var(--muted-v); font-size: 8px; margin-top: 1px; }
-  .draw-react { display: flex; justify-content: center; gap: 14px; margin-top: 12px; font-size: 20px; }
 
   /* screen: winner */
   .scr-winner { background: var(--royal); padding-bottom: 18px; position: relative; min-height: 540px; }
@@ -700,51 +702,21 @@
             </div>
             <div class="wheel-wrap">
               <div class="wheel-stage">
-                <svg class="wheel-svg" viewBox="0 0 300 300" aria-label="Live draw wheel">
-                  <defs>
-                    <radialGradient id="seg0" cx="50%" cy="35%" r="75%"><stop offset="0%" stop-color="#5a3fa8"/><stop offset="100%" stop-color="#3a2480"/></radialGradient>
-                    <radialGradient id="seg1" cx="50%" cy="35%" r="75%"><stop offset="0%" stop-color="#7C4DDC"/><stop offset="100%" stop-color="#5223a8"/></radialGradient>
-                    <linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FCE08A"/><stop offset="35%" stop-color="#F9C846"/><stop offset="60%" stop-color="#D99A1C"/><stop offset="100%" stop-color="#FCE08A"/></linearGradient>
-                    <radialGradient id="peg" cx="35%" cy="35%" r="70%"><stop offset="0%" stop-color="#fff"/><stop offset="45%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></radialGradient>
-                    <radialGradient id="hub" cx="38%" cy="32%" r="80%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="55%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#5223a8"/></radialGradient>
-                    <radialGradient id="hubring" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></radialGradient>
-                    <radialGradient id="gloss" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#fff" stop-opacity="0.22"/><stop offset="55%" stop-color="#fff" stop-opacity="0"/></radialGradient>
-                  </defs>
-                  <circle cx="150" cy="150" r="142" fill="url(#rim)"/>
-                  <circle cx="150" cy="150" r="134" fill="#2a1a5e"/>
-                  <g class="wheel-rotor">
-                    <path d="M150 150 L150 20 A130 130 0 0 1 241.92 58.08 Z" fill="url(#seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                    <path d="M150 150 L241.92 58.08 A130 130 0 0 1 280 150 Z" fill="url(#seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                    <path d="M150 150 L280 150 A130 130 0 0 1 241.92 241.92 Z" fill="url(#seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                    <path d="M150 150 L241.92 241.92 A130 130 0 0 1 150 280 Z" fill="url(#seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                    <path d="M150 150 L150 280 A130 130 0 0 1 58.08 241.92 Z" fill="url(#seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                    <path d="M150 150 L58.08 241.92 A130 130 0 0 1 20 150 Z" fill="url(#seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                    <path d="M150 150 L20 150 A130 130 0 0 1 58.08 58.08 Z" fill="url(#seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                    <path d="M150 150 L58.08 58.08 A130 130 0 0 1 150 20 Z" fill="url(#seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                    <text x="182.91" y="70.55" text-anchor="middle" dominant-baseline="middle" transform="rotate(22.5 182.91 70.55)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">sophie_k</text>
-                    <text x="229.45" y="117.09" text-anchor="middle" dominant-baseline="middle" transform="rotate(67.5 229.45 117.09)" font-family="Georgia,serif" font-size="11" fill="#F9C846" font-style="italic" font-weight="bold">you</text>
-                    <text x="229.45" y="182.91" text-anchor="middle" dominant-baseline="middle" transform="rotate(112.5 229.45 182.91)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">marcus</text>
-                    <text x="182.91" y="229.45" text-anchor="middle" dominant-baseline="middle" transform="rotate(157.5 182.91 229.45)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">em.w</text>
-                    <text x="117.09" y="229.45" text-anchor="middle" dominant-baseline="middle" transform="rotate(202.5 117.09 229.45)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">jay_99</text>
-                    <text x="70.55" y="182.91" text-anchor="middle" dominant-baseline="middle" transform="rotate(247.5 70.55 182.91)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">priya</text>
-                    <text x="70.55" y="117.09" text-anchor="middle" dominant-baseline="middle" transform="rotate(292.5 70.55 117.09)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">alex_b</text>
-                    <text x="117.09" y="70.55" text-anchor="middle" dominant-baseline="middle" transform="rotate(337.5 117.09 70.55)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">nina</text>
-                    <circle cx="150" cy="20" r="4" fill="url(#peg)"/><circle cx="241.92" cy="58.08" r="4" fill="url(#peg)"/><circle cx="280" cy="150" r="4" fill="url(#peg)"/><circle cx="241.92" cy="241.92" r="4" fill="url(#peg)"/><circle cx="150" cy="280" r="4" fill="url(#peg)"/><circle cx="58.08" cy="241.92" r="4" fill="url(#peg)"/><circle cx="20" cy="150" r="4" fill="url(#peg)"/><circle cx="58.08" cy="58.08" r="4" fill="url(#peg)"/>
-                  </g>
-                  <circle cx="150" cy="150" r="130" fill="url(#gloss)" pointer-events="none"/>
-                  <circle cx="150" cy="150" r="36" fill="url(#hubring)"/>
-                  <circle cx="150" cy="150" r="31" fill="url(#hub)"/>
-                  <text x="150" y="152" text-anchor="middle" dominant-baseline="middle" font-family="Georgia,serif" font-size="26" font-weight="bold" font-style="italic" fill="#fff">d.</text>
-                </svg>
-                <svg class="wheel-pointer-svg" width="30" height="38" viewBox="0 0 34 42">
-                  <defs><linearGradient id="ptr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#F9C846"/></linearGradient></defs>
-                  <path d="M17 40 L4 12 Q17 0 30 12 Z" fill="url(#ptr)" stroke="#D99A1C" stroke-width="1"/>
-                  <circle cx="17" cy="13" r="5" fill="#fff"/>
-                </svg>
+                <canvas id="wheel-hero" class="wheel-canvas" width="420" height="420" aria-label="Live draw wheel"></canvas>
+                <div class="wheel-pointer-wrap" id="ptr-hero">
+                  <svg width="32" height="44" viewBox="0 0 32 44">
+                    <defs><linearGradient id="ptr-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></linearGradient></defs>
+                    <path d="M16 42 L3 14 Q16 0 29 14 Z" fill="url(#ptr-g)" stroke="#a07010" stroke-width="1"/>
+                    <circle cx="16" cy="14" r="6" fill="#fff" stroke="#D99A1C" stroke-width="1.5"/>
+                    <circle cx="16" cy="14" r="3" fill="#F9C846"/>
+                  </svg>
+                </div>
               </div>
             </div>
             <div class="draw-prize">
-              <div class="pic">&#128092;</div>
+              <div class="pic" style="padding:0;overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=76&h=76&fit=crop" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Chanel bag" loading="lazy">
+              </div>
               <div class="info"><div class="pn">Chanel Flap Bag</div><div class="ps">@sophiestyle · 2,000 tickets</div></div>
               <div class="you">You: 12</div>
             </div>
@@ -959,47 +931,15 @@
               </div>
               <div class="wheel-wrap">
                 <div class="wheel-stage">
-                  <svg class="wheel-svg" viewBox="0 0 300 300" aria-label="Live draw wheel">
-                    <defs>
-                      <radialGradient id="b-seg0" cx="50%" cy="35%" r="75%"><stop offset="0%" stop-color="#5a3fa8"/><stop offset="100%" stop-color="#3a2480"/></radialGradient>
-                      <radialGradient id="b-seg1" cx="50%" cy="35%" r="75%"><stop offset="0%" stop-color="#7C4DDC"/><stop offset="100%" stop-color="#5223a8"/></radialGradient>
-                      <linearGradient id="b-rim" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FCE08A"/><stop offset="35%" stop-color="#F9C846"/><stop offset="60%" stop-color="#D99A1C"/><stop offset="100%" stop-color="#FCE08A"/></linearGradient>
-                      <radialGradient id="b-peg" cx="35%" cy="35%" r="70%"><stop offset="0%" stop-color="#fff"/><stop offset="45%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></radialGradient>
-                      <radialGradient id="b-hub" cx="38%" cy="32%" r="80%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="55%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#5223a8"/></radialGradient>
-                      <radialGradient id="b-hubring" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></radialGradient>
-                      <radialGradient id="b-gloss" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#fff" stop-opacity="0.22"/><stop offset="55%" stop-color="#fff" stop-opacity="0"/></radialGradient>
-                    </defs>
-                    <circle cx="150" cy="150" r="142" fill="url(#b-rim)"/>
-                    <circle cx="150" cy="150" r="134" fill="#2a1a5e"/>
-                    <g class="wheel-rotor">
-                      <path d="M150 150 L150 20 A130 130 0 0 1 241.92 58.08 Z" fill="url(#b-seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                      <path d="M150 150 L241.92 58.08 A130 130 0 0 1 280 150 Z" fill="url(#b-seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                      <path d="M150 150 L280 150 A130 130 0 0 1 241.92 241.92 Z" fill="url(#b-seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                      <path d="M150 150 L241.92 241.92 A130 130 0 0 1 150 280 Z" fill="url(#b-seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                      <path d="M150 150 L150 280 A130 130 0 0 1 58.08 241.92 Z" fill="url(#b-seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                      <path d="M150 150 L58.08 241.92 A130 130 0 0 1 20 150 Z" fill="url(#b-seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                      <path d="M150 150 L20 150 A130 130 0 0 1 58.08 58.08 Z" fill="url(#b-seg0)" stroke="#F9C846" stroke-width="0.5"/>
-                      <path d="M150 150 L58.08 58.08 A130 130 0 0 1 150 20 Z" fill="url(#b-seg1)" stroke="#F9C846" stroke-width="0.5"/>
-                      <text x="182.91" y="70.55" text-anchor="middle" dominant-baseline="middle" transform="rotate(22.5 182.91 70.55)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">sophie_k</text>
-                      <text x="229.45" y="117.09" text-anchor="middle" dominant-baseline="middle" transform="rotate(67.5 229.45 117.09)" font-family="Georgia,serif" font-size="11" fill="#F9C846" font-style="italic" font-weight="bold">you</text>
-                      <text x="229.45" y="182.91" text-anchor="middle" dominant-baseline="middle" transform="rotate(112.5 229.45 182.91)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">marcus</text>
-                      <text x="182.91" y="229.45" text-anchor="middle" dominant-baseline="middle" transform="rotate(157.5 182.91 229.45)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">em.w</text>
-                      <text x="117.09" y="229.45" text-anchor="middle" dominant-baseline="middle" transform="rotate(202.5 117.09 229.45)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">jay_99</text>
-                      <text x="70.55" y="182.91" text-anchor="middle" dominant-baseline="middle" transform="rotate(247.5 70.55 182.91)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">priya</text>
-                      <text x="70.55" y="117.09" text-anchor="middle" dominant-baseline="middle" transform="rotate(292.5 70.55 117.09)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">alex_b</text>
-                      <text x="117.09" y="70.55" text-anchor="middle" dominant-baseline="middle" transform="rotate(337.5 117.09 70.55)" font-family="Georgia,serif" font-size="11" fill="#fff" font-style="italic">nina</text>
-                      <circle cx="150" cy="20" r="4" fill="url(#b-peg)"/><circle cx="241.92" cy="58.08" r="4" fill="url(#b-peg)"/><circle cx="280" cy="150" r="4" fill="url(#b-peg)"/><circle cx="241.92" cy="241.92" r="4" fill="url(#b-peg)"/><circle cx="150" cy="280" r="4" fill="url(#b-peg)"/><circle cx="58.08" cy="241.92" r="4" fill="url(#b-peg)"/><circle cx="20" cy="150" r="4" fill="url(#b-peg)"/><circle cx="58.08" cy="58.08" r="4" fill="url(#b-peg)"/>
-                    </g>
-                    <circle cx="150" cy="150" r="130" fill="url(#b-gloss)" pointer-events="none"/>
-                    <circle cx="150" cy="150" r="36" fill="url(#b-hubring)"/>
-                    <circle cx="150" cy="150" r="31" fill="url(#b-hub)"/>
-                    <text x="150" y="152" text-anchor="middle" dominant-baseline="middle" font-family="Georgia,serif" font-size="26" font-weight="bold" font-style="italic" fill="#fff">d.</text>
-                  </svg>
-                  <svg class="wheel-pointer-svg" width="30" height="38" viewBox="0 0 34 42">
-                    <defs><linearGradient id="b-ptr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#F9C846"/></linearGradient></defs>
-                    <path d="M17 40 L4 12 Q17 0 30 12 Z" fill="url(#b-ptr)" stroke="#D99A1C" stroke-width="1"/>
-                    <circle cx="17" cy="13" r="5" fill="#fff"/>
-                  </svg>
+                  <canvas id="wheel-screen" class="wheel-canvas" width="420" height="420" aria-label="Live draw wheel"></canvas>
+                  <div class="wheel-pointer-wrap" id="ptr-screen">
+                    <svg width="32" height="44" viewBox="0 0 32 44">
+                      <defs><linearGradient id="ptr-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCE08A"/><stop offset="100%" stop-color="#D99A1C"/></linearGradient></defs>
+                      <path d="M16 42 L3 14 Q16 0 29 14 Z" fill="url(#ptr-g2)" stroke="#a07010" stroke-width="1"/>
+                      <circle cx="16" cy="14" r="6" fill="#fff" stroke="#D99A1C" stroke-width="1.5"/>
+                      <circle cx="16" cy="14" r="3" fill="#F9C846"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
               <!-- Prize strip with real photo -->
@@ -1699,6 +1639,325 @@
         c.style.animationDelay = (Math.random() * 2) + 's';
         screen.appendChild(c);
       }
+    })();
+
+    /* ================================================================
+       CANVAS WHEEL ENGINE
+       High-quality prize wheel with:
+       - 12 segments, metallic gold rim, LED glow ring
+       - JS-driven deceleration (8+ rotations, prolonged crawl)
+       - Pointer bounce on each segment tick
+       - Winner segment spotlight + confetti burst
+       - Auto-restarts every ~9s for demo loop
+       ================================================================ */
+    (function () {
+      var NAMES  = ['sophie_k','you','marcus','em.w','jay_99','priya','alex_b','nina','chloe','tom_d','rosa','luca'];
+      var WIN_IDX = 1; // "you"
+      var SEG    = NAMES.length;
+      var SEG_ANG = (Math.PI * 2) / SEG;
+
+      // Colour palette — alternating deep violet / royal purple, winner = gold flash
+      var COLS = ['#3a2480','#5223a8','#3a2480','#5223a8','#3a2480','#5223a8',
+                  '#3a2480','#5223a8','#3a2480','#5223a8','#3a2480','#5223a8'];
+
+      function buildWheel(canvasId, ptrId, size) {
+        var canvas = document.getElementById(canvasId);
+        var ptrEl  = document.getElementById(ptrId);
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var R   = size / 2;         // logical radius (canvas is 2× for retina)
+        var cx  = R, cy = R;
+        var rimW  = R * 0.09;
+        var ledW  = R * 0.045;
+        var innerR = R - rimW - ledW;
+
+        var angle    = 0;          // current rotation angle (radians)
+        var spinning = false;
+        var lastSeg  = -1;
+        var glowAlpha = 0;         // rim glow intensity
+        var confetti = [];
+        var winFlash = 0;
+
+        function segAtPointer(a) {
+          // pointer is at top (π*1.5 = 270°). Which segment is at top?
+          var norm = ((a % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+          var seg  = Math.floor(((Math.PI*1.5 - norm + Math.PI*2) % (Math.PI*2)) / SEG_ANG);
+          return ((seg % SEG) + SEG) % SEG;
+        }
+
+        function drawFrame() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // -- Outer glow ring (LED) --
+          var glow = ctx.createRadialGradient(cx,cy,innerR+ledW*0.3, cx,cy,R);
+          var ga = Math.min(1, glowAlpha);
+          glow.addColorStop(0, 'rgba(249,200,70,' + (0.12 + ga*0.45) + ')');
+          glow.addColorStop(0.5, 'rgba(249,200,70,' + (0.04 + ga*0.2) + ')');
+          glow.addColorStop(1, 'rgba(249,200,70,0)');
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, 0, Math.PI*2);
+          ctx.fillStyle = glow;
+          ctx.fill();
+
+          // -- Metallic gold rim --
+          var rimGrad = ctx.createLinearGradient(cx-R, cy-R, cx+R, cy+R);
+          rimGrad.addColorStop(0,    '#FCE08A');
+          rimGrad.addColorStop(0.25, '#F9C846');
+          rimGrad.addColorStop(0.5,  '#D99A1C');
+          rimGrad.addColorStop(0.75, '#F9C846');
+          rimGrad.addColorStop(1,    '#FCE08A');
+          ctx.beginPath();
+          ctx.arc(cx, cy, R - ledW*0.5, 0, Math.PI*2);
+          ctx.strokeStyle = rimGrad;
+          ctx.lineWidth = rimW;
+          ctx.stroke();
+
+          // -- LED dots on rim (12 positions) --
+          for (var d = 0; d < 12; d++) {
+            var da = (d / 12) * Math.PI * 2 - Math.PI/2;
+            var dr = R - ledW * 0.5 - rimW * 0.5;
+            var dx = cx + Math.cos(da) * dr;
+            var dy = cy + Math.sin(da) * dr;
+            ctx.beginPath();
+            ctx.arc(dx, dy, ledW * 0.38, 0, Math.PI*2);
+            var lit = (glowAlpha > 0.1 && d % 2 === 0) || (d % 3 === 0 && glowAlpha < 0.1);
+            ctx.fillStyle = lit ? '#FFF9E0' : '#B8860B';
+            if (lit) {
+              ctx.shadowColor = '#F9C846';
+              ctx.shadowBlur  = ledW * 3;
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+
+          // -- Segments --
+          var borderR = innerR + ledW * 0.3;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(cx, cy, borderR, 0, Math.PI*2);
+          ctx.clip();
+
+          for (var i = 0; i < SEG; i++) {
+            var start = angle + i * SEG_ANG - Math.PI/2;
+            var end   = start + SEG_ANG;
+            var isWin = (i === WIN_IDX) && winFlash > 0;
+
+            // Segment fill
+            var segGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, innerR);
+            var baseCol = COLS[i % COLS.length];
+            var lightCol = isWin ? '#FEF9C3' : (i % 2 === 0 ? '#5a3fa8' : '#7C4DDC');
+            segGrad.addColorStop(0.3, lightCol);
+            segGrad.addColorStop(1,   baseCol);
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, borderR, start, end);
+            ctx.closePath();
+            if (isWin) {
+              ctx.shadowColor = '#F9C846';
+              ctx.shadowBlur  = 18;
+            }
+            ctx.fillStyle = segGrad;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Segment border
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, borderR, start, end);
+            ctx.closePath();
+            ctx.strokeStyle = 'rgba(249,200,70,0.35)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Pegs at rim
+            var pegAngle = start + SEG_ANG / 2;
+            var px = cx + Math.cos(pegAngle) * (borderR - 6);
+            var py = cy + Math.sin(pegAngle) * (borderR - 6);
+            ctx.beginPath();
+            ctx.arc(px, py, 4, 0, Math.PI*2);
+            var pg = ctx.createRadialGradient(px-1,py-1,0, px,py,4);
+            pg.addColorStop(0, '#fff');
+            pg.addColorStop(0.4, '#FCE08A');
+            pg.addColorStop(1,  '#D99A1C');
+            ctx.fillStyle = pg;
+            ctx.fill();
+
+            // Name label
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(start + SEG_ANG / 2);
+            ctx.textAlign = 'right';
+            ctx.font = 'italic bold ' + Math.round(innerR * 0.11) + 'px Georgia, serif';
+            ctx.fillStyle = (i === WIN_IDX) ? '#F9C846' : 'rgba(255,255,255,0.9)';
+            if (i === WIN_IDX) {
+              ctx.shadowColor = '#F9C846';
+              ctx.shadowBlur = 6;
+            }
+            ctx.fillText(NAMES[i], innerR * 0.88, 4);
+            ctx.shadowBlur = 0;
+            ctx.restore();
+          }
+          ctx.restore();
+
+          // -- Hub --
+          var hubRing = ctx.createRadialGradient(cx,cy,0, cx,cy,innerR*0.14);
+          hubRing.addColorStop(0, '#FCE08A');
+          hubRing.addColorStop(1, '#D99A1C');
+          ctx.beginPath();
+          ctx.arc(cx, cy, innerR * 0.14, 0, Math.PI*2);
+          ctx.fillStyle = hubRing;
+          ctx.fill();
+
+          var hub = ctx.createRadialGradient(cx-2,cy-2,0, cx,cy,innerR*0.11);
+          hub.addColorStop(0, '#A78BFA');
+          hub.addColorStop(0.55, '#8B5CF6');
+          hub.addColorStop(1,   '#5223a8');
+          ctx.beginPath();
+          ctx.arc(cx, cy, innerR * 0.11, 0, Math.PI*2);
+          ctx.fillStyle = hub;
+          ctx.fill();
+
+          ctx.font = 'italic bold ' + Math.round(innerR*0.13) + 'px Georgia,serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#fff';
+          ctx.fillText('d.', cx, cy + 1);
+
+          // -- Gloss overlay --
+          var gloss = ctx.createRadialGradient(cx, cy - innerR*0.2, 0, cx, cy, innerR);
+          gloss.addColorStop(0,   'rgba(255,255,255,0.18)');
+          gloss.addColorStop(0.5, 'rgba(255,255,255,0)');
+          ctx.beginPath();
+          ctx.arc(cx, cy, innerR, 0, Math.PI*2);
+          ctx.fillStyle = gloss;
+          ctx.fill();
+
+          // -- Confetti --
+          confetti.forEach(function(p) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life;
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+          });
+        }
+
+        function burstConfetti() {
+          confetti = [];
+          var cols = ['#F9C846','#F472B6','#8B5CF6','#fff','#FEF9C3'];
+          for (var i = 0; i < 36; i++) {
+            var a2 = Math.random() * Math.PI * 2;
+            var sp = 1.5 + Math.random() * 2.5;
+            confetti.push({
+              x: cx, y: cy,
+              vx: Math.cos(a2) * sp, vy: Math.sin(a2) * sp - 2,
+              rot: Math.random() * Math.PI,
+              vr: (Math.random() - 0.5) * 0.2,
+              w: 6 + Math.random()*6, h: 3 + Math.random()*3,
+              color: cols[i % cols.length],
+              life: 1
+            });
+          }
+        }
+
+        var startTime, totalDur, startAngle, totalRot;
+
+        function easeOut(t) {
+          // Quintic ease-out — fast start, prolonged crawl at end
+          return 1 - Math.pow(1 - t, 5);
+        }
+
+        function spinTo(targetAngle, duration) {
+          startTime  = null;
+          totalDur   = duration;
+          startAngle = angle;
+          totalRot   = targetAngle - startAngle;
+          spinning   = true;
+          glowAlpha  = 0;
+          winFlash   = 0;
+          confetti   = [];
+          requestAnimationFrame(animStep);
+        }
+
+        function animStep(ts) {
+          if (!startTime) startTime = ts;
+          var elapsed = ts - startTime;
+          var t = Math.min(elapsed / totalDur, 1);
+          var eased = easeOut(t);
+
+          angle = startAngle + totalRot * eased;
+
+          // Spinning speed proxy (derivative of easing)
+          var speed = (t < 1) ? (1 - eased) : 0;
+          glowAlpha = speed * 2.5;
+
+          // Detect segment tick → bounce pointer
+          var seg = segAtPointer(angle);
+          if (seg !== lastSeg && ptrEl) {
+            lastSeg = seg;
+            ptrEl.querySelector('svg').style.transform = 'rotate(-18deg)';
+            setTimeout(function() {
+              if (ptrEl) ptrEl.querySelector('svg').style.transform = 'rotate(0deg)';
+            }, 80);
+          }
+
+          // Confetti + win flash on landing
+          if (confetti.length > 0) {
+            confetti.forEach(function(p) {
+              p.x  += p.vx; p.y += p.vy;
+              p.vy += 0.12; // gravity
+              p.rot += p.vr;
+              p.life -= 0.018;
+            });
+            confetti = confetti.filter(function(p) { return p.life > 0; });
+          }
+
+          if (t === 1 && winFlash === 0) {
+            winFlash = 1;
+            burstConfetti();
+            // Fade winFlash
+            var wf = setInterval(function() {
+              winFlash = Math.max(0, winFlash - 0.04);
+              if (winFlash <= 0) clearInterval(wf);
+            }, 40);
+          }
+
+          drawFrame();
+
+          if (t < 1 || confetti.length > 0) {
+            requestAnimationFrame(animStep);
+          } else {
+            spinning = false;
+          }
+        }
+
+        function launchSpin() {
+          // Winner segment (WIN_IDX) should land at pointer (top).
+          // Current angle: pointer reads segAtPointer(angle) = WIN_IDX when:
+          // angle = π/2*3 - WIN_IDX*SEG_ANG - SEG_ANG/2  (centre of segment at top)
+          var targetSeg  = WIN_IDX;
+          var targetBase = Math.PI * 1.5 - targetSeg * SEG_ANG - SEG_ANG / 2;
+          // Add 8.5 full rotations
+          var fullRots   = Math.PI * 2 * 8.5;
+          var targetAngle = angle + fullRots + ((targetBase - angle) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+          spinTo(targetAngle, 7800);
+        }
+
+        // Draw initial static frame
+        drawFrame();
+        // Start first spin after 1.5s, then loop
+        setTimeout(function loop() {
+          launchSpin();
+          setTimeout(loop, 12000);
+        }, 1500);
+      }
+
+      // Size in CSS pixels (canvas is 2× for retina sharpness)
+      buildWheel('wheel-hero',   'ptr-hero',   210);
+      buildWheel('wheel-screen', 'ptr-screen', 210);
     })();
 
     /* ---- Animated stats counter ---- */
