@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /supabase/
+Disallow: /src/
+Disallow: /app/
+Disallow: /node_modules/
+
+Sitemap: https://yoniaibi.github.io/Drawn/sitemap.xml
