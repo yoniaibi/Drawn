@@ -609,6 +609,58 @@
   .cross { color: #c0b8d4; }
 
   /* ===================================================================
+     HERO ODDS ROW
+     =================================================================== */
+  .hero-odds-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0 16px; }
+  .hero-odds-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #c4b5fd; }
+
+  /* ===================================================================
+     CATEGORY STRIP
+     =================================================================== */
+  .cat-strip { background: #fff; border-top: 1px solid #EDE9F6; border-bottom: 1px solid #EDE9F6; padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .cat-strip::-webkit-scrollbar { display: none; }
+  .cat-strip-inner { display: flex; gap: 0; white-space: nowrap; justify-content: center; }
+  .cat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 24px; text-decoration: none; color: var(--mid); font-size: 12px; font-weight: 600; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; white-space: nowrap; }
+  .cat-item:hover { color: var(--royal); }
+  .cat-active { color: var(--royal); border-bottom-color: var(--royal); }
+  .cat-icon { width: 32px; height: 32px; border-radius: 9px; background: var(--mist); display: flex; align-items: center; justify-content: center; }
+  .cat-active .cat-icon { background: rgba(109,40,217,0.1); }
+  .cat-icon svg { width: 16px; height: 16px; }
+
+  /* ===================================================================
+     TESTIMONIALS AGGREGATE + MOBILE
+     =================================================================== */
+  .testi-agg { display: flex; align-items: center; gap: 10px; justify-content: center; margin: 14px 0 0; flex-wrap: wrap; }
+  .tagg-stars { color: #F9C846; font-size: 16px; letter-spacing: 2px; }
+  .tagg-score { font-size: 22px; font-weight: 900; color: var(--ink); }
+  .tagg-count { font-size: 13px; color: var(--mid); }
+  .tagg-sep { color: #ddd; }
+  .tagg-badges { display: flex; gap: 8px; }
+  .tagg-badges span { background: var(--mist); color: var(--body); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+  @media (max-width: 700px) { .testi-grid { grid-template-columns: 1fr; } .tagg-badges { display: none; } }
+
+  /* ===================================================================
+     COMMUNITY SOCIAL ROW
+     =================================================================== */
+  .community-social-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 20px; }
+  .csr-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--mid); font-weight: 600; }
+
+  /* ===================================================================
+     STICKY MOBILE CTA
+     =================================================================== */
+  .sticky-cta { position: fixed; bottom: 0; left: 0; right: 0; z-index: 999; background: var(--ink); border-top: 1px solid rgba(139,92,246,0.3); padding: 12px 20px; transform: translateY(100%); transition: transform .3s cubic-bezier(.22,.61,.36,1); display: none; }
+  .sticky-cta.visible { transform: translateY(0); }
+  .sticky-cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 480px; margin: 0 auto; }
+  .sticky-cta-text { font-size: 13px; color: #c4b5fd; }
+  .sticky-cta-text strong { color: #fff; }
+  @media (max-width: 700px) { .sticky-cta { display: block; } }
+
+  /* ===================================================================
+     FOOTER SOCIAL LINKS
+     =================================================================== */
+  .footer-social { display: inline-flex !important; align-items: center; gap: 6px; }
+
+  /* ===================================================================
      PRESS STRIP
      =================================================================== */
   .press-strip { background: #fff; border-top: 1px solid #EDE9F6; border-bottom: 1px solid #EDE9F6; padding: 22px 0; }
@@ -935,13 +987,6 @@
           </div>
         </div>
 
-        <form class="waitlist-form" onsubmit="return handleWaitlist(event)">
-          <input type="email" placeholder="Your email" required aria-label="Email address">
-          <button type="submit" class="btn btn-pink">Join the waitlist</button>
-        </form>
-        <div class="hero-cta-row">
-          <a href="#sellers" class="btn btn-ghost">Apply to sell &rarr;</a>
-        </div>
         <div class="hero-social-proof">
           <div class="hsp-faces">
             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=44&h=44&fit=crop&crop=face" alt="">
@@ -950,6 +995,18 @@
             <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=44&h=44&fit=crop&crop=face" alt="">
           </div>
           <div class="hsp-text"><strong>4,312 people</strong> already on the waitlist</div>
+        </div>
+        <form class="waitlist-form" onsubmit="return handleWaitlist(event)">
+          <input type="email" placeholder="Your email" required aria-label="Email address">
+          <button type="submit" class="btn btn-pink">Join the waitlist</button>
+        </form>
+        <div class="hero-odds-row">
+          <span class="hero-odds-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F9C846" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>From 10p a ticket</span>
+          <span class="hero-odds-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F9C846" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Avg winner spends £1.20</span>
+          <span class="hero-odds-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F9C846" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Free entry available</span>
+        </div>
+        <div class="hero-cta-row">
+          <a href="#sellers" class="btn btn-ghost">Apply to sell &rarr;</a>
         </div>
         <div class="hero-app-badges">
           <a href="#waitlist" class="app-badge app-badge-ios">
@@ -981,7 +1038,7 @@
                   <div class="ww-bg"></div>
                   <div class="ww-label">Winner!</div>
                   <div class="ww-name" id="win-name-hero"></div>
-                  <div class="ww-emoji">🎉</div>
+                  <div class="ww-emoji" style="font-size:0;letter-spacing:0;">&#127881;</div>
                 </div>
                 <div class="wheel-pointer-wrap" id="ptr-hero">
                   <svg width="32" height="44" viewBox="0 0 32 44">
@@ -1215,6 +1272,42 @@
       <div class="tonight-cta">
         <p>Sign up to grab tickets before tonight's draw closes at 9pm.</p>
         <a href="#waitlist" class="btn btn-pink">Join the waitlist &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CATEGORY STRIP ============ -->
+  <section class="cat-strip">
+    <div class="container">
+      <div class="cat-strip-inner">
+        <a href="#tonight" class="cat-item cat-active">
+          <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <span>All draws</span>
+        </a>
+        <a href="#tonight" class="cat-item">
+          <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+          <span>Bags</span>
+        </a>
+        <a href="#tonight" class="cat-item">
+          <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 12c0 4.14-3.58 7.5-8 7.5S1.5 16.14 1.5 12 5.08 4.5 9.5 4.5"/><polyline points="22 2 13 11"/><polyline points="22 2 16 2 22 8"/></svg></div>
+          <span>Trainers</span>
+        </a>
+        <a href="#tonight" class="cat-item">
+          <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/></svg></div>
+          <span>Watches</span>
+        </a>
+        <a href="#tonight" class="cat-item">
+          <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg></div>
+          <span>Clothing</span>
+        </a>
+        <a href="#tonight" class="cat-item">
+          <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+          <span>Jewellery</span>
+        </a>
+        <a href="#tonight" class="cat-item">
+          <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+          <span>Bundles</span>
+        </a>
       </div>
     </div>
   </section>
@@ -1539,6 +1632,11 @@
       <!-- Copy + posts -->
       <div class="community-copy">
         <div class="eyebrow">Real people. Real wins.</div>
+        <div class="community-social-row">
+          <span class="csr-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.54C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>24.3k on TikTok</span>
+          <span class="csr-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>18.1k on Instagram</span>
+          <span class="csr-item">&#128293; 312 draws won this week</span>
+        </div>
         <h2 class="section-title">Someone wins<br>every night at 9pm.</h2>
         <p class="section-sub">From clearing out a wardrobe to winning a designer haul — real people, real items, real draws. Every single night.</p>
         <div class="community-posts">
@@ -1579,6 +1677,16 @@
     <div class="container">
       <div class="eyebrow">What people are saying</div>
       <h2 class="section-title">Real wins. Real people.</h2>
+      <div class="testi-agg">
+        <div class="tagg-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div class="tagg-score">4.9</div>
+        <div class="tagg-count">from 312 beta testers</div>
+        <div class="tagg-sep">·</div>
+        <div class="tagg-badges">
+          <span>&#127881; 94% would recommend</span>
+          <span>&#128293; 98% say it's addictive</span>
+        </div>
+      </div>
       <div class="testi-grid">
 
         <div class="testi-card testi-featured">
@@ -2286,8 +2394,8 @@
             <h4>Get involved</h4>
             <a href="#waitlist">Join the waitlist</a>
             <a href="#sellers">Become a seller</a>
-            <a href="#">Instagram</a>
-            <a href="#">TikTok</a>
+            <a href="#" class="footer-social"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Instagram</a>
+            <a href="#" class="footer-social"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12 C9 12 10 17 15 17 C18 17 20 15 21 12 L21 3 L17 3 C17 7 15 9 12 9 L9 9 Z"/><path d="M9 9 L3 9"/><path d="M9 12 L3 12"/></svg>TikTok</a>
           </div>
           <div class="footer-col">
             <h4>Company</h4>
@@ -2541,6 +2649,20 @@
       if (!isOpen) item.classList.add('open');
     }
 
+    /* ---- Sticky mobile CTA ---- */
+    (function(){
+      var bar = document.getElementById('sticky-cta');
+      if(!bar) return;
+      var hero = document.querySelector('.hero');
+      var shown = false;
+      window.addEventListener('scroll', function(){
+        if(!hero) return;
+        var heroBottom = hero.getBoundingClientRect().bottom;
+        if(heroBottom < 0 && !shown){ bar.classList.add('visible'); shown = true; }
+        else if(heroBottom >= 0 && shown){ bar.classList.remove('visible'); shown = false; }
+      }, {passive: true});
+    })();
+
     /* ---- Waitlist form ---- */
     function handleWaitlist(e) {
       e.preventDefault();
@@ -2566,6 +2688,14 @@
       links.style.gap = '18px';
     });
   </script>
+
+  <!-- sticky mobile CTA -->
+  <div class="sticky-cta" id="sticky-cta">
+    <div class="sticky-cta-inner">
+      <div class="sticky-cta-text"><strong>4,312 already in.</strong> Spots filling fast.</div>
+      <a href="#waitlist" class="btn btn-pink btn-sm" style="white-space:nowrap;">Secure my spot</a>
+    </div>
+  </div>
 
 </body>
 </html>
