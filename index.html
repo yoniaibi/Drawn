@@ -421,100 +421,132 @@
      TRUST & AUTHENTICATION SECTION
      =================================================================== */
   .trust-section { background: var(--ink); color: #fff; overflow: hidden; }
-  .trust-top { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; margin-bottom: 72px; }
+  /* Top split */
+  .trust-top { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; margin-bottom: 80px; }
   /* Auth certificate card */
   .auth-cert-wrap { position: relative; }
-  .auth-cert-wrap::before { content: ''; position: absolute; inset: -40px; background: radial-gradient(circle at 50% 50%, rgba(109,40,217,0.35) 0%, transparent 70%); pointer-events: none; }
-  .auth-cert {
-    position: relative; background: #fff; border-radius: 20px; overflow: hidden;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
-    color: #111;
-  }
-  .auth-cert-header { background: linear-gradient(135deg, #1A1040, #2D1B69); padding: 18px 20px; display: flex; align-items: center; gap: 10px; }
-  .auth-cert-header .ach-logo { font-family: var(--serif); font-style: italic; font-weight: 800; font-size: 16px; color: #fff; }
-  .auth-cert-header .ach-title { font-size: 10px; font-weight: 700; color: #9D8FD9; letter-spacing: .08em; text-transform: uppercase; margin-left: auto; }
+  .auth-cert-wrap::before { content: ''; position: absolute; inset: -60px; background: radial-gradient(circle at 50% 50%, rgba(109,40,217,0.3) 0%, transparent 65%); pointer-events: none; }
+  .auth-cert { position: relative; background: #fff; border-radius: 22px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06); color: #111; }
+  .auth-cert-header { background: linear-gradient(135deg, #1A1040, #2D1B69); padding: 16px 20px; display: flex; align-items: center; gap: 10px; }
+  .auth-cert-header .ach-logo { font-family: var(--serif); font-style: italic; font-weight: 800; font-size: 15px; color: #fff; }
+  .auth-cert-header .ach-title { font-size: 9px; font-weight: 700; color: #9D8FD9; letter-spacing: .1em; text-transform: uppercase; margin-left: auto; }
   .auth-cert-img { position: relative; }
-  .auth-cert-img img { width: 100%; height: 200px; object-fit: cover; display: block; }
-  .auth-cert-img .aci-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgba(10,4,30,0.7)); display: flex; align-items: flex-end; padding: 14px 16px; }
-  .auth-cert-img .aci-status { display: inline-flex; align-items: center; gap: 6px; background: #10b981; color: #fff; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; letter-spacing: .04em; }
-  .auth-cert-img .aci-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #fff; display: block; }
+  .auth-cert-img img { width: 100%; height: 195px; object-fit: cover; display: block; }
+  .auth-cert-img .aci-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(10,4,30,0.75)); display: flex; align-items: flex-end; padding: 14px 16px; }
+  .aci-status { display: inline-flex; align-items: center; gap: 7px; background: #10b981; color: #fff; font-size: 10px; font-weight: 800; padding: 5px 12px; border-radius: 20px; letter-spacing: .05em; }
+  .aci-status svg { width: 12px; height: 12px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
   .auth-cert-body { padding: 18px 20px; }
-  .auth-cert-item { font-size: 16px; font-weight: 800; color: #111; margin-bottom: 2px; }
-  .auth-cert-partner { font-size: 11px; color: #6D28D9; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 5px; }
-  .auth-cert-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .acr { background: #f8f7ff; border-radius: 10px; padding: 10px 12px; }
+  .auth-cert-item { font-size: 15px; font-weight: 800; color: #111; margin-bottom: 3px; }
+  .auth-cert-partner { font-size: 11px; color: #6D28D9; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .auth-cert-partner svg { width: 13px; height: 13px; stroke: #6D28D9; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .auth-cert-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .acr { background: #f8f7ff; border-radius: 9px; padding: 10px 12px; }
   .acr-label { font-size: 9px; color: #9D8FD9; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
-  .acr-val { font-size: 13px; font-weight: 800; color: #111; margin-top: 3px; }
-  .auth-cert-verdict { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #065f46; line-height: 1.5; margin-bottom: 14px; }
+  .acr-val { font-size: 12px; font-weight: 800; color: #111; margin-top: 3px; }
+  .auth-cert-verdict { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px; padding: 10px 12px; font-size: 11px; color: #065f46; line-height: 1.55; margin-bottom: 14px; }
   .auth-cert-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f0eef9; }
   .acf-cert { font-size: 10px; color: #9D8FD9; }
   .acf-cert strong { color: #6D28D9; font-weight: 700; font-size: 11px; display: block; }
-  .acf-shield { width: 36px; height: 36px; background: linear-gradient(135deg, #6D28D9, #8B5CF6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .acf-shield { width: 34px; height: 34px; background: linear-gradient(135deg, #6D28D9, #8B5CF6); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+  .acf-shield svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* Right copy */
   .trust-copy .section-sub { color: #9D8FD9; font-size: 15px; line-height: 1.7; margin-top: 14px; }
-  /* Stats strip */
   .trust-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(139,92,246,0.2); border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; overflow: hidden; margin: 36px 0 0; }
   .trust-stat { background: rgba(255,255,255,0.03); padding: 20px; text-align: center; }
   .trust-stat .tsv { font-size: 28px; font-weight: 900; color: #fff; line-height: 1; }
   .trust-stat .tsv span { color: var(--gold); }
-  .trust-stat .tsl { font-size: 11px; color: #9D8FD9; margin-top: 5px; }
-  /* Partners row */
-  .trust-partners { margin-top: 72px; }
-  .trust-partners-label { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #9D8FD9; margin-bottom: 24px; }
-  .trust-partners-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .tp-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(139,92,246,0.2); border-radius: 40px; padding: 10px 18px; }
-  .tp-pill .tp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .tp-pill .tp-name { font-size: 13px; font-weight: 700; color: #fff; }
-  .tp-pill .tp-cat { font-size: 10px; color: #9D8FD9; margin-top: 1px; }
-  /* Flow */
-  .trust-flow { margin-top: 72px; }
-  .trust-flow-title { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #9D8FD9; margin-bottom: 40px; }
+  .trust-stat .tsl { font-size: 10px; color: #9D8FD9; margin-top: 5px; text-transform: uppercase; letter-spacing: .06em; }
+  /* Inspection photo banner */
+  .trust-banner { position: relative; border-radius: 22px; overflow: hidden; margin-bottom: 80px; height: 340px; }
+  .trust-banner img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.45) saturate(0.8); }
+  .trust-banner-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(26,16,64,0.6) 0%, transparent 50%, rgba(26,16,64,0.6) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 40px 48px; }
+  .trust-banner-label { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+  .trust-banner-steps { display: flex; align-items: center; gap: 0; }
+  .tbs-node { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 120px; }
+  .tbs-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .tbs-icon svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tbs-label { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3; }
+  .tbs-sub { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+  .tbs-line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05)); margin: 0 12px; margin-bottom: 38px; }
+  .tbs-split { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; margin-bottom: 38px; }
+  .tbs-outcome { display: flex; align-items: center; gap: 8px; }
+  .tbs-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .tbs-outcome-label { font-size: 11px; font-weight: 700; }
+  /* Partners */
+  .trust-partners { margin-bottom: 80px; }
+  .trust-partners-label { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #9D8FD9; margin-bottom: 24px; }
+  .trust-partners-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .tp-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(139,92,246,0.18); border-radius: 16px; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .tp-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .tp-icon svg { width: 20px; height: 20px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tp-name { font-size: 13px; font-weight: 800; color: #fff; }
+  .tp-cat { font-size: 11px; color: #9D8FD9; margin-top: 2px; }
+  /* Detailed flow */
+  .trust-flow { margin-bottom: 80px; }
+  .trust-flow-title { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #9D8FD9; margin-bottom: 32px; }
   .trust-flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .tflow-col { border-radius: 20px; overflow: hidden; }
-  .tflow-col-pass { border: 1px solid rgba(52,211,153,0.25); }
-  .tflow-col-fail { border: 1px solid rgba(244,114,182,0.25); }
-  .tflow-header { padding: 16px 22px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 800; }
-  .tflow-col-pass .tflow-header { background: rgba(52,211,153,0.08); color: #34D399; }
-  .tflow-col-fail .tflow-header { background: rgba(244,114,182,0.08); color: #F472B6; }
-  .tflow-steps { display: flex; flex-direction: column; gap: 0; background: rgba(255,255,255,0.02); }
+  .tflow-col-pass { border: 1px solid rgba(52,211,153,0.2); }
+  .tflow-col-fail { border: 1px solid rgba(244,114,182,0.2); }
+  .tflow-header { padding: 18px 22px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 800; }
+  .tflow-header svg { width: 18px; height: 18px; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .tflow-col-pass .tflow-header { background: rgba(52,211,153,0.07); color: #34D399; }
+  .tflow-col-pass .tflow-header svg { stroke: #34D399; }
+  .tflow-col-fail .tflow-header { background: rgba(244,114,182,0.07); color: #F472B6; }
+  .tflow-col-fail .tflow-header svg { stroke: #F472B6; }
+  .tflow-steps { display: flex; flex-direction: column; background: rgba(255,255,255,0.02); }
   .tflow-step { display: flex; gap: 14px; padding: 14px 22px; border-top: 1px solid rgba(255,255,255,0.05); align-items: flex-start; }
-  .tflow-step .tsnum { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
-  .tflow-col-pass .tsnum { background: rgba(52,211,153,0.15); color: #34D399; }
-  .tflow-col-fail .tsnum { background: rgba(244,114,182,0.15); color: #F472B6; }
+  .tflow-step .ts-ico { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .tflow-step .ts-ico svg { width: 15px; height: 15px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .tflow-col-pass .ts-ico { background: rgba(52,211,153,0.1); }
+  .tflow-col-pass .ts-ico svg { stroke: #34D399; }
+  .tflow-col-fail .ts-ico { background: rgba(244,114,182,0.1); }
+  .tflow-col-fail .ts-ico svg { stroke: #F472B6; }
   .tflow-step .tst { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.3; }
-  .tflow-step .tss { font-size: 11px; color: #9D8FD9; margin-top: 3px; }
-  /* Tier badges */
-  .trust-tiers { margin-top: 72px; text-align: center; }
-  .trust-tiers-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #9D8FD9; margin-bottom: 24px; }
+  .tflow-step .tss { font-size: 11px; color: #9D8FD9; margin-top: 3px; line-height: 1.4; }
+  /* Tier cards */
+  .trust-tiers { margin-bottom: 80px; }
+  .trust-tiers-label { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #9D8FD9; margin-bottom: 24px; }
   .trust-tier-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-  .ttc { border-radius: 16px; padding: 22px 20px; border: 1px solid; text-align: left; }
-  .ttc-t1 { background: rgba(120,113,108,0.06); border-color: rgba(120,113,108,0.2); }
-  .ttc-t2 { background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.3); }
-  .ttc-t3 { background: rgba(249,200,70,0.06); border-color: rgba(249,200,70,0.3); }
-  .ttc-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; border-radius: 20px; padding: 4px 12px; margin-bottom: 12px; }
-  .ttc-t1 .ttc-badge { background: rgba(120,113,108,0.12); color: #a8a29e; }
-  .ttc-t2 .ttc-badge { background: rgba(139,92,246,0.15); color: #a78bfa; }
-  .ttc-t3 .ttc-badge { background: rgba(249,200,70,0.15); color: var(--gold); }
-  .ttc-range { font-size: 12px; color: #9D8FD9; margin-bottom: 6px; }
-  .ttc-desc { font-size: 13px; color: #c4b5fd; line-height: 1.5; }
+  .ttc { border-radius: 18px; padding: 24px 22px; border: 1px solid; }
+  .ttc-t1 { background: rgba(120,113,108,0.05); border-color: rgba(120,113,108,0.18); }
+  .ttc-t2 { background: rgba(139,92,246,0.07); border-color: rgba(139,92,246,0.28); }
+  .ttc-t3 { background: rgba(249,200,70,0.05); border-color: rgba(249,200,70,0.28); }
+  .ttc-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .ttc-t1 .ttc-icon { background: rgba(120,113,108,0.1); }
+  .ttc-t2 .ttc-icon { background: rgba(139,92,246,0.12); }
+  .ttc-t3 .ttc-icon { background: rgba(249,200,70,0.12); }
+  .ttc-icon svg { width: 22px; height: 22px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ttc-t1 .ttc-icon svg { stroke: #a8a29e; }
+  .ttc-t2 .ttc-icon svg { stroke: #a78bfa; }
+  .ttc-t3 .ttc-icon svg { stroke: var(--gold); }
+  .ttc-name { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+  .ttc-range { font-size: 11px; color: #9D8FD9; margin-bottom: 10px; }
+  .ttc-desc { font-size: 13px; color: #c4b5fd; line-height: 1.55; }
   /* Comparison */
-  .trust-vs { margin-top: 72px; background: linear-gradient(135deg, rgba(109,40,217,0.2), rgba(139,92,246,0.1)); border: 1px solid rgba(139,92,246,0.25); border-radius: 20px; padding: 40px 48px; display: flex; gap: 48px; align-items: center; }
+  .trust-vs { background: linear-gradient(135deg, rgba(109,40,217,0.18), rgba(139,92,246,0.08)); border: 1px solid rgba(139,92,246,0.22); border-radius: 22px; padding: 44px 52px; display: flex; gap: 52px; align-items: center; }
   .tvs-quote { flex: 1; }
-  .tvs-quote blockquote { font-family: var(--serif); font-style: italic; font-size: 22px; color: #fff; line-height: 1.5; }
+  .tvs-quote blockquote { font-family: var(--serif); font-style: italic; font-size: 21px; color: #fff; line-height: 1.55; }
   .tvs-quote blockquote em { color: var(--gold); font-style: normal; }
   .tvs-quote cite { display: block; margin-top: 14px; font-size: 12px; color: #9D8FD9; font-style: normal; }
-  .tvs-table { min-width: 260px; }
-  .tvs-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 13px; }
+  .tvs-table { min-width: 268px; }
+  .tvs-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 13px; }
   .tvs-row:last-child { border-bottom: none; }
   .tvs-row .tvsr-label { color: #9D8FD9; }
-  .tvsr-vals { display: flex; gap: 12px; }
-  .tvsr-them { color: #6b7280; font-weight: 600; text-decoration: line-through; }
-  .tvsr-us { color: #34D399; font-weight: 700; }
+  .tvsr-vals { display: flex; gap: 16px; align-items: center; }
+  .tvsr-them { display: flex; align-items: center; gap: 4px; color: #4b5563; font-size: 12px; font-weight: 600; }
+  .tvsr-them svg { width: 14px; height: 14px; stroke: #6b7280; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .tvsr-us { display: flex; align-items: center; gap: 4px; color: #34D399; font-size: 12px; font-weight: 700; }
+  .tvsr-us svg { width: 14px; height: 14px; stroke: #34D399; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
   @media (max-width: 700px) {
     .trust-top { grid-template-columns: 1fr; gap: 40px; }
+    .trust-banner { height: auto; }
+    .trust-banner-steps { flex-wrap: wrap; gap: 20px; }
+    .tbs-line { display: none; }
+    .trust-partners-row { grid-template-columns: 1fr 1fr; }
     .trust-flow-grid { grid-template-columns: 1fr; }
     .trust-tier-cards { grid-template-columns: 1fr; }
-    .trust-vs { flex-direction: column; padding: 28px 20px; gap: 28px; }
+    .trust-vs { flex-direction: column; padding: 28px 22px; gap: 28px; }
     .trust-stats { grid-template-columns: 1fr; }
   }
 
@@ -1382,7 +1414,6 @@
       <!-- Top: cert card + copy -->
       <div class="trust-top">
 
-        <!-- Auth certificate mockup -->
         <div class="auth-cert-wrap">
           <div class="auth-cert">
             <div class="auth-cert-header">
@@ -1390,14 +1421,20 @@
               <span class="ach-title">Authentication Certificate</span>
             </div>
             <div class="auth-cert-img">
-              <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=560&h=200&fit=crop" alt="Chanel Classic Flap">
+              <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=560&h=195&fit=crop" alt="Chanel Classic Flap">
               <div class="aci-overlay">
-                <span class="aci-status">PASSED AUTHENTICATION</span>
+                <span class="aci-status">
+                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  PASSED AUTHENTICATION
+                </span>
               </div>
             </div>
             <div class="auth-cert-body">
               <div class="auth-cert-item">Chanel Classic Flap · Beige</div>
-              <div class="auth-cert-partner">🛡 Authenticate Plus · Independent Specialist</div>
+              <div class="auth-cert-partner">
+                <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Authenticate Plus · Independent Specialist
+              </div>
               <div class="auth-cert-rows">
                 <div class="acr"><div class="acr-label">Certificate</div><div class="acr-val">AP-2026-004821</div></div>
                 <div class="acr"><div class="acr-label">Inspected</div><div class="acr-val">18 Jun 2026</div></div>
@@ -1407,13 +1444,12 @@
               <div class="auth-cert-verdict">Hardware, stitching, date code and serial number all consistent with authentic example. Materials confirmed genuine lambskin.</div>
               <div class="auth-cert-footer">
                 <div class="acf-cert"><span>Verification ref</span><strong>AP-2026-004821</strong></div>
-                <div class="acf-shield">🛡</div>
+                <div class="acf-shield"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Copy -->
         <div class="trust-copy">
           <div class="eyebrow">Trust &amp; Authentication</div>
           <h2 class="section-title on-dark">Every item verified.<br>Every winner protected.</h2>
@@ -1427,41 +1463,108 @@
 
       </div>
 
-      <!-- Partner logos -->
-      <div class="trust-partners">
-        <div class="trust-partners-label">Our authentication partners</div>
-        <div class="trust-partners-row">
-          <div class="tp-pill"><div class="tp-dot" style="background:#818cf8;"></div><div><div class="tp-name">Authenticate Plus</div><div class="tp-cat">Handbags &amp; leather goods</div></div></div>
-          <div class="tp-pill"><div class="tp-dot" style="background:#34d399;"></div><div><div class="tp-name">LEGIT APP</div><div class="tp-cat">Trainers &amp; streetwear</div></div></div>
-          <div class="tp-pill"><div class="tp-dot" style="background:#f9c846;"></div><div><div class="tp-name">WatchCertify</div><div class="tp-cat">Watches &amp; jewellery</div></div></div>
-          <div class="tp-pill"><div class="tp-dot" style="background:#f472b6;"></div><div><div class="tp-name">Real Authentication</div><div class="tp-cat">All categories backup</div></div></div>
+      <!-- Inspection photo banner with process overlay -->
+      <div class="trust-banner">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&h=340&fit=crop" alt="Authentication in process">
+        <div class="trust-banner-overlay">
+          <div class="trust-banner-label">What happens after the draw closes</div>
+          <div class="trust-banner-steps">
+            <div class="tbs-node">
+              <div class="tbs-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+              <div class="tbs-label">Draw closes</div>
+              <div class="tbs-sub">9pm nightly</div>
+            </div>
+            <div class="tbs-line"></div>
+            <div class="tbs-node">
+              <div class="tbs-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+              <div class="tbs-label">Seller ships</div>
+              <div class="tbs-sub">Within 48 hours</div>
+            </div>
+            <div class="tbs-line"></div>
+            <div class="tbs-node">
+              <div class="tbs-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div class="tbs-label">Expert inspects</div>
+              <div class="tbs-sub">24–48h physical check</div>
+            </div>
+            <div class="tbs-line"></div>
+            <div class="tbs-node">
+              <div class="tbs-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <div class="tbs-label">Verdict</div>
+              <div class="tbs-sub" style="text-align:left;">
+                <div class="tbs-split">
+                  <div class="tbs-outcome"><div class="tbs-dot" style="background:#34D399;"></div><span class="tbs-outcome-label" style="color:#34D399;">Pass → item ships to you</span></div>
+                  <div class="tbs-outcome"><div class="tbs-dot" style="background:#F472B6;"></div><span class="tbs-outcome-label" style="color:#F472B6;">Fail → cash paid in 24h</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Two-path flow -->
+      <!-- Partner cards -->
+      <div class="trust-partners">
+        <div class="trust-partners-label">Our independent authentication partners</div>
+        <div class="trust-partners-row">
+          <div class="tp-card">
+            <div class="tp-icon" style="background:rgba(129,140,248,0.12);">
+              <svg viewBox="0 0 24 24" style="stroke:#818cf8;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div><div class="tp-name">Authenticate Plus</div><div class="tp-cat">Handbags &amp; leather goods</div></div>
+          </div>
+          <div class="tp-card">
+            <div class="tp-icon" style="background:rgba(52,211,153,0.12);">
+              <svg viewBox="0 0 24 24" style="stroke:#34d399;"><path d="M17.5 12c0 4.14-3.58 7.5-8 7.5S1.5 16.14 1.5 12 5.08 4.5 9.5 4.5"/><polyline points="22 2 13 11"/><polyline points="22 2 16 2 22 8"/></svg>
+            </div>
+            <div><div class="tp-name">LEGIT APP</div><div class="tp-cat">Trainers &amp; streetwear</div></div>
+          </div>
+          <div class="tp-card">
+            <div class="tp-icon" style="background:rgba(249,200,70,0.12);">
+              <svg viewBox="0 0 24 24" style="stroke:#f9c846;"><circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"/></svg>
+            </div>
+            <div><div class="tp-name">WatchCertify</div><div class="tp-cat">Watches &amp; jewellery</div></div>
+          </div>
+          <div class="tp-card">
+            <div class="tp-icon" style="background:rgba(244,114,182,0.12);">
+              <svg viewBox="0 0 24 24" style="stroke:#f472b6;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </div>
+            <div><div class="tp-name">Real Authentication</div><div class="tp-cat">All categories backup</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed two-path flow -->
       <div class="trust-flow">
-        <div class="trust-flow-title">What happens after the draw closes</div>
+        <div class="trust-flow-title">Step-by-step — what you can expect</div>
         <div class="trust-flow-grid">
+
           <div class="tflow-col tflow-col-pass">
-            <div class="tflow-header">✓ Item passes authentication</div>
+            <div class="tflow-header">
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Item passes authentication
+            </div>
             <div class="tflow-steps">
-              <div class="tflow-step"><div class="tsnum">1</div><div><div class="tst">Seller ships within 48h</div><div class="tss">DRAWN provides a prepaid tracked label</div></div></div>
-              <div class="tflow-step"><div class="tsnum">2</div><div><div class="tst">Expert inspection</div><div class="tss">Physical check of materials, hardware, serial numbers — 24–48h</div></div></div>
-              <div class="tflow-step"><div class="tsnum">3</div><div><div class="tst">Certificate issued</div><div class="tss">Digital cert published on your draw listing with specialist's name</div></div></div>
-              <div class="tflow-step"><div class="tsnum">4</div><div><div class="tst">Item ships to you</div><div class="tss">Direct from auth partner. Tracked, signature required</div></div></div>
-              <div class="tflow-step"><div class="tsnum">5</div><div><div class="tst">Seller gets paid</div><div class="tss">Escrow releases 48h after you confirm delivery</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div><div class="tst">Seller ships within 48h</div><div class="tss">DRAWN provides a prepaid tracked label to the auth partner</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="tst">Expert physical inspection</div><div class="tss">Materials, hardware, serial numbers, stitching — 24 to 48 hours</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div><div class="tst">Certificate issued &amp; published</div><div class="tss">Cert number and specialist name visible on your draw listing</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="tst">Item ships direct to you</div><div class="tss">From auth partner. Tracked and signature required</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div><div class="tst">Escrow releases to seller</div><div class="tss">48 hours after you confirm delivery. Drawn takes 12%</div></div></div>
             </div>
           </div>
+
           <div class="tflow-col tflow-col-fail">
-            <div class="tflow-header">✗ Item fails authentication</div>
+            <div class="tflow-header">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Item fails authentication
+            </div>
             <div class="tflow-steps">
-              <div class="tflow-step"><div class="tsnum">1</div><div><div class="tst">Specialist flags failure</div><div class="tss">Certificate of failure issued. Item returned to seller at their cost</div></div></div>
-              <div class="tflow-step"><div class="tsnum">2</div><div><div class="tst">Penalty executes automatically</div><div class="tss">Escrow never released. Seller's entire payout is forfeited</div></div></div>
-              <div class="tflow-step"><div class="tsnum">3</div><div><div class="tst">You get paid in cash</div><div class="tss">Full prize pool paid to your wallet within 24 hours</div></div></div>
-              <div class="tflow-step"><div class="tsnum">4</div><div><div class="tst">Seller permanently banned</div><div class="tss">KYC identity on file. No payout, deposit forfeited, account closed</div></div></div>
-              <div class="tflow-step"><div class="tsnum">5</div><div><div class="tst">You never wait</div><div class="tss">Payout message: "The item failed our check. You've been paid £X."</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="tst">Specialist flags failure</div><div class="tss">Certificate of failure issued. Item returned to seller at their cost</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><div><div class="tst">Penalty executes automatically</div><div class="tss">Escrow never released. Seller forfeits their entire payout</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="tst">You receive cash within 24h</div><div class="tss">Full prize pool to your wallet. Not a refund — a payout</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a8 8 0 0 0-16 0v2"/><line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/></svg></div><div><div class="tst">Seller permanently banned</div><div class="tss">ID verified via KYC. Deposit forfeited, account closed permanently</div></div></div>
+              <div class="tflow-step"><div class="ts-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="tst">You're notified immediately</div><div class="tss">"The item failed our check. You've been paid £X." Done.</div></div></div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -1470,19 +1573,28 @@
         <div class="trust-tiers-label">Three levels of verification — every draw gets at least one</div>
         <div class="trust-tier-cards">
           <div class="ttc ttc-t1">
-            <div class="ttc-badge">✓ Condition Verified</div>
+            <div class="ttc-icon">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="ttc-name">Condition Verified</div>
             <div class="ttc-range">Items under £200</div>
-            <div class="ttc-desc">Photo condition check against listing. No cost to seller. Badge issued immediately.</div>
+            <div class="ttc-desc">Photo condition check against listing. No cost to seller. Badge issued immediately on listing approval.</div>
           </div>
           <div class="ttc ttc-t2">
-            <div class="ttc-badge">🛡 Authenticated</div>
+            <div class="ttc-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="ttc-name">Authenticated</div>
             <div class="ttc-range">£200 – £1,000</div>
-            <div class="ttc-desc">Physical expert inspection. Digital certificate with partner name published on listing.</div>
+            <div class="ttc-desc">Physical expert inspection. Digital certificate with partner name and inspection notes published on listing.</div>
           </div>
           <div class="ttc ttc-t3">
-            <div class="ttc-badge">⭐ Premium Authenticated</div>
-            <div class="ttc-range">£1,000+</div>
-            <div class="ttc-desc">Full inspection with provenance record. Cert number, specialist name, and inspection photos all public. Mandatory.</div>
+            <div class="ttc-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </div>
+            <div class="ttc-name">Premium Authenticated</div>
+            <div class="ttc-range">£1,000 and above</div>
+            <div class="ttc-desc">Full provenance record. Certificate number, specialist name, and inspection photos all public. Mandatory at this tier.</div>
           </div>
         </div>
       </div>
@@ -1494,10 +1606,34 @@
           <cite>— DRAWN Authentication Brief, 2026</cite>
         </div>
         <div class="tvs-table">
-          <div class="tvs-row"><span class="tvsr-label">Physical inspection</span><div class="tvsr-vals"><span class="tvsr-them">Vinted ✗</span><span class="tvsr-us">DRAWN ✓</span></div></div>
-          <div class="tvs-row"><span class="tvsr-label">Independent expert</span><div class="tvsr-vals"><span class="tvsr-them">eBay ✗</span><span class="tvsr-us">DRAWN ✓</span></div></div>
-          <div class="tvs-row"><span class="tvsr-label">Cash payout if fake</span><div class="tvsr-vals"><span class="tvsr-them">StockX ✗</span><span class="tvsr-us">DRAWN ✓</span></div></div>
-          <div class="tvs-row"><span class="tvsr-label">Fraud penalty built in</span><div class="tvsr-vals"><span class="tvsr-them">Depop ✗</span><span class="tvsr-us">DRAWN ✓</span></div></div>
+          <div class="tvs-row">
+            <span class="tvsr-label">Physical inspection</span>
+            <div class="tvsr-vals">
+              <span class="tvsr-them"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Vinted</span>
+              <span class="tvsr-us"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>DRAWN</span>
+            </div>
+          </div>
+          <div class="tvs-row">
+            <span class="tvsr-label">Independent expert</span>
+            <div class="tvsr-vals">
+              <span class="tvsr-them"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>eBay</span>
+              <span class="tvsr-us"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>DRAWN</span>
+            </div>
+          </div>
+          <div class="tvs-row">
+            <span class="tvsr-label">Cash payout if fake</span>
+            <div class="tvsr-vals">
+              <span class="tvsr-them"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>StockX</span>
+              <span class="tvsr-us"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>DRAWN</span>
+            </div>
+          </div>
+          <div class="tvs-row">
+            <span class="tvsr-label">Fraud penalty built in</span>
+            <div class="tvsr-vals">
+              <span class="tvsr-them"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Depop</span>
+              <span class="tvsr-us"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>DRAWN</span>
+            </div>
+          </div>
         </div>
       </div>
 
