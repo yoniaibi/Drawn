@@ -3,694 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRAWN Admin</title>
+<title>Drawn Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --violet: #2D1B69;
-    --royal: #6D28D9;
-    --lilac: #8B5CF6;
-    --pink: #F472B6;
-    --gold: #F9C846;
-    --ink: #1A1040;
-    --bg: #0F0A1E;
-    --card: #1A1040;
-    --border: rgba(255,255,255,0.08);
-    --text: #E8E0FF;
-    --muted: rgba(255,255,255,0.45);
-    --sidebar-w: 220px;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ===== AUTH GATE ===== */
-  #auth-gate {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9999;
-    background-image: radial-gradient(ellipse at 30% 20%, rgba(109,40,217,0.25) 0%, transparent 60%),
-                      radial-gradient(ellipse at 70% 80%, rgba(244,114,182,0.12) 0%, transparent 60%);
-  }
-
-  #auth-gate.hidden { display: none; }
-
-  .auth-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-  }
-
-  .auth-logo {
-    font-family: Georgia, serif;
-    font-size: 36px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 4px;
-    margin-bottom: 8px;
-  }
-
-  .auth-subtitle {
-    color: var(--muted);
-    font-size: 14px;
-    margin-bottom: 32px;
-  }
-
-  .auth-box input[type="password"] {
-    width: 100%;
-    padding: 14px 18px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 12px;
-  }
-
-  .auth-box input[type="password"]:focus {
-    border-color: var(--lilac);
-  }
-
-  .auth-error {
-    color: var(--pink);
-    font-size: 13px;
-    margin-bottom: 12px;
-    min-height: 18px;
-  }
-
-  .btn-primary {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, var(--royal), var(--lilac));
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-
-  .btn-primary:hover { opacity: 0.9; }
-  .btn-primary:active { transform: scale(0.98); }
-
-  /* ===== APP LAYOUT ===== */
-  #app { display: none; min-height: 100vh; }
-  #app.visible { display: flex; }
-
-  /* ===== SIDEBAR ===== */
-  #sidebar {
-    width: var(--sidebar-w);
-    min-height: 100vh;
-    background: var(--card);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    z-index: 100;
-  }
-
-  .sidebar-header {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo-text {
-    font-family: Georgia, serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 3px;
-  }
-
-  .admin-badge {
-    display: inline-block;
-    background: var(--lilac);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    margin-left: 6px;
-    vertical-align: middle;
-    text-transform: uppercase;
-  }
-
-  .sidebar-nav {
-    flex: 1;
-    padding: 16px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.15s;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-  }
-
-  .nav-item:hover { background: rgba(139,92,246,0.12); color: var(--text); }
-  .nav-item.active { background: rgba(139,92,246,0.2); color: var(--lilac); }
-
-  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-
-  .sidebar-footer {
-    padding: 16px 12px;
-    border-top: 1px solid var(--border);
-  }
-
-  .btn-logout {
-    width: 100%;
-    padding: 10px 12px;
-    background: rgba(244,114,182,0.1);
-    border: 1px solid rgba(244,114,182,0.2);
-    border-radius: 10px;
-    color: var(--pink);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-logout:hover { background: rgba(244,114,182,0.18); }
-
-  /* ===== MAIN CONTENT ===== */
-  #main {
-    margin-left: var(--sidebar-w);
-    flex: 1;
-    padding: 32px 36px;
-    min-height: 100vh;
-    background-image: radial-gradient(ellipse at 80% 10%, rgba(109,40,217,0.1) 0%, transparent 50%);
-  }
-
-  .section { display: none; }
-  .section.active { display: block; }
-
-  .section-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 24px;
-  }
-
-  /* ===== STAT CARDS ===== */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 22px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--royal), var(--lilac));
-  }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-  }
-
-  .stat-card.pink::before { background: linear-gradient(90deg, var(--pink), #f9a8d4); }
-  .stat-card.gold::before { background: linear-gradient(90deg, var(--gold), #fde68a); }
-  .stat-card.green::before { background: linear-gradient(90deg, #10b981, #6ee7b7); }
-
-  /* ===== TABLE ===== */
-  .table-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-  }
-
-  .table-header {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .table-header h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-  }
-
-  .refresh-btn {
-    background: rgba(139,92,246,0.15);
-    border: 1px solid rgba(139,92,246,0.3);
-    border-radius: 8px;
-    color: var(--lilac);
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .refresh-btn:hover { background: rgba(139,92,246,0.25); }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  thead th {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.12s;
-  }
-
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.025); }
-
-  td {
-    padding: 14px 16px;
-    font-size: 14px;
-    vertical-align: middle;
-  }
-
-  /* ===== BADGES ===== */
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .badge-open { background: rgba(139,92,246,0.2); color: var(--lilac); border: 1px solid rgba(139,92,246,0.3); }
-  .badge-closing { background: rgba(244,114,182,0.2); color: var(--pink); border: 1px solid rgba(244,114,182,0.3); }
-  .badge-completed { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-  .badge-cancelled { background: rgba(255,255,255,0.08); color: var(--muted); border: 1px solid var(--border); }
-  .badge-seller { background: rgba(249,200,70,0.15); color: var(--gold); border: 1px solid rgba(249,200,70,0.3); }
-
-  /* ===== FILL BAR ===== */
-  .fill-wrap { width: 100px; }
-  .fill-bar-bg {
-    height: 6px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 3px;
-  }
-
-  .fill-bar-inner {
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, var(--royal), var(--lilac));
-    transition: width 0.4s;
-  }
-
-  .fill-bar-inner.high { background: linear-gradient(90deg, var(--pink), #f9a8d4); }
-
-  .fill-pct {
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  /* ===== PICK WINNER BTN ===== */
-  .btn-pick {
-    padding: 7px 14px;
-    background: linear-gradient(135deg, var(--royal), var(--lilac));
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-pick:hover { opacity: 0.85; }
-
-  .btn-pick:disabled {
-    background: rgba(255,255,255,0.08);
-    color: var(--muted);
-    cursor: not-allowed;
-    opacity: 1;
-  }
-
-  /* ===== AVATAR LETTER ===== */
-  .avatar-letter {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--royal), var(--lilac));
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-right: 10px;
-    flex-shrink: 0;
-  }
-
-  .user-row-inner {
-    display: flex;
-    align-items: center;
-  }
-
-  /* ===== SETTINGS ===== */
-  .settings-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 16px;
-    max-width: 580px;
-  }
-
-  .settings-card h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 6px;
-  }
-
-  .settings-card p {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  .settings-input-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .settings-input {
-    flex: 1;
-    padding: 11px 14px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    color: #fff;
-    font-size: 13px;
-    font-family: monospace;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .settings-input:focus { border-color: var(--lilac); }
-
-  .btn-save {
-    padding: 11px 20px;
-    background: var(--lilac);
-    border: none;
-    border-radius: 9px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-save:hover { opacity: 0.85; }
-
-  .btn-clear {
-    padding: 11px 16px;
-    background: rgba(244,114,182,0.1);
-    border: 1px solid rgba(244,114,182,0.2);
-    border-radius: 9px;
-    color: var(--pink);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-clear:hover { background: rgba(244,114,182,0.18); }
-
-  .key-status {
-    margin-top: 12px;
-    font-size: 13px;
-  }
-
-  .key-status.ok { color: #34d399; }
-  .key-status.missing { color: var(--pink); }
-
-  /* ===== EMPTY / LOADING ===== */
-  .loading-row td {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
-  }
-
-  .spinner {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(139,92,246,0.3);
-    border-top-color: var(--lilac);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-state {
-    text-align: center;
-    padding: 48px 24px;
-    color: var(--muted);
-    font-size: 14px;
-  }
-
-  /* ===== WINNER MODAL ===== */
-  #winner-modal {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(6px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9000;
-  }
-
-  #winner-modal.open { display: flex; }
-
-  .modal-box {
-    background: var(--card);
-    border: 1px solid rgba(139,92,246,0.4);
-    border-radius: 20px;
-    padding: 40px 36px;
-    max-width: 440px;
-    width: 90%;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 80px rgba(139,92,246,0.15);
-    animation: pop-in 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
-  }
-
-  @keyframes pop-in {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-
-  .modal-emoji { font-size: 56px; margin-bottom: 12px; }
-
-  .modal-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 6px;
-  }
-
-  .modal-draw-name {
-    font-size: 14px;
-    color: var(--muted);
-    margin-bottom: 24px;
-  }
-
-  .winner-handle {
-    display: inline-block;
-    font-size: 28px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--lilac), var(--pink));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 24px;
-  }
-
-  .btn-close-modal {
-    padding: 12px 28px;
-    background: linear-gradient(135deg, var(--royal), var(--lilac));
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-
-  .btn-close-modal:hover { opacity: 0.85; }
-
-  /* ===== CONFETTI CANVAS ===== */
-  #confetti-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 8999;
-    display: none;
-  }
-
-  #confetti-canvas.active { display: block; }
-
-  /* ===== TOOLTIP ===== */
-  [data-tooltip] {
-    position: relative;
-  }
-
-  [data-tooltip]:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(26,16,64,0.95);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 11px;
-    padding: 5px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 100;
-  }
-
-  /* ===== ALERT TOAST ===== */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 14px;
-    color: var(--text);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    z-index: 9998;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s;
-    max-width: 320px;
-  }
-
-  #toast.show {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  #toast.success { border-color: rgba(16,185,129,0.4); }
-  #toast.error { border-color: rgba(244,114,182,0.4); }
-
-  .draw-title-cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .draw-emoji { font-size: 20px; }
-
-  .draw-name { font-weight: 500; color: #fff; font-size: 14px; }
-  .draw-seller { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* ===== SCROLLBAR ===== */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--violet:#2D1B69;--royal:#6D28D9;--lilac:#8B5CF6;--pink:#F472B6;--gold:#F9C846;--ink:#1A1040;--bg:#0F0A1E;--card:#1A1040;--border:rgba(255,255,255,0.08)}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:#E5E7EB;min-height:100vh}
+
+/* GATE */
+#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;background-image:radial-gradient(ellipse at 30% 20%,rgba(109,40,217,.2) 0%,transparent 60%)}
+#gate.hidden{display:none}
+.gate-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:380px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.gate-logo{font-family:'Playfair Display',serif;font-size:2.2rem;color:#fff;letter-spacing:2px;margin-bottom:4px}
+.gate-logo span{color:var(--lilac)}
+.gate-sub{color:rgba(255,255,255,.45);font-size:.85rem;margin-bottom:28px}
+.gate-box input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:#fff;font-size:1rem;outline:none;margin-bottom:10px;transition:border .2s}
+.gate-box input:focus{border-color:var(--lilac)}
+.gate-error{color:var(--pink);font-size:.82rem;min-height:18px;margin-bottom:10px}
+.btn-gate{width:100%;background:linear-gradient(135deg,var(--royal),var(--lilac));border:none;border-radius:10px;color:#fff;padding:14px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-gate:hover{opacity:.88}
+
+/* APP */
+#app{display:none;min-height:100vh}
+#app.show{display:flex}
+
+/* SIDEBAR */
+#sidebar{width:220px;min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:50}
+.sb-logo{padding:26px 20px 20px;border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-size:1.25rem;color:#fff;letter-spacing:2px}
+.sb-logo span{color:var(--lilac);font-size:.7rem;font-family:'Inter',sans-serif;font-weight:700;background:var(--lilac);color:#fff;border-radius:20px;padding:2px 8px;margin-left:6px;letter-spacing:.5px;text-transform:uppercase;vertical-align:middle}
+nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:none;background:none;color:rgba(255,255,255,.45);font-size:.875rem;font-weight:500;cursor:pointer;width:100%;text-align:left;transition:all .15s}
+.nav-btn:hover{background:rgba(139,92,246,.12);color:#fff}
+.nav-btn.active{background:rgba(139,92,246,.2);color:var(--lilac)}
+.nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.btn-logout{width:100%;padding:10px 12px;background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.2);border-radius:10px;color:var(--pink);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .15s;text-align:left;display:flex;align-items:center;gap:8px}
+.btn-logout:hover{background:rgba(244,114,182,.16)}
+
+/* MAIN */
+#main{margin-left:220px;flex:1;padding:34px 38px;min-height:100vh;background-image:radial-gradient(ellipse at 80% 5%,rgba(109,40,217,.08) 0%,transparent 50%)}
+.section{display:none}.section.active{display:block}
+.page-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:#fff;margin-bottom:24px}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--royal),var(--lilac))}
+.stat-card.c-pink::before{background:linear-gradient(90deg,var(--pink),#f9a8d4)}
+.stat-card.c-gold::before{background:linear-gradient(90deg,var(--gold),#fde68a)}
+.stat-card.c-green::before{background:linear-gradient(90deg,#10b981,#6ee7b7)}
+.stat-label{font-size:.72rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.stat-value{font-size:2rem;font-weight:700;color:#fff;line-height:1}
+
+/* TABLE */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.table-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-head h3{font-size:.95rem;font-weight:600;color:#fff}
+.btn-refresh{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:8px;color:var(--lilac);padding:6px 14px;font-size:.8rem;cursor:pointer;transition:all .15s}
+.btn-refresh:hover{background:rgba(139,92,246,.25)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:12px 16px;text-align:left;font-size:.7rem;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td{padding:13px 16px;font-size:.875rem;vertical-align:middle}
+.empty-row td{text-align:center;color:rgba(255,255,255,.35);padding:40px}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.b-open{background:rgba(139,92,246,.2);color:var(--lilac);border:1px solid rgba(139,92,246,.3)}
+.b-closing{background:rgba(244,114,182,.2);color:var(--pink);border:1px solid rgba(244,114,182,.3)}
+.b-completed{background:rgba(16,185,129,.18);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.b-cancelled{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border:1px solid var(--border)}
+.b-seller{background:rgba(249,200,70,.12);color:var(--gold);border:1px solid rgba(249,200,70,.3)}
+
+/* FILL BAR */
+.fill-wrap{min-width:90px}
+.fill-bg{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.fill-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--royal),var(--lilac));transition:width .4s}
+.fill-bar.high{background:linear-gradient(90deg,var(--pink),#f9a8d4)}
+.fill-pct{font-size:.7rem;color:rgba(255,255,255,.4)}
+
+/* PICK WINNER BUTTON */
+.btn-pick{padding:6px 13px;background:linear-gradient(135deg,var(--royal),var(--lilac));border:none;border-radius:8px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.btn-pick:hover{opacity:.85}
+.btn-pick:disabled{background:rgba(255,255,255,.08);color:rgba(255,255,255,.3);cursor:not-allowed;opacity:1}
+.dash-cell{color:rgba(255,255,255,.25);font-size:.8rem}
+
+/* AVATAR */
+.av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--royal),var(--lilac));color:#fff;font-size:.85rem;font-weight:700;text-transform:uppercase;flex-shrink:0}
+.user-cell{display:flex;align-items:center;gap:10px}
+.user-name{font-weight:500;color:#fff;font-size:.875rem}
+.user-id{font-size:.7rem;color:rgba(255,255,255,.3);font-family:monospace}
+
+/* SETTINGS */
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;max-width:580px;margin-bottom:16px}
+.settings-card h3{font-size:.95rem;font-weight:600;color:#fff;margin-bottom:6px}
+.settings-card p{font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:16px;line-height:1.55}
+.input-row{display:flex;gap:10px;align-items:center}
+.svc-input-wrap{position:relative;flex:1}
+.svc-input{width:100%;padding:11px 42px 11px 13px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;color:#fff;font-size:.82rem;font-family:monospace;outline:none;transition:border .2s}
+.svc-input:focus{border-color:var(--lilac)}
+.vis-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;line-height:0;padding:2px}
+.vis-btn:hover{color:#fff}
+.btn-save{padding:11px 18px;background:var(--lilac);border:none;border-radius:9px;color:#fff;font-size:.82rem;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.btn-save:hover{opacity:.85}
+.btn-clear{padding:11px 14px;background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.2);border-radius:9px;color:var(--pink);font-size:.82rem;cursor:pointer;white-space:nowrap;transition:all .15s}
+.btn-clear:hover{background:rgba(244,114,182,.16)}
+.key-status{margin-top:12px;font-size:.82rem}
+.key-ok{color:#34d399}.key-missing{color:var(--pink)}
+
+/* USERS GATE */
+.users-gate{text-align:center;padding:48px 24px;color:rgba(255,255,255,.4)}
+.users-gate .icon{font-size:2.5rem;margin-bottom:12px}
+
+/* WINNER MODAL */
+#winner-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:8000}
+#winner-modal.open{display:flex}
+.modal-box{background:var(--card);border:1px solid rgba(139,92,246,.4);border-radius:20px;padding:40px 36px;max-width:460px;width:92%;text-align:center;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 80px rgba(139,92,246,.12);animation:pop-in .3s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes pop-in{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.1rem;cursor:pointer;line-height:1;padding:4px}
+.modal-close:hover{color:#fff}
+.modal-step{min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.modal-spinner{width:40px;height:40px;border:3px solid rgba(139,92,246,.3);border-top-color:var(--lilac);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal-step-label{color:rgba(255,255,255,.5);font-size:.85rem}
+.winner-emoji{font-size:3.5rem}
+.winner-handle{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--lilac),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:8px 0}
+.winner-sub{font-size:.82rem;color:rgba(255,255,255,.4)}
+.modal-actions{display:flex;gap:10px;justify-content:center;margin-top:24px}
+.btn-confirm{padding:12px 26px;background:linear-gradient(135deg,var(--royal),var(--lilac));border:none;border-radius:10px;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.btn-confirm:hover{opacity:.85}
+.btn-cancel{padding:12px 20px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:rgba(255,255,255,.6);font-size:.95rem;cursor:pointer;transition:all .15s}
+.btn-cancel:hover{color:#fff;border-color:rgba(255,255,255,.3)}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;margin-bottom:20px}
+.modal-error{color:var(--pink);font-size:.875rem;max-width:280px}
+
+/* CONFETTI */
+#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:7999;display:none}
+#confetti-canvas.active{display:block}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px 18px;font-size:.875rem;color:#E5E7EB;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9990;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{border-color:rgba(16,185,129,.4)}
+#toast.err{border-color:rgba(244,114,182,.4)}
+
+/* SPINNER ROW */
+.spin-row td{text-align:center;padding:40px;color:rgba(255,255,255,.35)}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(139,92,246,.3);border-top-color:var(--lilac);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
 </style>
 </head>
 <body>
 
-<!-- AUTH GATE -->
-<div id="auth-gate">
-  <div class="auth-box">
-    <div class="auth-logo">DRAWN</div>
-    <div class="auth-subtitle">Admin Panel — Authorised Access Only</div>
-    <input type="password" id="password-input" placeholder="Enter admin password" autocomplete="current-password" />
-    <div class="auth-error" id="auth-error"></div>
-    <button class="btn-primary" onclick="login()">Sign In</button>
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">drawn<span>admin</span></div>
+    <div class="gate-sub">Authorised access only</div>
+    <input type="password" id="pw" placeholder="Admin password" autocomplete="current-password">
+    <div class="gate-error" id="gate-error"></div>
+    <button class="btn-gate" onclick="login()">Sign In</button>
   </div>
 </div>
 
@@ -700,153 +176,98 @@
 <!-- WINNER MODAL -->
 <div id="winner-modal">
   <div class="modal-box">
-    <div class="modal-emoji">🎉</div>
-    <div class="modal-title">We Have a Winner!</div>
-    <div class="modal-draw-name" id="modal-draw-name"></div>
-    <div class="winner-handle" id="modal-winner-handle"></div>
-    <br>
-    <button class="btn-close-modal" onclick="closeWinnerModal()">Done</button>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title">Pick winner</div>
+    <div class="modal-step" id="modal-step">
+      <div class="modal-spinner"></div>
+      <div class="modal-step-label">Loading…</div>
+    </div>
+    <div class="modal-actions" id="modal-actions"></div>
   </div>
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app">
+  <div id="sidebar">
+    <div class="sb-logo">drawn<span>admin</span></div>
+    <nav>
+      <button class="nav-btn active" data-sec="dashboard" onclick="go('dashboard')">
+        <span class="nav-icon">📊</span>Dashboard
+      </button>
+      <button class="nav-btn" data-sec="draws" onclick="go('draws')">
+        <span class="nav-icon">🎟️</span>Draws
+      </button>
+      <button class="nav-btn" data-sec="users" onclick="go('users')">
+        <span class="nav-icon">👤</span>Users
+      </button>
+      <button class="nav-btn" data-sec="settings" onclick="go('settings')">
+        <span class="nav-icon">⚙️</span>Settings
+      </button>
+    </nav>
+    <div class="sb-foot">
+      <button class="btn-logout" onclick="logout()"><span>🚪</span>Sign out</button>
+    </div>
+  </div>
 
-  <!-- SIDEBAR -->
-  <nav id="sidebar">
-    <div class="sidebar-header">
-      <span class="logo-text">DRAWN</span><span class="admin-badge">Admin</span>
-    </div>
-    <div class="sidebar-nav">
-      <button class="nav-item active" data-section="dashboard" onclick="loadSection('dashboard')">
-        <span class="nav-icon">📊</span> Dashboard
-      </button>
-      <button class="nav-item" data-section="draws" onclick="loadSection('draws')">
-        <span class="nav-icon">🎟️</span> Draws
-      </button>
-      <button class="nav-item" data-section="users" onclick="loadSection('users')">
-        <span class="nav-icon">👤</span> Users
-      </button>
-      <button class="nav-item" data-section="applications" onclick="loadSection('applications')">
-        <span class="nav-icon">📋</span> Applications
-      </button>
-      <button class="nav-item" data-section="settings" onclick="loadSection('settings')">
-        <span class="nav-icon">⚙️</span> Settings
-      </button>
-    </div>
-    <div class="sidebar-footer">
-      <button class="btn-logout" onclick="logout()">
-        <span>🚪</span> Sign Out
-      </button>
-    </div>
-  </nav>
-
-  <!-- MAIN CONTENT -->
   <main id="main">
 
     <!-- DASHBOARD -->
-    <section id="section-dashboard" class="section active">
-      <div class="section-title">Dashboard</div>
+    <section id="sec-dashboard" class="section active">
+      <div class="page-title">Dashboard</div>
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total Draws</div>
-          <div class="stat-value" id="stat-total">—</div>
-        </div>
-        <div class="stat-card pink">
-          <div class="stat-label">Open Draws</div>
-          <div class="stat-value" id="stat-open">—</div>
-        </div>
-        <div class="stat-card gold">
-          <div class="stat-label">Closing Tonight</div>
-          <div class="stat-value" id="stat-closing">—</div>
-        </div>
-        <div class="stat-card green">
-          <div class="stat-label">Tickets Sold</div>
-          <div class="stat-value" id="stat-tickets">—</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Total Draws</div><div class="stat-value" id="s-total">—</div></div>
+        <div class="stat-card c-pink"><div class="stat-label">Open Draws</div><div class="stat-value" id="s-open">—</div></div>
+        <div class="stat-card c-gold"><div class="stat-label">Closing Tonight</div><div class="stat-value" id="s-closing">—</div></div>
+        <div class="stat-card c-green"><div class="stat-label">Tickets Sold</div><div class="stat-value" id="s-tickets">—</div></div>
       </div>
-
       <div class="table-wrap">
-        <div class="table-header">
-          <h3>Recent Draws</h3>
-          <button class="refresh-btn" onclick="fetchDraws(true)">↻ Refresh</button>
-        </div>
-        <div id="dashboard-draws-container">
-          <div class="empty-state"><span class="spinner"></span> Loading...</div>
-        </div>
+        <div class="table-head"><h3>Recent Draws</h3><button class="btn-refresh" onclick="loadDashboard()">↻ Refresh</button></div>
+        <div id="dash-draws"></div>
       </div>
     </section>
 
     <!-- DRAWS -->
-    <section id="section-draws" class="section">
-      <div class="section-title">Draws</div>
+    <section id="sec-draws" class="section">
+      <div class="page-title">Draws</div>
       <div class="table-wrap">
-        <div class="table-header">
-          <h3>All Draws</h3>
-          <button class="refresh-btn" onclick="fetchDraws()">↻ Refresh</button>
-        </div>
-        <div id="draws-container">
-          <div class="empty-state"><span class="spinner"></span> Loading...</div>
-        </div>
+        <div class="table-head"><h3>All Draws</h3><button class="btn-refresh" onclick="loadDraws()">↻ Refresh</button></div>
+        <div id="draws-cont"></div>
       </div>
     </section>
 
     <!-- USERS -->
-    <section id="section-users" class="section">
-      <div class="section-title">Users</div>
-      <div id="users-gate-msg" style="display:none" class="empty-state" style="padding:32px">
-        <div style="font-size:32px;margin-bottom:12px">🔑</div>
-        Service key required to view all users. Paste it in Settings.
+    <section id="sec-users" class="section">
+      <div class="page-title">Users</div>
+      <div id="users-gate" class="users-gate" style="display:none">
+        <div class="icon">🔑</div>
+        Paste your service role key in <strong>Settings</strong> to view all users.
       </div>
-      <div class="table-wrap" id="users-table-wrap">
-        <div class="table-header">
-          <h3>All Users</h3>
-          <button class="refresh-btn" onclick="fetchUsers()">↻ Refresh</button>
-        </div>
-        <div id="users-container">
-          <div class="empty-state"><span class="spinner"></span> Loading...</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- APPLICATIONS -->
-    <section id="section-applications" class="section">
-      <div class="section-title">Seller Applications</div>
-      <div class="table-wrap">
-        <div class="table-header">
-          <h3>Applications</h3>
-          <button class="refresh-btn" onclick="fetchApplications()">↻ Refresh</button>
-        </div>
-        <div id="applications-container">
-          <div class="empty-state"><span class="spinner"></span> Loading...</div>
-        </div>
+      <div class="table-wrap" id="users-wrap">
+        <div class="table-head"><h3>All Users</h3><button class="btn-refresh" onclick="loadUsers()">↻ Refresh</button></div>
+        <div id="users-cont"></div>
       </div>
     </section>
 
     <!-- SETTINGS -->
-    <section id="section-settings" class="section">
-      <div class="section-title">Settings</div>
-
+    <section id="sec-settings" class="section">
+      <div class="page-title">Settings</div>
       <div class="settings-card">
         <h3>🔑 Supabase Service Role Key</h3>
-        <p>Required for write operations (pick winner, view all users). Stored in your browser's localStorage — never sent anywhere except Supabase.</p>
-        <div class="settings-input-row">
-          <input type="password" class="settings-input" id="service-key-input" placeholder="eyJhbGciOi..." />
-          <button class="btn-save" onclick="saveServiceKey()">Save</button>
-          <button class="btn-clear" onclick="clearServiceKey()">Clear</button>
+        <p>Required to view all users and pick winners. Stored in your browser's localStorage only — never sent anywhere except Supabase.<br>Find it in: <strong>Supabase Dashboard → Project Settings → API → service_role</strong>.</p>
+        <div class="input-row">
+          <div class="svc-input-wrap">
+            <input type="password" class="svc-input" id="svc-key" placeholder="eyJhbGci…">
+            <button class="vis-btn" onclick="toggleVis()" title="Show/hide">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <button class="btn-save" onclick="saveKey()">Save</button>
+          <button class="btn-clear" onclick="clearKey()">Clear</button>
         </div>
         <div class="key-status" id="key-status"></div>
-      </div>
-
-      <div class="settings-card">
-        <h3>ℹ️ Supabase Config</h3>
-        <p style="font-family:monospace; font-size:12px; color: var(--muted);">
-          URL: https://eqaltlwngsmomlwbkqzu.supabase.co<br>
-          Anon Key: eyJhbGci... (hardcoded)
-        </p>
       </div>
     </section>
 
@@ -854,624 +275,331 @@
 </div>
 
 <script>
-// ===== CONFIG =====
 const SUPABASE_URL = 'https://eqaltlwngsmomlwbkqzu.supabase.co';
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxYWx0bHduZ3Ntb21sd2JrcXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MTA2NzUsImV4cCI6MjA5NzI4NjY3NX0.zcwgXht0vKkkQcu3cVHe4v3q5xv-37BV1GFnwXOGBQY';
-const ADMIN_PASSWORD = 'drawn-admin-2025';
-const SERVICE_KEY_STORAGE = 'drawn_service_key';
+const PASS = 'drawn-admin-2025';
 
-// ===== STATE =====
 let drawsCache = [];
-let confettiAnimId = null;
+let confettiRaf = null;
+let pendingWinner = null; // {drawId, userId, handle}
 
-// ===== HELPERS =====
-function getServiceKey() {
-  return localStorage.getItem(SERVICE_KEY_STORAGE) || '';
+// ── API ──────────────────────────────────────────────────────────────
+async function sbFetch(path, method = 'GET', body = null) {
+  const svcKey = localStorage.getItem('drawn_service_key');
+  const key = svcKey || ANON_KEY;
+  const headers = { apikey: ANON_KEY, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' };
+  if (method !== 'GET') headers['Prefer'] = 'return=minimal';
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    method, headers, body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return method === 'GET' ? res.json() : null;
 }
 
-function authHeaders(useService = false) {
-  const key = useService ? (getServiceKey() || ANON_KEY) : ANON_KEY;
-  return {
-    'apikey': ANON_KEY,
-    'Authorization': 'Bearer ' + key,
-    'Content-Type': 'application/json'
-  };
-}
-
-function penceToGBP(pence) {
-  if (pence == null) return '—';
-  return '£' + (pence / 100).toFixed(2);
-}
-
-function fmtDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-}
-
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + type;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.className = ''; }, 3500);
-}
-
-// ===== AUTH =====
-function checkAuth() {
-  const authed = sessionStorage.getItem('drawn_admin_auth') === '1';
-  if (authed) {
-    document.getElementById('auth-gate').classList.add('hidden');
-    document.getElementById('app').classList.add('visible');
-    init();
-  }
-}
-
+// ── AUTH ─────────────────────────────────────────────────────────────
 function login() {
-  const val = document.getElementById('password-input').value;
-  if (val === ADMIN_PASSWORD) {
-    sessionStorage.setItem('drawn_admin_auth', '1');
-    document.getElementById('auth-gate').classList.add('hidden');
-    document.getElementById('app').classList.add('visible');
-    document.getElementById('auth-error').textContent = '';
-    init();
+  const v = document.getElementById('pw').value;
+  if (v === PASS) {
+    sessionStorage.setItem('drawn_admin', '1');
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('app').classList.add('show');
+    document.getElementById('gate-error').textContent = '';
+    loadDashboard();
   } else {
-    document.getElementById('auth-error').textContent = 'Incorrect password. Try again.';
-    document.getElementById('password-input').value = '';
-    document.getElementById('password-input').focus();
+    document.getElementById('gate-error').textContent = 'Incorrect password.';
+    document.getElementById('pw').value = '';
+    document.getElementById('pw').focus();
+  }
+}
+function logout() { sessionStorage.removeItem('drawn_admin'); location.reload(); }
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+if (sessionStorage.getItem('drawn_admin') === '1') {
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('app').classList.add('show');
+  loadDashboard();
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────
+function go(sec) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.sec === sec));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === 'sec-' + sec));
+  if (sec === 'dashboard') loadDashboard();
+  if (sec === 'draws') loadDraws();
+  if (sec === 'users') loadUsers();
+  if (sec === 'settings') renderSettings();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────
+async function loadDashboard() {
+  setHtml('dash-draws', spinRow(7));
+  try {
+    const draws = await sbFetch('draws?select=*&order=created_at.desc');
+    drawsCache = draws;
+    document.getElementById('s-total').textContent = draws.length;
+    document.getElementById('s-open').textContent = draws.filter(d => d.status === 'open').length;
+    document.getElementById('s-closing').textContent = draws.filter(d => d.status === 'closing_tonight').length;
+    document.getElementById('s-tickets').textContent = draws.reduce((n, d) => n + (d.tickets_sold || 0), 0).toLocaleString();
+    setHtml('dash-draws', buildDrawsTable(draws.slice(0, 8)));
+  } catch (e) {
+    setHtml('dash-draws', errRow(e.message, 7));
   }
 }
 
-function logout() {
-  sessionStorage.removeItem('drawn_admin_auth');
-  location.reload();
-}
-
-document.getElementById('password-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') login();
-});
-
-// ===== INIT =====
-function init() {
-  updateKeyStatus();
-  loadSection('dashboard');
-}
-
-// ===== NAV =====
-function loadSection(name) {
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.section === name);
-  });
-  document.querySelectorAll('.section').forEach(el => {
-    el.classList.toggle('active', el.id === 'section-' + name);
-  });
-
-  if (name === 'dashboard') fetchDashboard();
-  if (name === 'draws') fetchDraws();
-  if (name === 'users') fetchUsers();
-  if (name === 'applications') fetchApplications();
-  if (name === 'settings') renderSettings();
-}
-
-// ===== DASHBOARD =====
-async function fetchDashboard() {
+// ── DRAWS ────────────────────────────────────────────────────────────
+async function loadDraws() {
+  setHtml('draws-cont', spinRow(7));
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/draws?select=*&order=created_at.desc`,
-      { headers: { ...authHeaders(), 'Prefer': 'count=exact' } }
-    );
-    const draws = await res.json();
-
-    if (!Array.isArray(draws)) throw new Error('Bad response');
-
+    const draws = await sbFetch('draws?select=*&order=created_at.desc');
     drawsCache = draws;
-
-    const total = draws.length;
-    const open = draws.filter(d => d.status === 'open').length;
-    const closing = draws.filter(d => d.status === 'closing_tonight').length;
-    const tickets = draws.reduce((s, d) => s + (d.tickets_sold || 0), 0);
-
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-open').textContent = open;
-    document.getElementById('stat-closing').textContent = closing;
-    document.getElementById('stat-tickets').textContent = tickets.toLocaleString();
-
-    const recent = draws.slice(0, 8);
-    document.getElementById('dashboard-draws-container').innerHTML = buildDrawsTable(recent);
+    setHtml('draws-cont', buildDrawsTable(draws));
   } catch (e) {
-    document.getElementById('dashboard-draws-container').innerHTML =
-      `<div class="empty-state">Failed to load draws: ${e.message}</div>`;
-  }
-}
-
-// ===== DRAWS =====
-async function fetchDraws(fromDashboard = false) {
-  const container = fromDashboard
-    ? document.getElementById('dashboard-draws-container')
-    : document.getElementById('draws-container');
-
-  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
-
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/draws?select=*&order=created_at.desc`,
-      { headers: authHeaders() }
-    );
-    const draws = await res.json();
-    if (!Array.isArray(draws)) throw new Error(draws.message || 'Unexpected response');
-    drawsCache = draws;
-
-    // Update stats too if on dashboard
-    if (fromDashboard) {
-      document.getElementById('stat-total').textContent = draws.length;
-      document.getElementById('stat-open').textContent = draws.filter(d=>d.status==='open').length;
-      document.getElementById('stat-closing').textContent = draws.filter(d=>d.status==='closing_tonight').length;
-      document.getElementById('stat-tickets').textContent = draws.reduce((s,d)=>s+(d.tickets_sold||0),0).toLocaleString();
-    }
-
-    container.innerHTML = buildDrawsTable(draws);
-  } catch (e) {
-    container.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+    setHtml('draws-cont', errRow(e.message, 7));
   }
 }
 
 function buildDrawsTable(draws) {
-  if (!draws.length) return '<div class="empty-state">No draws found.</div>';
-
-  const hasKey = !!getServiceKey();
-
-  const rows = draws.map(d => {
+  if (!draws.length) return '<div style="padding:40px;text-align:center;color:rgba(255,255,255,.35)">No draws found.</div>';
+  const hasKey = !!localStorage.getItem('drawn_service_key');
+  const rows = draws.map((d, i) => {
     const total = d.total_tickets || 1;
     const sold = d.tickets_sold || 0;
-    const pct = Math.round((sold / total) * 100);
-    const isHigh = pct >= 80;
-    const minThresh = d.min_threshold || 0;
-    const fillPct = Math.round((sold / total) * 100);
-    const meetsThresh = sold >= minThresh;
-    const canPick = meetsThresh && (d.status === 'closing_tonight' || d.status === 'open') && d.status !== 'completed' && d.status !== 'cancelled';
-
-    const statusMap = {
-      open: '<span class="badge badge-open">Open</span>',
-      closing_tonight: '<span class="badge badge-closing">Closing Tonight</span>',
-      completed: '<span class="badge badge-completed">Completed</span>',
-      cancelled: '<span class="badge badge-cancelled">Cancelled</span>',
-    };
-
-    const statusBadge = statusMap[d.status] || `<span class="badge badge-cancelled">${d.status}</span>`;
-
-    let pickBtn = '';
+    const pct = Math.min(100, Math.round(sold / total * 100));
+    const high = pct >= 80;
+    const thresh = d.min_threshold || 0;
+    const meetsThresh = thresh ? sold >= thresh * total : sold > 0;
+    const canPick = meetsThresh && (d.status === 'closing_tonight' || d.status === 'open');
+    const price = d.ticket_price != null ? '&pound;' + Number(d.ticket_price).toFixed(2) : '&mdash;';
+    let action = '<span class="dash-cell">&mdash;</span>';
     if (canPick) {
-      if (hasKey) {
-        pickBtn = `<button class="btn-pick" onclick="pickWinner('${d.id}')">Pick Winner</button>`;
-      } else {
-        pickBtn = `<button class="btn-pick" disabled data-tooltip="Paste service key in Settings to enable">Pick Winner</button>`;
-      }
+      if (hasKey) action = `<button class="btn-pick" onclick="openPickWinner('${d.id}')">Pick Winner</button>`;
+      else action = `<button class="btn-pick" disabled title="Add service key in Settings">Pick Winner</button>`;
     }
-
     return `<tr>
-      <td>
-        <div class="draw-title-cell">
-          <span class="draw-emoji">${d.emoji || '🎁'}</span>
-          <div>
-            <div class="draw-name">${escHtml(d.title || 'Untitled')}</div>
-            <div class="draw-seller">@${escHtml(d.seller_handle || '—')}</div>
-          </div>
-        </div>
-      </td>
-      <td>${statusBadge}</td>
-      <td>
-        <div class="fill-wrap">
-          <div class="fill-bar-bg">
-            <div class="fill-bar-inner ${isHigh ? 'high' : ''}" style="width:${Math.min(pct,100)}%"></div>
-          </div>
-          <div class="fill-pct">${sold}/${total} (${fillPct}%)</div>
-        </div>
-      </td>
-      <td>${penceToGBP(d.ticket_price)}</td>
-      <td>${fmtDate(d.closes_at || d.created_at)}</td>
-      <td>${pickBtn}</td>
+      <td style="color:rgba(255,255,255,.3);font-size:.8rem">${i + 1}</td>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.15rem">${d.emoji || '🎁'}</span>
+        <div><div style="font-weight:500;color:#fff">${esc(d.title || 'Untitled')}</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.35)">@${esc(d.seller_handle || '—')}</div></div>
+      </div></td>
+      <td>${statusBadge(d.status)}</td>
+      <td><div class="fill-wrap">
+        <div class="fill-bg"><div class="fill-bar ${high ? 'high' : ''}" style="width:${pct}%"></div></div>
+        <div class="fill-pct">${sold}/${d.total_tickets || 0} &mdash; ${pct}%</div>
+      </div></td>
+      <td style="color:#D1D5DB">${price}</td>
+      <td>${action}</td>
     </tr>`;
   }).join('');
-
-  return `<table>
-    <thead>
-      <tr>
-        <th>Draw</th>
-        <th>Status</th>
-        <th>Fill</th>
-        <th>Ticket</th>
-        <th>Closes</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+  return `<table><thead><tr><th>#</th><th>Item</th><th>Status</th><th>Fill %</th><th>Ticket Price</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// ===== USERS =====
-async function fetchUsers() {
-  const hasKey = !!getServiceKey();
-  const gateMsg = document.getElementById('users-gate-msg');
-  const tableWrap = document.getElementById('users-table-wrap');
-  const container = document.getElementById('users-container');
+function statusBadge(s) {
+  const m = { open: 'b-open', closing_tonight: 'b-closing', completed: 'b-completed', cancelled: 'b-cancelled' };
+  const cls = m[s] || 'b-cancelled';
+  const label = s === 'closing_tonight' ? 'Closing Tonight' : (s || '').replace(/_/g, ' ');
+  return `<span class="badge ${cls}">${label}</span>`;
+}
 
-  if (!hasKey) {
-    gateMsg.style.display = 'block';
-    tableWrap.style.display = 'none';
-    return;
-  }
-
-  gateMsg.style.display = 'none';
-  tableWrap.style.display = 'block';
-  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
-
+// ── USERS ────────────────────────────────────────────────────────────
+async function loadUsers() {
+  const hasKey = !!localStorage.getItem('drawn_service_key');
+  const gate = document.getElementById('users-gate');
+  const wrap = document.getElementById('users-wrap');
+  if (!hasKey) { gate.style.display = 'block'; wrap.style.display = 'none'; return; }
+  gate.style.display = 'none'; wrap.style.display = 'block';
+  setHtml('users-cont', spinRow(5));
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/profiles?select=*&order=created_at.desc`,
-      { headers: authHeaders(true) }
-    );
-    const users = await res.json();
-    if (!Array.isArray(users)) throw new Error(users.message || 'Unexpected response');
-
-    if (!users.length) {
-      container.innerHTML = '<div class="empty-state">No users found.</div>';
-      return;
-    }
-
+    const users = await sbFetch('profiles?select=*&order=created_at.desc');
+    if (!users.length) { setHtml('users-cont', '<div style="padding:40px;text-align:center;color:rgba(255,255,255,.35)">No users found.</div>'); return; }
     const rows = users.map(u => {
-      const letter = (u.handle || u.username || '?')[0].toUpperCase();
-      const balance = u.wallet_balance != null ? penceToGBP(u.wallet_balance) : '—';
-      const sellerBadge = u.is_seller
-        ? '<span class="badge badge-seller">Seller</span>'
-        : '<span style="color:var(--muted);font-size:12px">Buyer</span>';
+      const letter = (u.handle || '?')[0].toUpperCase();
+      const balance = u.wallet_balance != null ? '&pound;' + Number(u.wallet_balance).toFixed(2) : '&mdash;';
+      const joined = u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '&mdash;';
+      const av = u.avatar_url ? `<img src="${esc(u.avatar_url)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover" alt="">` : `<span class="av">${letter}</span>`;
       return `<tr>
-        <td>
-          <div class="user-row-inner">
-            <span class="avatar-letter">${letter}</span>
-            <div>
-              <div style="font-weight:500;color:#fff">@${escHtml(u.handle || u.username || '—')}</div>
-              <div style="font-size:11px;color:var(--muted)">${escHtml(u.id || '')}</div>
-            </div>
-          </div>
-        </td>
-        <td>${sellerBadge}</td>
-        <td>${balance}</td>
-        <td>${fmtDate(u.created_at)}</td>
+        <td><div class="user-cell">${av}<div><div class="user-name">@${esc(u.handle || '—')}</div><div class="user-id">${esc(u.id || '')}</div></div></div></td>
+        <td>${u.is_seller ? '<span class="badge b-seller">Seller</span>' : '<span style="color:rgba(255,255,255,.35);font-size:.8rem">Buyer</span>'}</td>
+        <td style="color:var(--gold);font-weight:600">${balance}</td>
+        <td style="color:rgba(255,255,255,.4);font-size:.8rem">${joined}</td>
       </tr>`;
     }).join('');
-
-    container.innerHTML = `<table>
-      <thead>
-        <tr>
-          <th>User</th>
-          <th>Role</th>
-          <th>Wallet</th>
-          <th>Joined</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+    setHtml('users-cont', `<table><thead><tr><th>Handle</th><th>Seller?</th><th>Balance</th><th>Joined</th></tr></thead><tbody>${rows}</tbody></table>`);
   } catch (e) {
-    container.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+    setHtml('users-cont', errRow(e.message, 5));
   }
 }
 
-// ===== APPLICATIONS =====
-async function fetchApplications() {
-  const container = document.getElementById('applications-container');
-  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
-
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/seller_applications?select=*&order=created_at.desc`,
-      { headers: authHeaders(true) }
-    );
-
-    if (res.status === 404 || res.status === 400) {
-      container.innerHTML = '<div class="empty-state">No applications yet — table does not exist.</div>';
-      return;
-    }
-
-    const apps = await res.json();
-
-    if (!Array.isArray(apps)) {
-      if (apps && apps.message && apps.message.includes('does not exist')) {
-        container.innerHTML = '<div class="empty-state">No applications yet.</div>';
-        return;
-      }
-      throw new Error(apps.message || 'Unexpected response');
-    }
-
-    if (!apps.length) {
-      container.innerHTML = '<div class="empty-state">No seller applications yet.</div>';
-      return;
-    }
-
-    const rows = apps.map(a => {
-      const statusMap = {
-        pending: '<span class="badge badge-open">Pending</span>',
-        approved: '<span class="badge badge-completed">Approved</span>',
-        rejected: '<span class="badge badge-cancelled">Rejected</span>',
-      };
-      const statusBadge = statusMap[a.status] || `<span class="badge badge-cancelled">${a.status || '—'}</span>`;
-
-      return `<tr>
-        <td style="font-weight:500;color:#fff">@${escHtml(a.handle || a.user_id || '—')}</td>
-        <td>${escHtml(a.business_name || '—')}</td>
-        <td>${statusBadge}</td>
-        <td>${fmtDate(a.created_at)}</td>
-      </tr>`;
-    }).join('');
-
-    container.innerHTML = `<table>
-      <thead>
-        <tr>
-          <th>Applicant</th>
-          <th>Business</th>
-          <th>Status</th>
-          <th>Applied</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  } catch (e) {
-    container.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
-  }
-}
-
-// ===== PICK WINNER =====
-async function pickWinner(drawId) {
+// ── PICK WINNER MODAL ────────────────────────────────────────────────
+function openPickWinner(drawId) {
   const draw = drawsCache.find(d => d.id == drawId);
-  if (!draw) { showToast('Draw not found', 'error'); return; }
+  if (!draw) return;
+  pendingWinner = null;
+  setModal(`Pick winner for ${esc(draw.title || 'draw')}`, pickingStep(), '');
+  document.getElementById('winner-modal').classList.add('open');
+  runPickWinner(draw);
+}
 
-  const sk = getServiceKey();
-  if (!sk) { showToast('Service key required', 'error'); return; }
-
-  showToast('Fetching tickets...', 'success');
-
+async function runPickWinner(draw) {
   try {
-    // 1. Fetch tickets for this draw
-    const ticketsRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/tickets?draw_id=eq.${drawId}&select=user_id,quantity`,
-      {
-        headers: {
-          'apikey': ANON_KEY,
-          'Authorization': 'Bearer ' + sk,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    const tickets = await ticketsRes.json();
-    if (!Array.isArray(tickets) || !tickets.length) {
-      showToast('No tickets found for this draw', 'error');
-      return;
-    }
+    setModalStep(pickingStep('Fetching tickets…'));
+    const tickets = await sbFetch('tickets?draw_id=eq.' + draw.id + '&select=user_id,quantity');
+    if (!Array.isArray(tickets) || !tickets.length) throw new Error('No tickets found for this draw.');
 
-    // 2. Build weighted pool
     const pool = [];
-    for (const t of tickets) {
-      const qty = t.quantity || 1;
-      for (let i = 0; i < qty; i++) {
-        pool.push(t.user_id);
-      }
-    }
+    for (const t of tickets) { const q = parseInt(t.quantity) || 1; for (let i = 0; i < q; i++) pool.push(t.user_id); }
+    const userId = pool[Math.floor(Math.random() * pool.length)];
 
-    // 3. Pick random winner
-    const winnerUserId = pool[Math.floor(Math.random() * pool.length)];
+    setModalStep(pickingStep('Looking up winner profile…'));
+    const profs = await sbFetch('profiles?id=eq.' + userId + '&select=handle');
+    const handle = (profs[0] && profs[0].handle) ? profs[0].handle : userId;
 
-    // 4. Fetch winner profile
-    let winnerHandle = winnerUserId;
-    try {
-      const profRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${winnerUserId}&select=handle,username`,
-        {
-          headers: {
-            'apikey': ANON_KEY,
-            'Authorization': 'Bearer ' + sk
-          }
-        }
-      );
-      const profs = await profRes.json();
-      if (Array.isArray(profs) && profs.length) {
-        winnerHandle = profs[0].handle || profs[0].username || winnerUserId;
-      }
-    } catch (_) {}
+    pendingWinner = { drawId: draw.id, userId, handle };
 
-    // 5. PATCH the draw
-    const now = new Date().toISOString();
-    const patchRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/draws?id=eq.${drawId}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'apikey': ANON_KEY,
-          'Authorization': 'Bearer ' + sk,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          status: 'completed',
-          winner_user_id: winnerUserId,
-          winner_handle: winnerHandle,
-          completed_at: now
-        })
-      }
-    );
+    setModalStep(`<div class="winner-emoji">🏆</div>
+      <div class="winner-handle">@${esc(handle)}</div>
+      <div class="winner-sub">Selected from ${pool.length.toLocaleString()} entries</div>`);
+    startConfetti();
 
-    if (!patchRes.ok && patchRes.status !== 204) {
-      const txt = await patchRes.text();
-      throw new Error(`Patch failed: ${txt}`);
-    }
-
-    // 6. Insert wallet transaction for seller
-    try {
-      await fetch(
-        `${SUPABASE_URL}/rest/v1/wallet_transactions`,
-        {
-          method: 'POST',
-          headers: {
-            'apikey': ANON_KEY,
-            'Authorization': 'Bearer ' + sk,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            user_id: draw.seller_id || draw.user_id,
-            type: 'win',
-            description: 'Draw completed - payout pending',
-            draw_id: drawId,
-            created_at: now
-          })
-        }
-      );
-    } catch (_) {
-      // Non-fatal
-    }
-
-    // 7. Update local cache
-    const idx = drawsCache.findIndex(d => d.id == drawId);
-    if (idx !== -1) {
-      drawsCache[idx] = { ...drawsCache[idx], status: 'completed', winner_user_id: winnerUserId, winner_handle: winnerHandle, completed_at: now };
-    }
-
-    // 8. Show celebration
-    showWinnerModal(winnerHandle, draw.title || 'this draw', draw.emoji || '🎁');
-    fetchDraws();
-    fetchDashboard();
-
+    setModalActions(`<button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmWinner()">Confirm Winner</button>`);
   } catch (e) {
-    showToast('Error: ' + e.message, 'error');
+    setModalStep(`<div class="modal-error">${esc(e.message)}</div>`);
+    setModalActions(`<button class="btn-cancel" onclick="closeModal()">Close</button>`);
   }
 }
 
-// ===== WINNER MODAL =====
-function showWinnerModal(handle, drawTitle, emoji) {
-  document.getElementById('modal-winner-handle').textContent = '@' + handle;
-  document.getElementById('modal-draw-name').textContent = emoji + ' ' + drawTitle;
-  document.getElementById('winner-modal').classList.add('open');
-  startConfetti();
+async function confirmWinner() {
+  if (!pendingWinner) return;
+  const { drawId, userId, handle } = pendingWinner;
+  const btn = document.querySelector('.btn-confirm');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    await sbFetch('draws?id=eq.' + drawId, 'PATCH', {
+      status: 'completed', winner_user_id: userId, winner_handle: handle, completed_at: new Date().toISOString()
+    });
+    closeModal();
+    toast('Winner confirmed! 🎉');
+    loadDraws();
+    loadDashboard();
+  } catch (e) {
+    toast('Error: ' + e.message, true);
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm Winner'; }
+  }
 }
 
-function closeWinnerModal() {
+function closeModal() {
   document.getElementById('winner-modal').classList.remove('open');
   stopConfetti();
+  pendingWinner = null;
 }
 
-// ===== CONFETTI =====
+function setModal(title, stepHtml, actionsHtml) {
+  document.getElementById('modal-title').innerHTML = title;
+  setModalStep(stepHtml);
+  setModalActions(actionsHtml);
+}
+function setModalStep(h) { document.getElementById('modal-step').innerHTML = h; }
+function setModalActions(h) { document.getElementById('modal-actions').innerHTML = h; }
+function pickingStep(msg = 'Selecting a winner…') {
+  return `<div class="modal-spinner"></div><div class="modal-step-label">${esc(msg)}</div>`;
+}
+
+document.getElementById('winner-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+// ── CONFETTI ─────────────────────────────────────────────────────────
 function startConfetti() {
   const canvas = document.getElementById('confetti-canvas');
   canvas.classList.add('active');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = innerWidth; canvas.height = innerHeight;
   const ctx = canvas.getContext('2d');
-
-  const colors = ['#8B5CF6','#F472B6','#F9C846','#6D28D9','#34d399','#60a5fa','#fb923c'];
+  const cols = ['#8B5CF6','#F472B6','#F9C846','#6D28D9','#34d399','#60a5fa','#fb923c'];
   const pieces = Array.from({length: 160}, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * -canvas.height,
-    w: Math.random() * 10 + 5,
-    h: Math.random() * 6 + 3,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    rot: Math.random() * Math.PI * 2,
-    rotSpeed: (Math.random() - 0.5) * 0.15,
-    vx: (Math.random() - 0.5) * 2.5,
-    vy: Math.random() * 3 + 2,
-    opacity: 1
+    x: Math.random() * canvas.width, y: Math.random() * -canvas.height,
+    w: Math.random() * 10 + 5, h: Math.random() * 6 + 3,
+    color: cols[Math.floor(Math.random() * cols.length)],
+    rot: Math.random() * Math.PI * 2, rs: (Math.random() - .5) * .15,
+    vx: (Math.random() - .5) * 2.5, vy: Math.random() * 3 + 2, op: 1
   }));
-
-  let startTime = null;
-  const duration = 4000;
-
-  function draw(ts) {
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
+  let t0 = null;
+  const dur = 4000;
+  function frame(ts) {
+    if (!t0) t0 = ts;
+    const el = ts - t0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    let allGone = true;
+    let alive = false;
     for (const p of pieces) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.rotSpeed;
-      if (elapsed > duration * 0.6) {
-        p.opacity -= 0.012;
-      }
-      if (p.opacity > 0) {
-        allGone = false;
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, p.opacity);
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      p.x += p.vx; p.y += p.vy; p.rot += p.rs;
+      if (el > dur * .6) p.op -= .012;
+      if (p.op > 0) {
+        alive = true;
+        ctx.save(); ctx.globalAlpha = Math.max(0, p.op);
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
         ctx.restore();
       }
     }
-
-    if (!allGone && elapsed < duration + 1000) {
-      confettiAnimId = requestAnimationFrame(draw);
-    } else {
-      stopConfetti();
-    }
+    if (alive && el < dur + 1000) confettiRaf = requestAnimationFrame(frame);
+    else stopConfetti();
   }
-
-  if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
-  confettiAnimId = requestAnimationFrame(draw);
+  if (confettiRaf) cancelAnimationFrame(confettiRaf);
+  confettiRaf = requestAnimationFrame(frame);
 }
 
 function stopConfetti() {
-  if (confettiAnimId) {
-    cancelAnimationFrame(confettiAnimId);
-    confettiAnimId = null;
-  }
+  if (confettiRaf) { cancelAnimationFrame(confettiRaf); confettiRaf = null; }
   const canvas = document.getElementById('confetti-canvas');
   canvas.classList.remove('active');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 }
 
-// ===== SETTINGS =====
+// ── SETTINGS ─────────────────────────────────────────────────────────
 function renderSettings() {
   updateKeyStatus();
-  const sk = getServiceKey();
-  if (sk) {
-    document.getElementById('service-key-input').value = sk;
-  }
+  const saved = localStorage.getItem('drawn_service_key');
+  if (saved) document.getElementById('svc-key').value = saved;
 }
 
-function saveServiceKey() {
-  const val = document.getElementById('service-key-input').value.trim();
-  if (!val) { showToast('Please paste a service key first', 'error'); return; }
-  localStorage.setItem(SERVICE_KEY_STORAGE, val);
+function saveKey() {
+  const v = document.getElementById('svc-key').value.trim();
+  if (v) { localStorage.setItem('drawn_service_key', v); toast('Service key saved'); }
+  else { localStorage.removeItem('drawn_service_key'); toast('Service key cleared'); }
   updateKeyStatus();
-  showToast('Service key saved', 'success');
 }
 
-function clearServiceKey() {
-  localStorage.removeItem(SERVICE_KEY_STORAGE);
-  document.getElementById('service-key-input').value = '';
+function clearKey() {
+  localStorage.removeItem('drawn_service_key');
+  document.getElementById('svc-key').value = '';
   updateKeyStatus();
-  showToast('Service key cleared', 'success');
+  toast('Service key cleared');
+}
+
+function toggleVis() {
+  const inp = document.getElementById('svc-key');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
 function updateKeyStatus() {
   const el = document.getElementById('key-status');
   if (!el) return;
-  const has = !!getServiceKey();
-  el.className = 'key-status ' + (has ? 'ok' : 'missing');
-  el.textContent = has ? '✓ Service key is set — write operations enabled.' : '✗ No service key — write operations disabled.';
+  const has = !!localStorage.getItem('drawn_service_key');
+  el.className = 'key-status ' + (has ? 'key-ok' : 'key-missing');
+  el.textContent = has ? '✓ Service key set — write operations enabled.' : '✗ No service key — write operations disabled.';
 }
 
-// ===== UTIL =====
-function escHtml(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+// ── TOAST ────────────────────────────────────────────────────────────
+function toast(msg, isErr = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + (isErr ? 'err' : 'ok');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = ''; }, 3500);
 }
 
-// ===== BOOT =====
-checkAuth();
+// ── HELPERS ──────────────────────────────────────────────────────────
+function setHtml(id, h) { document.getElementById(id).innerHTML = h; }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function spinRow(cols) { return `<table><tbody><tr class="spin-row"><td colspan="${cols}"><span class="spinner"></span>Loading…</td></tr></tbody></table>`; }
+function errRow(msg, cols) { return `<table><tbody><tr class="spin-row"><td colspan="${cols}" style="color:var(--pink)">Error: ${esc(msg)}</td></tr></tbody></table>`; }
 </script>
 </body>
 </html>
