@@ -3,26 +3,28 @@
     "name": "DRAWN",
     "slug": "drawn",
     "version": "1.0.0",
-    "owner": "yoniaibi",
+    "owner": "drawnapp",
     "scheme": "drawn",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#2D1B69"
+      "backgroundColor": "#0F0A1E",
+      "resizeMode": "contain"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.drawn.app"
+      "bundleIdentifier": "app.drawn.ios"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#2D1B69"
       },
-      "package": "com.drawn.app"
+      "package": "app.drawn.android"
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "expo-secure-store"
     ]
   }
 }

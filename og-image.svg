@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#2D1B69" />
+      <stop offset="100%" stop-color="#0F0A1E" />
+    </radialGradient>
+    <radialGradient id="glowCenter" cx="50%" cy="45%" r="40%">
+      <stop offset="0%" stop-color="#6D28D9" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#0F0A1E" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+  <rect width="1200" height="630" fill="url(#glowCenter)" />
+
+  <!-- Decorative circles -->
+  <circle cx="80" cy="80" r="160" fill="#6D28D9" opacity="0.12" />
+  <circle cx="1140" cy="560" r="200" fill="#6D28D9" opacity="0.15" />
+  <circle cx="1100" cy="80" r="90" fill="#8B5CF6" opacity="0.1" />
+  <circle cx="100" cy="540" r="110" fill="#8B5CF6" opacity="0.08" />
+
+  <!-- Ticket shape decorations (low opacity) -->
+  <rect x="920" y="210" width="120" height="56" rx="12" fill="none" stroke="#8B5CF6" stroke-width="1.5" opacity="0.18" />
+  <line x1="968" y1="210" x2="968" y2="266" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.18" />
+  <rect x="160" y="400" width="100" height="46" rx="10" fill="none" stroke="#F472B6" stroke-width="1.5" opacity="0.15" />
+  <line x1="204" y1="400" x2="204" y2="446" stroke="#F472B6" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.15" />
+
+  <!-- Pink accent dot -->
+  <circle cx="960" cy="148" r="10" fill="#F472B6" opacity="0.9" />
+
+  <!-- Top-left URL -->
+  <text x="40" y="46" font-family="Georgia, 'Times New Roman', serif" font-size="18" fill="rgba(255,255,255,0.4)" font-weight="400">drawn.app</text>
+
+  <!-- Main wordmark -->
+  <text
+    x="600" y="290"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="120"
+    font-weight="700"
+    font-style="italic"
+    fill="#FFFFFF"
+    text-anchor="middle"
+    letter-spacing="-3"
+  >drawn.</text>
+
+  <!-- Tagline -->
+  <text
+    x="600" y="358"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="36"
+    fill="#8B5CF6"
+    text-anchor="middle"
+    font-weight="400"
+    letter-spacing="1"
+  >Win luxury. From 25p.</text>
+
+  <!-- Bottom strip separator -->
+  <line x1="200" y1="480" x2="1000" y2="480" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+
+  <!-- Bottom emoji + labels row -->
+  <text x="270" y="550" font-size="32" text-anchor="middle" font-family="sans-serif">👜</text>
+  <text x="270" y="578" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" fill="rgba(255,255,255,0.55)" text-anchor="middle">Designer fashion</text>
+
+  <text x="600" y="550" font-size="32" text-anchor="middle" font-family="sans-serif">⌚</text>
+  <text x="600" y="578" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" fill="rgba(255,255,255,0.55)" text-anchor="middle">Watches</text>
+
+  <text x="930" y="550" font-size="32" text-anchor="middle" font-family="sans-serif">👟</text>
+  <text x="930" y="578" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" fill="rgba(255,255,255,0.55)" text-anchor="middle">Sneakers</text>
+
+  <!-- Separator dots -->
+  <circle cx="430" cy="563" r="3" fill="rgba(255,255,255,0.2)" />
+  <circle cx="770" cy="563" r="3" fill="rgba(255,255,255,0.2)" />
+</svg>
