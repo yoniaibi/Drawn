@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAWN Admin</title>
+<style>
+  :root {
+    --violet: #2D1B69;
+    --royal: #6D28D9;
+    --lilac: #8B5CF6;
+    --pink: #F472B6;
+    --gold: #F9C846;
+    --ink: #1A1040;
+    --bg: #0F0A1E;
+    --card: #1A1040;
+    --border: rgba(255,255,255,0.08);
+    --text: #E8E0FF;
+    --muted: rgba(255,255,255,0.45);
+    --sidebar-w: 220px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== AUTH GATE ===== */
+  #auth-gate {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+    background-image: radial-gradient(ellipse at 30% 20%, rgba(109,40,217,0.25) 0%, transparent 60%),
+                      radial-gradient(ellipse at 70% 80%, rgba(244,114,182,0.12) 0%, transparent 60%);
+  }
+
+  #auth-gate.hidden { display: none; }
+
+  .auth-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+
+  .auth-logo {
+    font-family: Georgia, serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+
+  .auth-subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+
+  .auth-box input[type="password"] {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .auth-box input[type="password"]:focus {
+    border-color: var(--lilac);
+  }
+
+  .auth-error {
+    color: var(--pink);
+    font-size: 13px;
+    margin-bottom: 12px;
+    min-height: 18px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--royal), var(--lilac));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  /* ===== APP LAYOUT ===== */
+  #app { display: none; min-height: 100vh; }
+  #app.visible { display: flex; }
+
+  /* ===== SIDEBAR ===== */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 100;
+  }
+
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-text {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 3px;
+  }
+
+  .admin-badge {
+    display: inline-block;
+    background: var(--lilac);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-item:hover { background: rgba(139,92,246,0.12); color: var(--text); }
+  .nav-item.active { background: rgba(139,92,246,0.2); color: var(--lilac); }
+
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 16px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-logout {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(244,114,182,0.1);
+    border: 1px solid rgba(244,114,182,0.2);
+    border-radius: 10px;
+    color: var(--pink);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-logout:hover { background: rgba(244,114,182,0.18); }
+
+  /* ===== MAIN CONTENT ===== */
+  #main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px 36px;
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 80% 10%, rgba(109,40,217,0.1) 0%, transparent 50%);
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+
+  /* ===== STAT CARDS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--royal), var(--lilac));
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .stat-card.pink::before { background: linear-gradient(90deg, var(--pink), #f9a8d4); }
+  .stat-card.gold::before { background: linear-gradient(90deg, var(--gold), #fde68a); }
+  .stat-card.green::before { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+
+  /* ===== TABLE ===== */
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .table-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .refresh-btn {
+    background: rgba(139,92,246,0.15);
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 8px;
+    color: var(--lilac);
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .refresh-btn:hover { background: rgba(139,92,246,0.25); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+  td {
+    padding: 14px 16px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  /* ===== BADGES ===== */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-open { background: rgba(139,92,246,0.2); color: var(--lilac); border: 1px solid rgba(139,92,246,0.3); }
+  .badge-closing { background: rgba(244,114,182,0.2); color: var(--pink); border: 1px solid rgba(244,114,182,0.3); }
+  .badge-completed { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+  .badge-cancelled { background: rgba(255,255,255,0.08); color: var(--muted); border: 1px solid var(--border); }
+  .badge-seller { background: rgba(249,200,70,0.15); color: var(--gold); border: 1px solid rgba(249,200,70,0.3); }
+
+  /* ===== FILL BAR ===== */
+  .fill-wrap { width: 100px; }
+  .fill-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 3px;
+  }
+
+  .fill-bar-inner {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--royal), var(--lilac));
+    transition: width 0.4s;
+  }
+
+  .fill-bar-inner.high { background: linear-gradient(90deg, var(--pink), #f9a8d4); }
+
+  .fill-pct {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ===== PICK WINNER BTN ===== */
+  .btn-pick {
+    padding: 7px 14px;
+    background: linear-gradient(135deg, var(--royal), var(--lilac));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-pick:hover { opacity: 0.85; }
+
+  .btn-pick:disabled {
+    background: rgba(255,255,255,0.08);
+    color: var(--muted);
+    cursor: not-allowed;
+    opacity: 1;
+  }
+
+  /* ===== AVATAR LETTER ===== */
+  .avatar-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--royal), var(--lilac));
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  .user-row-inner {
+    display: flex;
+    align-items: center;
+  }
+
+  /* ===== SETTINGS ===== */
+  .settings-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+    max-width: 580px;
+  }
+
+  .settings-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .settings-card p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .settings-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .settings-input {
+    flex: 1;
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: #fff;
+    font-size: 13px;
+    font-family: monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .settings-input:focus { border-color: var(--lilac); }
+
+  .btn-save {
+    padding: 11px 20px;
+    background: var(--lilac);
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-save:hover { opacity: 0.85; }
+
+  .btn-clear {
+    padding: 11px 16px;
+    background: rgba(244,114,182,0.1);
+    border: 1px solid rgba(244,114,182,0.2);
+    border-radius: 9px;
+    color: var(--pink);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-clear:hover { background: rgba(244,114,182,0.18); }
+
+  .key-status {
+    margin-top: 12px;
+    font-size: 13px;
+  }
+
+  .key-status.ok { color: #34d399; }
+  .key-status.missing { color: var(--pink); }
+
+  /* ===== EMPTY / LOADING ===== */
+  .loading-row td {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(139,92,246,0.3);
+    border-top-color: var(--lilac);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ===== WINNER MODAL ===== */
+  #winner-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+  }
+
+  #winner-modal.open { display: flex; }
+
+  .modal-box {
+    background: var(--card);
+    border: 1px solid rgba(139,92,246,0.4);
+    border-radius: 20px;
+    padding: 40px 36px;
+    max-width: 440px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 80px rgba(139,92,246,0.15);
+    animation: pop-in 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+
+  @keyframes pop-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-emoji { font-size: 56px; margin-bottom: 12px; }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .modal-draw-name {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .winner-handle {
+    display: inline-block;
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--lilac), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 24px;
+  }
+
+  .btn-close-modal {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--royal), var(--lilac));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-close-modal:hover { opacity: 0.85; }
+
+  /* ===== CONFETTI CANVAS ===== */
+  #confetti-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 8999;
+    display: none;
+  }
+
+  #confetti-canvas.active { display: block; }
+
+  /* ===== TOOLTIP ===== */
+  [data-tooltip] {
+    position: relative;
+  }
+
+  [data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26,16,64,0.95);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ===== ALERT TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 9998;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 320px;
+  }
+
+  #toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #toast.success { border-color: rgba(16,185,129,0.4); }
+  #toast.error { border-color: rgba(244,114,182,0.4); }
+
+  .draw-title-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .draw-emoji { font-size: 20px; }
+
+  .draw-name { font-weight: 500; color: #fff; font-size: 14px; }
+  .draw-seller { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="auth-logo">DRAWN</div>
+    <div class="auth-subtitle">Admin Panel — Authorised Access Only</div>
+    <input type="password" id="password-input" placeholder="Enter admin password" autocomplete="current-password" />
+    <div class="auth-error" id="auth-error"></div>
+    <button class="btn-primary" onclick="login()">Sign In</button>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- WINNER MODAL -->
+<div id="winner-modal">
+  <div class="modal-box">
+    <div class="modal-emoji">🎉</div>
+    <div class="modal-title">We Have a Winner!</div>
+    <div class="modal-draw-name" id="modal-draw-name"></div>
+    <div class="winner-handle" id="modal-winner-handle"></div>
+    <br>
+    <button class="btn-close-modal" onclick="closeWinnerModal()">Done</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-text">DRAWN</span><span class="admin-badge">Admin</span>
+    </div>
+    <div class="sidebar-nav">
+      <button class="nav-item active" data-section="dashboard" onclick="loadSection('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" data-section="draws" onclick="loadSection('draws')">
+        <span class="nav-icon">🎟️</span> Draws
+      </button>
+      <button class="nav-item" data-section="users" onclick="loadSection('users')">
+        <span class="nav-icon">👤</span> Users
+      </button>
+      <button class="nav-item" data-section="applications" onclick="loadSection('applications')">
+        <span class="nav-icon">📋</span> Applications
+      </button>
+      <button class="nav-item" data-section="settings" onclick="loadSection('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">
+        <span>🚪</span> Sign Out
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="main">
+
+    <!-- DASHBOARD -->
+    <section id="section-dashboard" class="section active">
+      <div class="section-title">Dashboard</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Draws</div>
+          <div class="stat-value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card pink">
+          <div class="stat-label">Open Draws</div>
+          <div class="stat-value" id="stat-open">—</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Closing Tonight</div>
+          <div class="stat-value" id="stat-closing">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Tickets Sold</div>
+          <div class="stat-value" id="stat-tickets">—</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Recent Draws</h3>
+          <button class="refresh-btn" onclick="fetchDraws(true)">↻ Refresh</button>
+        </div>
+        <div id="dashboard-draws-container">
+          <div class="empty-state"><span class="spinner"></span> Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DRAWS -->
+    <section id="section-draws" class="section">
+      <div class="section-title">Draws</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>All Draws</h3>
+          <button class="refresh-btn" onclick="fetchDraws()">↻ Refresh</button>
+        </div>
+        <div id="draws-container">
+          <div class="empty-state"><span class="spinner"></span> Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- USERS -->
+    <section id="section-users" class="section">
+      <div class="section-title">Users</div>
+      <div id="users-gate-msg" style="display:none" class="empty-state" style="padding:32px">
+        <div style="font-size:32px;margin-bottom:12px">🔑</div>
+        Service key required to view all users. Paste it in Settings.
+      </div>
+      <div class="table-wrap" id="users-table-wrap">
+        <div class="table-header">
+          <h3>All Users</h3>
+          <button class="refresh-btn" onclick="fetchUsers()">↻ Refresh</button>
+        </div>
+        <div id="users-container">
+          <div class="empty-state"><span class="spinner"></span> Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPLICATIONS -->
+    <section id="section-applications" class="section">
+      <div class="section-title">Seller Applications</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Applications</h3>
+          <button class="refresh-btn" onclick="fetchApplications()">↻ Refresh</button>
+        </div>
+        <div id="applications-container">
+          <div class="empty-state"><span class="spinner"></span> Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="section-settings" class="section">
+      <div class="section-title">Settings</div>
+
+      <div class="settings-card">
+        <h3>🔑 Supabase Service Role Key</h3>
+        <p>Required for write operations (pick winner, view all users). Stored in your browser's localStorage — never sent anywhere except Supabase.</p>
+        <div class="settings-input-row">
+          <input type="password" class="settings-input" id="service-key-input" placeholder="eyJhbGciOi..." />
+          <button class="btn-save" onclick="saveServiceKey()">Save</button>
+          <button class="btn-clear" onclick="clearServiceKey()">Clear</button>
+        </div>
+        <div class="key-status" id="key-status"></div>
+      </div>
+
+      <div class="settings-card">
+        <h3>ℹ️ Supabase Config</h3>
+        <p style="font-family:monospace; font-size:12px; color: var(--muted);">
+          URL: https://eqaltlwngsmomlwbkqzu.supabase.co<br>
+          Anon Key: eyJhbGci... (hardcoded)
+        </p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ===== CONFIG =====
+const SUPABASE_URL = 'https://eqaltlwngsmomlwbkqzu.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxYWx0bHduZ3Ntb21sd2JrcXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MTA2NzUsImV4cCI6MjA5NzI4NjY3NX0.zcwgXht0vKkkQcu3cVHe4v3q5xv-37BV1GFnwXOGBQY';
+const ADMIN_PASSWORD = 'drawn-admin-2025';
+const SERVICE_KEY_STORAGE = 'drawn_service_key';
+
+// ===== STATE =====
+let drawsCache = [];
+let confettiAnimId = null;
+
+// ===== HELPERS =====
+function getServiceKey() {
+  return localStorage.getItem(SERVICE_KEY_STORAGE) || '';
+}
+
+function authHeaders(useService = false) {
+  const key = useService ? (getServiceKey() || ANON_KEY) : ANON_KEY;
+  return {
+    'apikey': ANON_KEY,
+    'Authorization': 'Bearer ' + key,
+    'Content-Type': 'application/json'
+  };
+}
+
+function penceToGBP(pence) {
+  if (pence == null) return '—';
+  return '£' + (pence / 100).toFixed(2);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3500);
+}
+
+// ===== AUTH =====
+function checkAuth() {
+  const authed = sessionStorage.getItem('drawn_admin_auth') === '1';
+  if (authed) {
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    init();
+  }
+}
+
+function login() {
+  const val = document.getElementById('password-input').value;
+  if (val === ADMIN_PASSWORD) {
+    sessionStorage.setItem('drawn_admin_auth', '1');
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    document.getElementById('auth-error').textContent = '';
+    init();
+  } else {
+    document.getElementById('auth-error').textContent = 'Incorrect password. Try again.';
+    document.getElementById('password-input').value = '';
+    document.getElementById('password-input').focus();
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('drawn_admin_auth');
+  location.reload();
+}
+
+document.getElementById('password-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') login();
+});
+
+// ===== INIT =====
+function init() {
+  updateKeyStatus();
+  loadSection('dashboard');
+}
+
+// ===== NAV =====
+function loadSection(name) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.section === name);
+  });
+  document.querySelectorAll('.section').forEach(el => {
+    el.classList.toggle('active', el.id === 'section-' + name);
+  });
+
+  if (name === 'dashboard') fetchDashboard();
+  if (name === 'draws') fetchDraws();
+  if (name === 'users') fetchUsers();
+  if (name === 'applications') fetchApplications();
+  if (name === 'settings') renderSettings();
+}
+
+// ===== DASHBOARD =====
+async function fetchDashboard() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/draws?select=*&order=created_at.desc`,
+      { headers: { ...authHeaders(), 'Prefer': 'count=exact' } }
+    );
+    const draws = await res.json();
+
+    if (!Array.isArray(draws)) throw new Error('Bad response');
+
+    drawsCache = draws;
+
+    const total = draws.length;
+    const open = draws.filter(d => d.status === 'open').length;
+    const closing = draws.filter(d => d.status === 'closing_tonight').length;
+    const tickets = draws.reduce((s, d) => s + (d.tickets_sold || 0), 0);
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-open').textContent = open;
+    document.getElementById('stat-closing').textContent = closing;
+    document.getElementById('stat-tickets').textContent = tickets.toLocaleString();
+
+    const recent = draws.slice(0, 8);
+    document.getElementById('dashboard-draws-container').innerHTML = buildDrawsTable(recent);
+  } catch (e) {
+    document.getElementById('dashboard-draws-container').innerHTML =
+      `<div class="empty-state">Failed to load draws: ${e.message}</div>`;
+  }
+}
+
+// ===== DRAWS =====
+async function fetchDraws(fromDashboard = false) {
+  const container = fromDashboard
+    ? document.getElementById('dashboard-draws-container')
+    : document.getElementById('draws-container');
+
+  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/draws?select=*&order=created_at.desc`,
+      { headers: authHeaders() }
+    );
+    const draws = await res.json();
+    if (!Array.isArray(draws)) throw new Error(draws.message || 'Unexpected response');
+    drawsCache = draws;
+
+    // Update stats too if on dashboard
+    if (fromDashboard) {
+      document.getElementById('stat-total').textContent = draws.length;
+      document.getElementById('stat-open').textContent = draws.filter(d=>d.status==='open').length;
+      document.getElementById('stat-closing').textContent = draws.filter(d=>d.status==='closing_tonight').length;
+      document.getElementById('stat-tickets').textContent = draws.reduce((s,d)=>s+(d.tickets_sold||0),0).toLocaleString();
+    }
+
+    container.innerHTML = buildDrawsTable(draws);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+}
+
+function buildDrawsTable(draws) {
+  if (!draws.length) return '<div class="empty-state">No draws found.</div>';
+
+  const hasKey = !!getServiceKey();
+
+  const rows = draws.map(d => {
+    const total = d.total_tickets || 1;
+    const sold = d.tickets_sold || 0;
+    const pct = Math.round((sold / total) * 100);
+    const isHigh = pct >= 80;
+    const minThresh = d.min_threshold || 0;
+    const fillPct = Math.round((sold / total) * 100);
+    const meetsThresh = sold >= minThresh;
+    const canPick = meetsThresh && (d.status === 'closing_tonight' || d.status === 'open') && d.status !== 'completed' && d.status !== 'cancelled';
+
+    const statusMap = {
+      open: '<span class="badge badge-open">Open</span>',
+      closing_tonight: '<span class="badge badge-closing">Closing Tonight</span>',
+      completed: '<span class="badge badge-completed">Completed</span>',
+      cancelled: '<span class="badge badge-cancelled">Cancelled</span>',
+    };
+
+    const statusBadge = statusMap[d.status] || `<span class="badge badge-cancelled">${d.status}</span>`;
+
+    let pickBtn = '';
+    if (canPick) {
+      if (hasKey) {
+        pickBtn = `<button class="btn-pick" onclick="pickWinner('${d.id}')">Pick Winner</button>`;
+      } else {
+        pickBtn = `<button class="btn-pick" disabled data-tooltip="Paste service key in Settings to enable">Pick Winner</button>`;
+      }
+    }
+
+    return `<tr>
+      <td>
+        <div class="draw-title-cell">
+          <span class="draw-emoji">${d.emoji || '🎁'}</span>
+          <div>
+            <div class="draw-name">${escHtml(d.title || 'Untitled')}</div>
+            <div class="draw-seller">@${escHtml(d.seller_handle || '—')}</div>
+          </div>
+        </div>
+      </td>
+      <td>${statusBadge}</td>
+      <td>
+        <div class="fill-wrap">
+          <div class="fill-bar-bg">
+            <div class="fill-bar-inner ${isHigh ? 'high' : ''}" style="width:${Math.min(pct,100)}%"></div>
+          </div>
+          <div class="fill-pct">${sold}/${total} (${fillPct}%)</div>
+        </div>
+      </td>
+      <td>${penceToGBP(d.ticket_price)}</td>
+      <td>${fmtDate(d.closes_at || d.created_at)}</td>
+      <td>${pickBtn}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table>
+    <thead>
+      <tr>
+        <th>Draw</th>
+        <th>Status</th>
+        <th>Fill</th>
+        <th>Ticket</th>
+        <th>Closes</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ===== USERS =====
+async function fetchUsers() {
+  const hasKey = !!getServiceKey();
+  const gateMsg = document.getElementById('users-gate-msg');
+  const tableWrap = document.getElementById('users-table-wrap');
+  const container = document.getElementById('users-container');
+
+  if (!hasKey) {
+    gateMsg.style.display = 'block';
+    tableWrap.style.display = 'none';
+    return;
+  }
+
+  gateMsg.style.display = 'none';
+  tableWrap.style.display = 'block';
+  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/profiles?select=*&order=created_at.desc`,
+      { headers: authHeaders(true) }
+    );
+    const users = await res.json();
+    if (!Array.isArray(users)) throw new Error(users.message || 'Unexpected response');
+
+    if (!users.length) {
+      container.innerHTML = '<div class="empty-state">No users found.</div>';
+      return;
+    }
+
+    const rows = users.map(u => {
+      const letter = (u.handle || u.username || '?')[0].toUpperCase();
+      const balance = u.wallet_balance != null ? penceToGBP(u.wallet_balance) : '—';
+      const sellerBadge = u.is_seller
+        ? '<span class="badge badge-seller">Seller</span>'
+        : '<span style="color:var(--muted);font-size:12px">Buyer</span>';
+      return `<tr>
+        <td>
+          <div class="user-row-inner">
+            <span class="avatar-letter">${letter}</span>
+            <div>
+              <div style="font-weight:500;color:#fff">@${escHtml(u.handle || u.username || '—')}</div>
+              <div style="font-size:11px;color:var(--muted)">${escHtml(u.id || '')}</div>
+            </div>
+          </div>
+        </td>
+        <td>${sellerBadge}</td>
+        <td>${balance}</td>
+        <td>${fmtDate(u.created_at)}</td>
+      </tr>`;
+    }).join('');
+
+    container.innerHTML = `<table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Wallet</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+}
+
+// ===== APPLICATIONS =====
+async function fetchApplications() {
+  const container = document.getElementById('applications-container');
+  container.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/seller_applications?select=*&order=created_at.desc`,
+      { headers: authHeaders(true) }
+    );
+
+    if (res.status === 404 || res.status === 400) {
+      container.innerHTML = '<div class="empty-state">No applications yet — table does not exist.</div>';
+      return;
+    }
+
+    const apps = await res.json();
+
+    if (!Array.isArray(apps)) {
+      if (apps && apps.message && apps.message.includes('does not exist')) {
+        container.innerHTML = '<div class="empty-state">No applications yet.</div>';
+        return;
+      }
+      throw new Error(apps.message || 'Unexpected response');
+    }
+
+    if (!apps.length) {
+      container.innerHTML = '<div class="empty-state">No seller applications yet.</div>';
+      return;
+    }
+
+    const rows = apps.map(a => {
+      const statusMap = {
+        pending: '<span class="badge badge-open">Pending</span>',
+        approved: '<span class="badge badge-completed">Approved</span>',
+        rejected: '<span class="badge badge-cancelled">Rejected</span>',
+      };
+      const statusBadge = statusMap[a.status] || `<span class="badge badge-cancelled">${a.status || '—'}</span>`;
+
+      return `<tr>
+        <td style="font-weight:500;color:#fff">@${escHtml(a.handle || a.user_id || '—')}</td>
+        <td>${escHtml(a.business_name || '—')}</td>
+        <td>${statusBadge}</td>
+        <td>${fmtDate(a.created_at)}</td>
+      </tr>`;
+    }).join('');
+
+    container.innerHTML = `<table>
+      <thead>
+        <tr>
+          <th>Applicant</th>
+          <th>Business</th>
+          <th>Status</th>
+          <th>Applied</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+}
+
+// ===== PICK WINNER =====
+async function pickWinner(drawId) {
+  const draw = drawsCache.find(d => d.id == drawId);
+  if (!draw) { showToast('Draw not found', 'error'); return; }
+
+  const sk = getServiceKey();
+  if (!sk) { showToast('Service key required', 'error'); return; }
+
+  showToast('Fetching tickets...', 'success');
+
+  try {
+    // 1. Fetch tickets for this draw
+    const ticketsRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/tickets?draw_id=eq.${drawId}&select=user_id,quantity`,
+      {
+        headers: {
+          'apikey': ANON_KEY,
+          'Authorization': 'Bearer ' + sk,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    const tickets = await ticketsRes.json();
+    if (!Array.isArray(tickets) || !tickets.length) {
+      showToast('No tickets found for this draw', 'error');
+      return;
+    }
+
+    // 2. Build weighted pool
+    const pool = [];
+    for (const t of tickets) {
+      const qty = t.quantity || 1;
+      for (let i = 0; i < qty; i++) {
+        pool.push(t.user_id);
+      }
+    }
+
+    // 3. Pick random winner
+    const winnerUserId = pool[Math.floor(Math.random() * pool.length)];
+
+    // 4. Fetch winner profile
+    let winnerHandle = winnerUserId;
+    try {
+      const profRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?id=eq.${winnerUserId}&select=handle,username`,
+        {
+          headers: {
+            'apikey': ANON_KEY,
+            'Authorization': 'Bearer ' + sk
+          }
+        }
+      );
+      const profs = await profRes.json();
+      if (Array.isArray(profs) && profs.length) {
+        winnerHandle = profs[0].handle || profs[0].username || winnerUserId;
+      }
+    } catch (_) {}
+
+    // 5. PATCH the draw
+    const now = new Date().toISOString();
+    const patchRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/draws?id=eq.${drawId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'apikey': ANON_KEY,
+          'Authorization': 'Bearer ' + sk,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          status: 'completed',
+          winner_user_id: winnerUserId,
+          winner_handle: winnerHandle,
+          completed_at: now
+        })
+      }
+    );
+
+    if (!patchRes.ok && patchRes.status !== 204) {
+      const txt = await patchRes.text();
+      throw new Error(`Patch failed: ${txt}`);
+    }
+
+    // 6. Insert wallet transaction for seller
+    try {
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/wallet_transactions`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': ANON_KEY,
+            'Authorization': 'Bearer ' + sk,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            user_id: draw.seller_id || draw.user_id,
+            type: 'win',
+            description: 'Draw completed - payout pending',
+            draw_id: drawId,
+            created_at: now
+          })
+        }
+      );
+    } catch (_) {
+      // Non-fatal
+    }
+
+    // 7. Update local cache
+    const idx = drawsCache.findIndex(d => d.id == drawId);
+    if (idx !== -1) {
+      drawsCache[idx] = { ...drawsCache[idx], status: 'completed', winner_user_id: winnerUserId, winner_handle: winnerHandle, completed_at: now };
+    }
+
+    // 8. Show celebration
+    showWinnerModal(winnerHandle, draw.title || 'this draw', draw.emoji || '🎁');
+    fetchDraws();
+    fetchDashboard();
+
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// ===== WINNER MODAL =====
+function showWinnerModal(handle, drawTitle, emoji) {
+  document.getElementById('modal-winner-handle').textContent = '@' + handle;
+  document.getElementById('modal-draw-name').textContent = emoji + ' ' + drawTitle;
+  document.getElementById('winner-modal').classList.add('open');
+  startConfetti();
+}
+
+function closeWinnerModal() {
+  document.getElementById('winner-modal').classList.remove('open');
+  stopConfetti();
+}
+
+// ===== CONFETTI =====
+function startConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.classList.add('active');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+
+  const colors = ['#8B5CF6','#F472B6','#F9C846','#6D28D9','#34d399','#60a5fa','#fb923c'];
+  const pieces = Array.from({length: 160}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    w: Math.random() * 10 + 5,
+    h: Math.random() * 6 + 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rot: Math.random() * Math.PI * 2,
+    rotSpeed: (Math.random() - 0.5) * 0.15,
+    vx: (Math.random() - 0.5) * 2.5,
+    vy: Math.random() * 3 + 2,
+    opacity: 1
+  }));
+
+  let startTime = null;
+  const duration = 4000;
+
+  function draw(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let allGone = true;
+    for (const p of pieces) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.rotSpeed;
+      if (elapsed > duration * 0.6) {
+        p.opacity -= 0.012;
+      }
+      if (p.opacity > 0) {
+        allGone = false;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      }
+    }
+
+    if (!allGone && elapsed < duration + 1000) {
+      confettiAnimId = requestAnimationFrame(draw);
+    } else {
+      stopConfetti();
+    }
+  }
+
+  if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+  confettiAnimId = requestAnimationFrame(draw);
+}
+
+function stopConfetti() {
+  if (confettiAnimId) {
+    cancelAnimationFrame(confettiAnimId);
+    confettiAnimId = null;
+  }
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.classList.remove('active');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ===== SETTINGS =====
+function renderSettings() {
+  updateKeyStatus();
+  const sk = getServiceKey();
+  if (sk) {
+    document.getElementById('service-key-input').value = sk;
+  }
+}
+
+function saveServiceKey() {
+  const val = document.getElementById('service-key-input').value.trim();
+  if (!val) { showToast('Please paste a service key first', 'error'); return; }
+  localStorage.setItem(SERVICE_KEY_STORAGE, val);
+  updateKeyStatus();
+  showToast('Service key saved', 'success');
+}
+
+function clearServiceKey() {
+  localStorage.removeItem(SERVICE_KEY_STORAGE);
+  document.getElementById('service-key-input').value = '';
+  updateKeyStatus();
+  showToast('Service key cleared', 'success');
+}
+
+function updateKeyStatus() {
+  const el = document.getElementById('key-status');
+  if (!el) return;
+  const has = !!getServiceKey();
+  el.className = 'key-status ' + (has ? 'ok' : 'missing');
+  el.textContent = has ? '✓ Service key is set — write operations enabled.' : '✗ No service key — write operations disabled.';
+}
+
+// ===== UTIL =====
+function escHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ===== BOOT =====
+checkAuth();
+</script>
+</body>
+</html>
