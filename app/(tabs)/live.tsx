@@ -293,7 +293,7 @@ export default function LiveScreen() {
               </Text>
             </View>
           ) : (
-            <TouchableOpacity style={styles.watchLive} onPress={() => router.push(`/live/wheel/${tonightDraws[0]?.id}`)}>
+            <TouchableOpacity style={styles.watchLive} onPress={() => { if (tonightDraws[0]?.id) router.push(`/live/wheel/${tonightDraws[0].id}` as any); }}>
               <Ionicons name="radio" size={18} color={Colors.white} />
               <Text style={styles.watchLiveText}>Watch Live Now</Text>
               <Ionicons name="chevron-forward" size={16} color={Colors.white} />

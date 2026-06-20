@@ -8,7 +8,7 @@ interface AuthState {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
-  // derived
+  // derived — kept as plain values, updated in setters
   isLoggedIn: boolean;
   isSeller: boolean;
   handle: string;
@@ -23,44 +23,70 @@ interface AuthState {
   deductFunds: (pence: number) => void;
 }
 
+function derived(profile: Profile | null, session: Session | null) {
+  return {
+    isLoggedIn: !!session,
+    isSeller: profile?.is_seller ?? false,
+    handle: profile?.handle ?? '@you',
+    avatar: profile?.avatar_letter ?? 'Y',
+    walletBalance: profile?.wallet_balance ?? 0,
+  };
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   profile: null,
   loading: true,
-  get isLoggedIn() { return !!get().session; },
-  get isSeller() { return get().profile?.is_seller ?? false; },
-  get handle() { return get().profile?.handle ?? '@you'; },
-  get avatar() { return get().profile?.avatar_letter ?? 'Y'; },
-  get walletBalance() { return get().profile?.wallet_balance ?? 0; },
+  isLoggedIn: false,
+  isSeller: false,
+  handle: '@you',
+  avatar: 'Y',
+  walletBalance: 0,
 
-  setSession: (session) => set({ session, user: session?.user ?? null, loading: false }),
+  setSession: (session) =>
+    set((s) => ({
+      session,
+      user: session?.user ?? null,
+      loading: false,
+      ...derived(s.profile, session),
+    })),
 
-  setProfile: (profile) => set({ profile }),
+  setProfile: (profile) =>
+    set((s) => ({
+      profile,
+      ...derived(profile, s.session),
+    })),
 
   logout: async () => {
     await supabase.auth.signOut();
-    set({ session: null, user: null, profile: null });
+    set({ session: null, user: null, profile: null, ...derived(null, null), loading: false });
   },
 
   refreshProfile: async () => {
-    const { user } = get();
+    const { user, session } = get();
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
-    if (data) set({ profile: data });
+    if (data) set({ profile: data, ...derived(data, session) });
   },
 
   addFunds: (pence) =>
-    set((s) => ({
-      profile: s.profile ? { ...s.profile, wallet_balance: s.profile.wallet_balance + pence } : null,
-    })),
+    set((s) => {
+      const profile = s.profile
+        ? { ...s.profile, wallet_balance: s.profile.wallet_balance + pence }
+        : null;
+      return { profile, walletBalance: (s.profile?.wallet_balance ?? 0) + pence };
+    }),
 
   deductFunds: (pence) =>
-    set((s) => ({
-      profile: s.profile ? { ...s.profile, wallet_balance: s.profile.wallet_balance - pence } : null,
-    })),
+    set((s) => {
+      const profile = s.profile
+        ? { ...s.profile, wallet_balance: s.profile.wallet_balance - pence }
+        : null;
+      return { profile, walletBalance: (s.profile?.wallet_balance ?? 0) - pence };
+    }),
 }));

@@ -166,6 +166,7 @@ export default function HomeScreen() {
     if (filter === 'Bundles') return d.isBundle;
     if (filter === 'High value') return d.retailValue >= 1000;
     if (filter === 'Saved') return savedIds.has(d.id);
+    if (filter === 'Just listed') return d.status === 'open' && (d.ticketsSold / d.totalTickets) < 0.15;
     return true;
   });
 
@@ -210,7 +211,9 @@ export default function HomeScreen() {
             onPress={() => router.push(`/live/winner/${wins[0].drawId}` as any)}
             activeOpacity={0.9}
           >
-            <Text style={styles.winBannerEmoji}>{wins[0].drawEmoji}</Text>
+            <View style={styles.winBannerIconBox}>
+              <Ionicons name="trophy" size={18} color={Colors.gold} />
+            </View>
             <View style={styles.winBannerInfo}>
               <Text style={styles.winBannerTitle}>You won</Text>
               <Text style={styles.winBannerSub}>{wins[0].drawTitle} · tap to celebrate</Text>
@@ -351,7 +354,9 @@ export default function HomeScreen() {
           {filter === 'Tonight' ? 'Closing tonight' :
            filter === 'Filling fast' ? 'Filling fast' :
            filter === 'Bundles' ? 'Bundle draws' :
-           filter === 'High value' ? 'High value draws' : 'All draws'}
+           filter === 'High value' ? 'High value draws' :
+           filter === 'Just listed' ? 'Just listed' :
+           filter === 'Saved' ? 'Saved draws' : 'All draws'}
         </Text>
 
         {/* 2-col grid */}
@@ -569,7 +574,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md, paddingVertical: 14,
     borderWidth: 1, borderColor: 'rgba(249,200,70,0.4)',
   },
-  winBannerEmoji: { fontSize: 28 },
+  winBannerIconBox: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(249,200,70,0.15)', alignItems: 'center', justifyContent: 'center' },
   winBannerInfo: { flex: 1 },
   winBannerTitle: { fontSize: FontSizes.base, color: Colors.gold, fontWeight: '800' },
   winBannerSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },

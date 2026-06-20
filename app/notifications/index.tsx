@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { useAuthStore } from '../../src/store';
 import { fetchWalletTransactions, checkForWins, WalletTransaction, WinResult } from '../../src/services/draws';
-import { MOCK_NOTIFICATIONS } from '../../src/mocks';
 
 type NotifItem = {
   id: string;
@@ -14,6 +13,7 @@ type NotifItem = {
   body: string;
   time: string;
   read: boolean;
+  drawId?: string;
 };
 
 function mapTxnToNotif(t: WalletTransaction): NotifItem {
@@ -23,7 +23,7 @@ function mapTxnToNotif(t: WalletTransaction): NotifItem {
   return {
     id: t.id,
     type,
-    title: isWin ? '🏆 You won!' : isPayout ? '💸 Payout received' : '🎫 Tickets purchased',
+    title: isWin ? 'You won!' : isPayout ? 'Payout received' : 'Tickets purchased',
     body: t.label,
     time: t.date,
     read: false,
@@ -34,10 +34,11 @@ function mapWinToNotif(w: WinResult): NotifItem {
   return {
     id: `win-${w.drawId}`,
     type: 'win',
-    title: `🏆 You won ${w.drawEmoji} ${w.drawTitle}!`,
+    title: `You won — ${w.drawTitle}`,
     body: `Worth £${(w.retailValue / 100).toFixed(0)} — congratulations! We'll be in touch to arrange delivery.`,
     time: w.completedAt ? new Date(w.completedAt).toLocaleDateString() : 'Recently',
     read: false,
+    drawId: w.drawId,
   };
 }
 
@@ -80,16 +81,7 @@ export default function NotificationsScreen() {
 
   useEffect(() => {
     if (!user) {
-      // Show mocks for unauthenticated preview
-      const mockItems: NotifItem[] = MOCK_NOTIFICATIONS.map(n => ({
-        id: n.id,
-        type: n.type as NotifItem['type'],
-        title: n.title,
-        body: n.body,
-        time: n.time,
-        read: n.read,
-      }));
-      setItems(mockItems);
+      setItems([]);
       setLoading(false);
       return;
     }
@@ -100,22 +92,7 @@ export default function NotificationsScreen() {
     ]).then(([txns, wins]) => {
       const winNotifs = wins.map(mapWinToNotif);
       const txnNotifs = txns.map(mapTxnToNotif);
-      // Wins first, then transactions
-      const combined = [...winNotifs, ...txnNotifs];
-      if (combined.length === 0) {
-        // Fallback to mocks so screen is never empty during demo
-        const mockItems: NotifItem[] = MOCK_NOTIFICATIONS.map(n => ({
-          id: n.id,
-          type: n.type as NotifItem['type'],
-          title: n.title,
-          body: n.body,
-          time: n.time,
-          read: n.read,
-        }));
-        setItems(mockItems);
-      } else {
-        setItems(combined);
-      }
+      setItems([...winNotifs, ...txnNotifs]);
     }).finally(() => setLoading(false));
   }, [user]);
 
@@ -133,8 +110,10 @@ export default function NotificationsScreen() {
         <ActivityIndicator color={Colors.lilac} style={{ marginTop: 60 }} />
       ) : items.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyEmoji}>🔔</Text>
-          <Text style={styles.emptyTitle}>No notifications yet</Text>
+          <View style={styles.emptyIconBox}>
+            <Ionicons name="notifications-outline" size={32} color={Colors.textTertiary} />
+          </View>
+          <Text style={styles.emptyTitle}>Nothing here yet</Text>
           <Text style={styles.emptySub}>Draw alerts and win announcements will appear here.</Text>
         </View>
       ) : (
@@ -142,13 +121,17 @@ export default function NotificationsScreen() {
           {items.map(n => {
             const { name: iconName, color: iconColor } = iconForType(n.type);
             return (
-              <View
+              <TouchableOpacity
                 key={n.id}
                 style={[
                   styles.row,
                   { backgroundColor: bgForType(n.type), borderColor: borderForType(n.type) },
                   !n.read && styles.rowUnread,
                 ]}
+                onPress={() => {
+                  if (n.drawId) router.push(`/live/winner/${n.drawId}` as any);
+                }}
+                activeOpacity={n.drawId ? 0.8 : 1}
               >
                 <View style={[styles.iconBox, { backgroundColor: `${iconColor}22` }]}>
                   <Ionicons name={iconName as any} size={18} color={iconColor} />
@@ -161,7 +144,7 @@ export default function NotificationsScreen() {
                   <Text style={styles.time}>{n.time}</Text>
                   {!n.read && <View style={styles.unreadDot} />}
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
         </ScrollView>
@@ -195,8 +178,8 @@ const styles = StyleSheet.create({
   meta: { alignItems: 'flex-end', gap: 6, flexShrink: 0 },
   time: { fontSize: 9, color: Colors.textTertiary },
   unreadDot: { width: 7, height: 7, borderRadius: 99, backgroundColor: Colors.lilac },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, padding: Spacing.xxl },
-  emptyEmoji: { fontSize: 40, marginBottom: 4 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: Spacing.xxl },
+  emptyIconBox: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   emptyTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
   emptySub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 18 },
 });

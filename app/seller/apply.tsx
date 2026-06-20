@@ -57,12 +57,17 @@ export default function SellerApplyScreen() {
   if (done) {
     return (
       <View style={styles.success}>
-        <Text style={styles.successEmoji}>🎉</Text>
+        <View style={styles.successIconBox}>
+          <Ionicons name="checkmark-circle" size={52} color={Colors.lilac} />
+        </View>
         <Text style={styles.successTitle}>Application received!</Text>
         <Text style={styles.successSub}>
-          We review applications within 24 hours. You'll get a notification when you're approved to list.
+          Next, we need to verify your identity. It takes about 2 minutes and keeps the platform safe for everyone.
         </Text>
-        <PrimaryButton label="Back to home" onPress={() => router.replace('/(tabs)')} style={{ marginTop: Spacing.xl }} />
+        <PrimaryButton label="Verify my identity →" onPress={() => router.replace('/seller/kyc')} style={{ marginTop: Spacing.xl }} />
+        <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={{ marginTop: Spacing.md, padding: Spacing.sm }}>
+          <Text style={{ color: Colors.textTertiary, fontSize: FontSizes.xs, textAlign: 'center' }}>Do this later</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -132,7 +137,7 @@ const styles = StyleSheet.create({
   errorCard: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(226,75,74,0.1)', borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(226,75,74,0.3)', padding: Spacing.md, marginTop: Spacing.md },
   errorText: { flex: 1, fontSize: FontSizes.sm, color: Colors.danger },
   success: { flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center', padding: Spacing.xl },
-  successEmoji: { fontSize: 60, marginBottom: 12 },
+  successIconBox: { width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   successTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.xxl, color: Colors.white, marginBottom: 8, textAlign: 'center' },
   successSub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 20 },
 });

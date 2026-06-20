@@ -128,7 +128,8 @@ export async function fetchMyTickets(userId: string): Promise<Draw[]> {
       .select('*, draws(*)')
       .eq('user_id', userId);
 
-    if (error || !tickets || tickets.length === 0) return MOCK_MY_TICKETS;
+    if (error || !tickets) return [];
+    if (tickets.length === 0) return [];
 
     // Bundle items for bundle draws
     const bundleDrawIds = tickets
@@ -155,7 +156,7 @@ export async function fetchMyTickets(userId: string): Promise<Draw[]> {
         return mapDraw(db, (t as DBTicket).quantity, bundleMap[db.id]);
       });
   } catch {
-    return MOCK_MY_TICKETS;
+    return [];
   }
 }
 
@@ -239,11 +240,11 @@ export async function fetchWalletTransactions(userId: string): Promise<WalletTra
       .order('created_at', { ascending: false })
       .limit(20);
 
-    if (error || !data || data.length === 0) return MOCK_WALLET.transactions;
+    if (error || !data) return [];
 
     return data.map(mapTransaction);
   } catch {
-    return MOCK_WALLET.transactions;
+    return [];
   }
 }
 

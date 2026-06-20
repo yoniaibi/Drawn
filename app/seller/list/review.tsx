@@ -75,9 +75,9 @@ export default function ListReviewScreen() {
 
       if (drawErr) throw new Error(drawErr.message);
 
-      // 3. Clear draft
-      draft.clearDraft();
+      // 3. Mark done first (while draft still holds values), then clear
       setDone(true);
+      draft.clearDraft();
 
     } catch (e: any) {
       setError(e.message ?? 'Something went wrong. Please try again.');
@@ -90,7 +90,9 @@ export default function ListReviewScreen() {
   if (done) {
     return (
       <View style={styles.successScreen}>
-        <Text style={styles.successEmoji}>{draft.emoji || '🎉'}</Text>
+        <View style={styles.successIconBox}>
+          <Ionicons name="checkmark-circle" size={52} color={Colors.lilac} />
+        </View>
         <Text style={styles.successHeading}>Draw submitted!</Text>
         <Text style={styles.successSub}>
           Ship your item to us within 3 days using the prepaid label we'll send to your email.
@@ -98,13 +100,13 @@ export default function ListReviewScreen() {
         </Text>
         <View style={styles.successSteps}>
           {[
-            { icon: '📦', label: 'Ship item', sub: 'Prepaid label sent to your email' },
-            { icon: '🔍', label: 'We verify it', sub: 'Authenticity check within 24h of receipt' },
-            { icon: '🚀', label: 'Goes live', sub: 'Next available 9pm slot' },
-            { icon: '💸', label: 'You get paid', sub: `${formatTicketPrice(sellerGets)} if all tickets sell` },
+            { icon: 'cube-outline' as const, label: 'Ship item', sub: 'Prepaid label sent to your email' },
+            { icon: 'search-outline' as const, label: 'We verify it', sub: 'Authenticity check within 24h of receipt' },
+            { icon: 'rocket-outline' as const, label: 'Goes live', sub: 'Next available 9pm slot' },
+            { icon: 'cash-outline' as const, label: 'You get paid', sub: `${formatTicketPrice(sellerGets)} if all tickets sell` },
           ].map((s) => (
             <View key={s.label} style={styles.successStep}>
-              <Text style={styles.successStepIcon}>{s.icon}</Text>
+              <Ionicons name={s.icon} size={22} color={Colors.lilac} />
               <View>
                 <Text style={styles.successStepLabel}>{s.label}</Text>
                 <Text style={styles.successStepSub}>{s.sub}</Text>
@@ -223,12 +225,11 @@ const styles = StyleSheet.create({
 
   // Success screen
   successScreen: { flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', padding: Spacing.xl, paddingTop: 80 },
-  successEmoji: { fontSize: 72, marginBottom: 12 },
+  successIconBox: { width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   successHeading: { fontFamily: Fonts.serif, fontSize: FontSizes.xxl, color: Colors.white, marginBottom: 8, textAlign: 'center' },
   successSub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 20, marginBottom: Spacing.xl },
   successSteps: { width: '100%', gap: 12, marginBottom: Spacing.xl },
   successStep: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: Colors.darkCard, borderRadius: Radius.md, padding: Spacing.md },
-  successStepIcon: { fontSize: 26 },
   successStepLabel: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '600' },
   successStepSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
 });

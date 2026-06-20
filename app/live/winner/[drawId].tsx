@@ -124,7 +124,7 @@ export default function WinnerScreen() {
       </TouchableOpacity>
 
       <View style={styles.body}>
-        <Animated.Text style={[styles.kicker, kickerStyle]}>🏆 WINNER ANNOUNCED</Animated.Text>
+        <Animated.Text style={[styles.kicker, kickerStyle]}>WINNER ANNOUNCED</Animated.Text>
 
         <Animated.Text style={[styles.name, nameStyle]}>
           {winner.winnerHandle}<Text style={styles.dot}>.</Text>
@@ -148,7 +148,7 @@ export default function WinnerScreen() {
               </View>
               <View style={styles.valueRatioSide}>
                 <Text style={[styles.valueRatioAmount, { color: Colors.gold }]}>
-                  £{(winner.retailValue / 100).toLocaleString()}
+                  £{winner.retailValue.toLocaleString()}
                 </Text>
                 <Text style={styles.valueRatioSubLabel}>retail value</Text>
               </View>
@@ -157,7 +157,7 @@ export default function WinnerScreen() {
         </Animated.View>
 
         <Animated.Text style={[styles.sellerNote, glowStyle]}>
-          {winner.sellerHandle} earned £{(winner.sellerEarned / 100).toFixed(0)} on this draw 💜
+          {winner.sellerHandle} earned £{(winner.sellerEarned / 100).toFixed(0)} on this draw
         </Animated.Text>
 
         <Animated.View style={[glowStyle, styles.shareRow]}>
