@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Page not found — DRAWN</title>
+<script>
+  // Redirect app routes to the Expo SPA
+  if (window.location.pathname.startsWith('/Drawn/app')) {
+    window.location.replace('/Drawn/app/');
+  }
+</script>
 <style>
   :root { --ink: #1A1040; --lilac: #8B5CF6; --pink: #F472B6; --gold: #F9C846; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
