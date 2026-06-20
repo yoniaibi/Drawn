@@ -51,7 +51,7 @@ export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {
   const isLive = draw.status === 'live';
   const isUrgent = isTonight && progress > 0.7;
   const urgentColor = URGENCY_COLORS[draw.status];
-  const viewers = Math.floor(draw.ticketsSold * 0.08 + 12);
+  const viewers = Math.floor(draw.ticketsSold * 0.012 + 4);
   const condition = CONDITION_LABELS[draw.condition] ?? CONDITION_LABELS.good;
 
   function handleSave() {

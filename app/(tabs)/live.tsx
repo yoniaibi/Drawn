@@ -20,13 +20,13 @@ import { useAuthStore } from '../../src/store';
 import { supabase } from '../../src/lib/supabase';
 
 const HYPE_MESSAGES = [
-  '@chloe_j is watching 👀',
+  '@chloe_j is watching',
   '@marcus just bought 5 more tickets',
-  '12 new people joined in the last minute',
+  'A few more people just joined',
   '@priya__ is ready for tonight',
-  'Threshold hit on Chanel draw! 🔥',
+  'Threshold hit on Chanel draw',
   '3 draws close in under 2 hours',
-  '@dan.west going BIG tonight 🎯',
+  '@dan.west going big tonight',
   'Rolex is 97% sold — last few tickets!',
   '@jade_m: omg I actually need that Chanel 😭',
   '✅ Draw confirmed — all thresholds met',
@@ -90,7 +90,7 @@ export default function LiveScreen() {
   const { handle: myHandle } = useAuthStore();
 
   const [time, setTime] = useState(getCountdownTo9pm());
-  const [viewerCount, setViewerCount] = useState(1247);
+  const [viewerCount, setViewerCount] = useState(47);
   const [hypeIdx, setHypeIdx] = useState(0);
   const hypeOpacity = useRef(new RNAnimated.Value(1)).current;
 
@@ -215,8 +215,8 @@ export default function LiveScreen() {
   // Viewer count drift
   useEffect(() => {
     const base = Math.max(800, tonightDraws.reduce((s, d) => s + d.ticketsSold, 0));
-    setViewerCount(Math.round(base * 0.08 + 100));
-    const id = setInterval(() => setViewerCount(v => Math.max(800, v + Math.floor(Math.random() * 5) - 2)), 4000);
+    setViewerCount(Math.round(base * 0.012 + 20));
+    const id = setInterval(() => setViewerCount(v => Math.max(20, v + Math.floor(Math.random() * 3) - 1)), 8000);
     return () => clearInterval(id);
   }, [tonightDraws.length]);
 

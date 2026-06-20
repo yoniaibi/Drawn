@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Animated as RNAnimated, Modal, Pressable, ActivityIndicator,
+  Animated as RNAnimated, Modal, Pressable, ActivityIndicator, Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -52,7 +52,7 @@ export default function PurchaseScreen() {
   if (!draw) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-        <Text style={{ fontSize: 40 }}>🎟️</Text>
+        <Ionicons name="ticket-outline" size={40} color={Colors.textTertiary} />
         <Text style={{ color: Colors.white, fontSize: FontSizes.base, fontWeight: '700' }}>Draw not found</Text>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={{ color: Colors.lilac, fontSize: FontSizes.sm }}>Go back</Text>
@@ -84,11 +84,11 @@ export default function PurchaseScreen() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      RNAnimated.timing(msgOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
+      RNAnimated.timing(msgOpacity, { toValue: 0, duration: 250, useNativeDriver: false }).start(() => {
         setMsgIdx(i => (i + 1) % BUYER_MESSAGES.length);
-        RNAnimated.timing(msgOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+        RNAnimated.timing(msgOpacity, { toValue: 1, duration: 250, useNativeDriver: false }).start();
       });
-    }, 3000);
+    }, 7000);
     return () => clearInterval(id);
   }, []);
 
@@ -150,7 +150,7 @@ export default function PurchaseScreen() {
         event: 'chat',
         payload: {
           handle: useAuthStore.getState().handle ?? '@you',
-          msg: `just bought ${qty} ticket${qty > 1 ? 's' : ''} on ${d.title} ${d.emoji}`,
+          msg: `just bought ${qty} ticket${qty > 1 ? 's' : ''} on ${d.title}`,
         },
       });
     }
@@ -167,7 +167,7 @@ export default function PurchaseScreen() {
       {/* Success banner */}
       {flow === 'success' && (
         <RNAnimated.View style={[styles.successBanner, { opacity: bannerOpacity }]}>
-          <Text style={styles.successBannerText}>🎟 You're in! Good luck tonight.</Text>
+          <Text style={styles.successBannerText}>You're in! Good luck tonight.</Text>
         </RNAnimated.View>
       )}
 
@@ -180,7 +180,11 @@ export default function PurchaseScreen() {
 
       {/* Draw preview */}
       <View style={styles.drawPreview}>
-        <Text style={styles.previewEmoji}>{d.emoji}</Text>
+        {d.image ? (
+          <Image source={{ uri: d.image }} style={styles.previewImage} resizeMode="cover" />
+        ) : (
+          <View style={styles.previewImage} />
+        )}
         <View style={styles.previewInfo}>
           <Text style={styles.previewTitle}>{d.title}</Text>
           <Text style={styles.previewSeller}>{d.seller}</Text>
@@ -203,7 +207,7 @@ export default function PurchaseScreen() {
         </View>
         <ProgressBar progress={progress} height={5} color={isLow ? Colors.danger : Colors.lilac} />
         {isLow && (
-          <Text style={styles.fillScarcity}>⚡ Only {remaining} tickets left!</Text>
+          <Text style={styles.fillScarcity}>Only {remaining} tickets left</Text>
         )}
       </View>
 
@@ -375,7 +379,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: Colors.darkCard, borderRadius: Radius.lg, padding: Spacing.md, marginBottom: Spacing.sm,
   },
-  previewEmoji: { fontSize: 36 },
+  previewImage: { width: 56, height: 56, borderRadius: 10, backgroundColor: 'rgba(139,92,246,0.2)' },
   previewInfo: { flex: 1 },
   previewTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
   previewSeller: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 4 },

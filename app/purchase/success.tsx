@@ -52,7 +52,7 @@ export default function PurchaseSuccessScreen() {
     return (
       <View style={styles.screen}>
         <Confetti />
-        <Text style={styles.heading}>You're in! 🎟️</Text>
+        <Text style={styles.heading}>You're in!</Text>
         <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={styles.secondaryBtn}>
           <Text style={styles.secondaryBtnText}>Back to draws</Text>
         </TouchableOpacity>
@@ -68,7 +68,7 @@ export default function PurchaseSuccessScreen() {
 
   function handleShare() {
     Share.share({
-      message: `I just entered the ${d.title} draw on Drawn for ${formatTicketPrice(totalNum)}. Could win £${d.retailValue.toLocaleString()} tonight at 9pm 🎟️ drawn.app`,
+      message: `I just entered the ${d.title} draw on Drawn for ${formatTicketPrice(totalNum)}. Could win £${d.retailValue.toLocaleString()} tonight at 9pm — drawn.app`,
     });
   }
 

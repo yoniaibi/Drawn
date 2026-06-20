@@ -102,7 +102,7 @@ export default function DrawDetailScreen() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const viewers = Math.round(draw.ticketsSold * 0.08 + 12);
+  const viewers = Math.round(draw.ticketsSold * 0.012 + 4);
 
   const myOdds = draw.myTickets > 0
     ? ((draw.myTickets / draw.totalTickets) * 100).toFixed(2)

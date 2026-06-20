@@ -248,7 +248,7 @@ export default function HomeScreen() {
               <View style={styles.heroViewers}>
                 <Ionicons name="eye-outline" size={10} color={Colors.textSecondary} />
                 <Text style={styles.heroViewersText}>
-                  {featuredDraw ? (Math.round(featuredDraw.ticketsSold * 0.08 + 12)).toLocaleString() : '—'} watching
+                  {featuredDraw ? (Math.round(featuredDraw.ticketsSold * 0.012 + 4)).toLocaleString() : '—'} watching
                 </Text>
               </View>
             </View>
