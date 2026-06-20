@@ -1,13 +1,37 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useFonts, PlayfairDisplay_700Bold_Italic } from '@expo-google-fonts/playfair-display';
-import { useEffect } from 'react';
+import { useEffect, Component, ReactNode } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, Platform } from 'react-native';
 import { Colors } from '../src/theme';
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/store';
 
-SplashScreen.preventAutoHideAsync();
+try { SplashScreen.preventAutoHideAsync(); } catch {}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      const err = this.state.error as Error;
+      return (
+        <View style={{ flex: 1, backgroundColor: '#0F0A1E', padding: 24, paddingTop: 60 }}>
+          <Text style={{ color: '#F472B6', fontSize: 16, fontWeight: '700', marginBottom: 12 }}>
+            App Error (web debug)
+          </Text>
+          <ScrollView>
+            <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'monospace' }}>
+              {err.message}{'\n\n'}{err.stack}
+            </Text>
+          </ScrollView>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold_Italic });
@@ -48,6 +72,7 @@ export default function RootLayout() {
   if (!fontsLoaded || loading) return null;
 
   return (
+    <ErrorBoundary>
     <SafeAreaProvider>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.darkBg } }}>
         <Stack.Screen name="(auth)" />
@@ -68,5 +93,6 @@ export default function RootLayout() {
         <Stack.Screen name="search/index" options={{ presentation: 'modal' }} />
       </Stack>
     </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
