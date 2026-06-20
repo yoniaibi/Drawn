@@ -25,12 +25,17 @@
     </style>
   </head>
 
-  <body>
-    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
-    <!-- The root element for your Expo app. -->
+  <body style="background:#0F0A1E">
+    <script>
+      window.onerror = function(msg, src, line, col, err) {
+        document.body.innerHTML = '<div style="padding:24px;font-family:monospace;color:#F472B6"><h2 style="margin-bottom:12px">JS Error (send this to Yoni)</h2><pre style="color:#fff;font-size:11px;white-space:pre-wrap">' + msg + '\n\nFile: ' + src + ':' + line + '\n\n' + (err ? err.stack : '') + '</pre></div>';
+        return true;
+      };
+      window.addEventListener('unhandledrejection', function(e) {
+        document.body.innerHTML = '<div style="padding:24px;font-family:monospace;color:#F472B6"><h2 style="margin-bottom:12px">Promise Error (send this to Yoni)</h2><pre style="color:#fff;font-size:11px;white-space:pre-wrap">' + e.reason + '</pre></div>';
+      });
+    </script>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
   <script src="/Drawn/_expo/static/js/web/entry-4a3596b6616267db6180fa63c3c00bcd.js" defer></script>
 </body>
