@@ -20,19 +20,18 @@ import { useStreak } from '../../src/hooks/useStreak';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { useAuthStore } from '../../src/store';
 
-const FILTERS = ['Tonight 🔥', 'Hot', 'High value', 'Bundles', 'Just listed', '♡ Saved'];
+const FILTERS = ['Tonight', 'Filling fast', 'High value', 'Bundles', 'Just listed', 'Saved'];
 
 const LIVE_TICKERS = [
-  '👀 1,247 people watching right now',
-  '🎟️ @jade_m just bought 3 tickets · Chanel Flap',
-  '🔥 Rolex Submariner is 97% full',
-  '🎟️ @ryan.k grabbed 10 tickets · Rolex',
-  '✅ Threshold hit on Chanel Flap — draw confirmed tonight',
-  '🎟️ @priya__ just joined · Designer Closet',
-  '👜 Chanel Flap draw closes in 2h',
-  '🎟️ @chloe_j added 15 tickets · Chanel Flap',
-  '🔒 All items verified before listing',
-  '⚡ @tom_w bought 5 more · MacBook Pro',
+  '@jade_m just bought 3 tickets · Chanel Flap',
+  'Rolex Submariner is 97% sold',
+  '@ryan.k grabbed 10 tickets · Rolex',
+  'Threshold hit on Chanel Flap — draw is on tonight',
+  '@priya__ joined · Designer Closet',
+  'Chanel Flap draw closes in 2h',
+  '@chloe_j added 15 tickets · Chanel Flap',
+  '@tom_w bought 5 more · MacBook Pro',
+  '@ellie.b just joined · Jordan 1 Chicago',
 ];
 
 
@@ -45,7 +44,7 @@ const DAILY_REWARDS = [
 export default function HomeScreen() {
   const router = useRouter();
   const { streak, isNewDay } = useStreak();
-  const [filter, setFilter] = useState('Tonight 🔥');
+  const [filter, setFilter] = useState('Tonight');
   const [tickerIdx, setTickerIdx] = useState(0);
   const [winnerIdx, setWinnerIdx] = useState(0);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
@@ -145,7 +144,7 @@ export default function HomeScreen() {
         setTickerIdx(i => (i + 1) % LIVE_TICKERS.length);
         RNAnimated.timing(tickerOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
       });
-    }, 5000);
+    }, 8000);
     return () => clearInterval(interval);
   }, []);
 
@@ -157,16 +156,16 @@ export default function HomeScreen() {
         RNAnimated.timing(winnerSlide, { toValue: -20, duration: 300, useNativeDriver: true }),
         RNAnimated.timing(winnerSlide, { toValue: 0, duration: 0, useNativeDriver: true }),
       ]).start(() => setWinnerIdx(i => (i + 1) % pool.length));
-    }, 5500);
+    }, 9000);
     return () => clearInterval(interval);
   }, [recentWinners]);
 
   const filtered = draws.filter(d => {
-    if (filter === 'Tonight 🔥') return d.status === 'closing_tonight';
-    if (filter === 'Hot') return (d.ticketsSold / d.totalTickets) >= 0.75;
+    if (filter === 'Tonight') return d.status === 'closing_tonight';
+    if (filter === 'Filling fast') return (d.ticketsSold / d.totalTickets) >= 0.75;
     if (filter === 'Bundles') return d.isBundle;
     if (filter === 'High value') return d.retailValue >= 1000;
-    if (filter === '♡ Saved') return savedIds.has(d.id);
+    if (filter === 'Saved') return savedIds.has(d.id);
     return true;
   });
 
@@ -184,7 +183,7 @@ export default function HomeScreen() {
         <View style={styles.navRight}>
           {streak >= 1 && (
             <Animated2.View style={[styles.streakBadge, streakStyle]}>
-              <Text style={styles.streakText}>🔥 {streak}</Text>
+              <Text style={styles.streakText}>{streak}</Text>
             </Animated2.View>
           )}
           <TouchableOpacity onPress={() => router.push('/search')}>
@@ -213,7 +212,7 @@ export default function HomeScreen() {
           >
             <Text style={styles.winBannerEmoji}>{wins[0].drawEmoji}</Text>
             <View style={styles.winBannerInfo}>
-              <Text style={styles.winBannerTitle}>🏆 You won!</Text>
+              <Text style={styles.winBannerTitle}>You won</Text>
               <Text style={styles.winBannerSub}>{wins[0].drawTitle} · tap to celebrate</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={Colors.gold} />
@@ -226,7 +225,7 @@ export default function HomeScreen() {
             <Text style={styles.dailyBannerEmoji}>{dailyReward.emoji}</Text>
             <View style={styles.dailyBannerInfo}>
               <Text style={styles.dailyBannerTitle}>{dailyReward.title}</Text>
-              {streak >= 2 && <Text style={styles.dailyBannerStreak}>🔥 {streak} day streak</Text>}
+              {streak >= 2 && <Text style={styles.dailyBannerStreak}>{streak} day streak</Text>}
             </View>
             <TouchableOpacity onPress={() => setDailyRewardVisible(false)} style={styles.dailyBannerClose}>
               <Ionicons name="close" size={14} color={Colors.textTertiary} />
@@ -289,7 +288,7 @@ export default function HomeScreen() {
         {/* Recent winner rotating banner */}
         <View style={styles.winnerBanner}>
           <View style={styles.winnerLeft}>
-            <Text style={styles.winnerKicker}>🏆 JUST WON</Text>
+            <Text style={styles.winnerKicker}>JUST WON</Text>
             <RNAnimated.Text style={[styles.winnerHandle, { transform: [{ translateY: winnerSlide }] }]}>
               {winner.handle}
             </RNAnimated.Text>
@@ -336,7 +335,7 @@ export default function HomeScreen() {
             activeOpacity={0.9}
           >
             <View style={styles.forYouLeft}>
-              <Text style={styles.forYouKicker}>✦ PICKED FOR YOU</Text>
+              <Text style={styles.forYouKicker}>PICKED FOR YOU</Text>
               <Text style={styles.forYouTitle}>{forYouDraw.title}</Text>
               <Text style={styles.forYouSub}>
                 {forYouDraw.ticketPrice}p ticket · £{forYouDraw.retailValue.toLocaleString()} prize
@@ -349,8 +348,8 @@ export default function HomeScreen() {
         )}
 
         <Text style={styles.sectionTitle}>
-          {filter === 'Tonight 🔥' ? 'Closing tonight' :
-           filter === 'Hot' ? '🔥 Filling fast' :
+          {filter === 'Tonight' ? 'Closing tonight' :
+           filter === 'Filling fast' ? 'Filling fast' :
            filter === 'Bundles' ? 'Bundle draws' :
            filter === 'High value' ? 'High value draws' : 'All draws'}
         </Text>

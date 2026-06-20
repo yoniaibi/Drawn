@@ -25,10 +25,10 @@ const URGENCY_COLORS = {
 };
 
 const CONDITION_LABELS: Record<string, { label: string; color: string }> = {
-  new:      { label: 'New',       color: '#10B981' },
+  new:      { label: 'New',       color: Colors.lilac },
   like_new: { label: 'Like new',  color: Colors.lilac },
-  good:     { label: 'Good',      color: Colors.gold },
-  fair:     { label: 'Fair',      color: Colors.textSecondary },
+  good:     { label: 'Good',      color: Colors.textSecondary },
+  fair:     { label: 'Fair',      color: Colors.textTertiary },
 };
 
 export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {

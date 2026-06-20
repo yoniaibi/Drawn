@@ -20,13 +20,12 @@ const FALLBACK_WINS = [
 type SplashWin = { handle: string; item: string; ticketPrice: number; retailValue: number; image: string; };
 
 const SOCIAL_PROOF = [
-  '👀 1,247 people watching tonight',
-  '🥇 23 items won this week',
-  '💰 £127,000 in prizes drawn so far',
-  '🎟️ Free postal entry on every draw',
-  '👜 Chanel Flap won for 25p tonight',
-  '⚡ Sellers paid within 24 hours',
-  '🔒 Every item verified before listing',
+  'Every item verified before listing',
+  'Sellers paid within 24 hours of the draw',
+  'Free postal entry available on every draw',
+  'Draw runs every night at 9pm',
+  'Winner chosen at random — fully transparent',
+  'No subscription. No catch.',
 ];
 
 export default function SplashScreen() {
@@ -61,7 +60,7 @@ export default function SplashScreen() {
       } else {
         setWinnerIdx(i => (i + 1) % recentWins.length);
       }
-    }, 3500);
+    }, 5000);
     return () => clearInterval(id);
   }, [recentWins.length]);
 
@@ -76,7 +75,7 @@ export default function SplashScreen() {
       } else {
         setProofIdx(i => (i + 1) % SOCIAL_PROOF.length);
       }
-    }, 2500);
+    }, 6000);
     return () => clearInterval(id);
   }, []);
 
@@ -232,13 +231,12 @@ const styles = StyleSheet.create({
   sub: { fontSize: FontSizes.sm, color: '#C9B3EF', textAlign: 'center', lineHeight: 20, marginBottom: 14 },
 
   proofTicker: {
-    flexDirection: 'row', alignItems: 'center', gap: 7,
-    backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: Radius.pill,
-    paddingHorizontal: 12, paddingVertical: 7, marginBottom: 14,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    borderRadius: Radius.pill, paddingHorizontal: 0, paddingVertical: 6, marginBottom: 14,
     alignSelf: 'center',
   },
-  proofDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
-  proofText: { fontSize: FontSizes.xs, color: '#E9D5FF', fontWeight: '600' },
+  proofDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: Colors.lilac, opacity: 0.6 },
+  proofText: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '500', fontStyle: 'italic' },
 
   winnerShowcase: {
     backgroundColor: Colors.ink, borderRadius: Radius.lg, padding: Spacing.md,
