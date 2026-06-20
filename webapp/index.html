@@ -26,13 +26,22 @@
   </head>
 
   <body style="background:#0F0A1E">
+    <div id="err" style="display:none;padding:20px;font-family:monospace;color:#F472B6;position:fixed;top:0;left:0;right:0;bottom:0;overflow:auto;z-index:9999;background:#0F0A1E">
+      <h2 style="font-size:16px;margin-bottom:8px">JS Error — send screenshot to Yoni</h2>
+      <pre id="err-msg" style="color:#fff;font-size:13px;white-space:pre-wrap;word-break:break-all"></pre>
+    </div>
     <script>
+      function showErr(msg) {
+        var el = document.getElementById('err');
+        var pre = document.getElementById('err-msg');
+        if (el && pre) { pre.textContent = msg; el.style.display = 'block'; }
+      }
       window.onerror = function(msg, src, line, col, err) {
-        document.body.innerHTML = '<div style="padding:24px;font-family:monospace;color:#F472B6"><h2 style="margin-bottom:12px">JS Error</h2><pre style="color:#fff;font-size:11px;white-space:pre-wrap">' + msg + '\n\nFile: ' + src + ':' + line + '\n\n' + (err ? err.stack : '') + '</pre></div>';
+        showErr((err ? err.message + '\n\n' + err.stack : msg) + '\n\nSrc: ' + src + ':' + line + ':' + col);
         return true;
       };
       window.addEventListener('unhandledrejection', function(e) {
-        document.body.innerHTML = '<div style="padding:24px;font-family:monospace;color:#F472B6"><h2 style="margin-bottom:12px">Promise Error</h2><pre style="color:#fff;font-size:11px;white-space:pre-wrap">' + e.reason + '</pre></div>';
+        showErr('Promise rejection:\n' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason)));
       });
     </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
