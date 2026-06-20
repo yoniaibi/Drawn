@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Share, Animated,
+  View, Text, StyleSheet, TouchableOpacity, Share, Animated, Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,9 +13,9 @@ import Confetti from '../../src/components/Confetti';
 import { getCountdownTo9pm, formatTicketPrice } from '../../src/utils/countdown';
 
 const OTHER_WINNERS = [
-  { handle: '@chloe_j', value: '£2,400', emoji: '👜' },
-  { handle: '@marcus_t', value: '£8,500', emoji: '⌚' },
-  { handle: '@priya__', value: '£8,600', emoji: '👗' },
+  { handle: '@chloe_j', value: '£2,400', image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80' },
+  { handle: '@marcus_t', value: '£8,500', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=100&q=80' },
+  { handle: '@priya__', value: '£8,600', image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=100&q=80' },
 ];
 
 export default function PurchaseSuccessScreen() {
@@ -87,9 +87,13 @@ export default function PurchaseSuccessScreen() {
         <Text style={styles.kicker}>ENTRY CONFIRMED</Text>
       </View>
 
-      {/* Big emoji */}
+      {/* Big item image */}
       <Animated2.View style={emojiStyle}>
-        <Text style={styles.bigEmoji}>{d.emoji}</Text>
+        {d.image ? (
+          <Image source={{ uri: d.image }} style={styles.bigImage} resizeMode="cover" />
+        ) : (
+          <View style={styles.bigImage} />
+        )}
       </Animated2.View>
 
       <Text style={styles.heading}>You're in!</Text>
@@ -139,7 +143,7 @@ export default function PurchaseSuccessScreen() {
         <View style={styles.winnersChips}>
           {OTHER_WINNERS.map((w, i) => (
             <View key={i} style={styles.winnerChip}>
-              <Text style={styles.winnerChipEmoji}>{w.emoji}</Text>
+              <Image source={{ uri: w.image }} style={styles.winnerChipImage} resizeMode="cover" />
               <Text style={styles.winnerChipHandle}>{w.handle}</Text>
               <Text style={styles.winnerChipVal}>{w.value}</Text>
             </View>
@@ -193,9 +197,12 @@ const styles = StyleSheet.create({
     color: Colors.pink,
     letterSpacing: 1.5,
   },
-  bigEmoji: {
-    fontSize: 96,
+  bigImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
     marginBottom: 8,
+    backgroundColor: 'rgba(139,92,246,0.2)',
   },
   heading: {
     fontFamily: Fonts.serif,
@@ -319,7 +326,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(249,200,70,0.12)',
   },
-  winnerChipEmoji: { fontSize: 18 },
+  winnerChipImage: { width: 36, height: 36, borderRadius: 6 },
   winnerChipHandle: { fontSize: 8, color: Colors.textSecondary, fontWeight: '600' },
   winnerChipVal: { fontSize: 9, color: Colors.gold, fontWeight: '800' },
   ctaRow: {

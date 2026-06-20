@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -20,7 +20,7 @@ import { supabase } from '../../../src/lib/supabase';
 
 interface WinnerData {
   winnerHandle: string;
-  emoji: string;
+  image: string;
   item: string;
   retailValue: number;
   ticketPrice: number;
@@ -32,7 +32,7 @@ function mapToWinner(db: any): WinnerData {
   const earned = Math.round((db.tickets_sold ?? 0) * (db.ticket_price ?? 0) * 0.846);
   return {
     winnerHandle: db.winner_handle ?? '@winner',
-    emoji: db.emoji ?? '🎁',
+    image: db.image ?? '',
     item: db.title ?? 'Prize',
     retailValue: Math.round((db.retail_value ?? 0) / 100), // pence → display-pounds
     ticketPrice: db.ticket_price ?? 10,
@@ -52,7 +52,7 @@ export default function WinnerScreen() {
     if (!drawId) { setWinner(mapToWinner(MOCK_WINNER)); setLoading(false); return; }
     supabase
       .from('draws')
-      .select('title, emoji, retail_value, ticket_price, tickets_sold, winner_handle, seller_handle')
+      .select('title, image, retail_value, ticket_price, tickets_sold, winner_handle, seller_handle')
       .eq('id', drawId)
       .single()
       .then(({ data, error }) => {
@@ -134,7 +134,7 @@ export default function WinnerScreen() {
         <Animated.View style={[styles.prizeCardWrap, cardStyle]}>
           <Animated.View style={[styles.prizeGlow, glowStyle]} />
           <Animated.View style={[styles.prizeCard, pulseStyle]}>
-            <Text style={styles.prizeEmoji}>{winner.emoji}</Text>
+            <Image source={{ uri: winner.image }} style={{ width: 80, height: 80, borderRadius: 12, marginBottom: 8 }} resizeMode="cover" />
             <Text style={styles.prizeTitle}>{winner.item}</Text>
 
             <View style={styles.valueRatioHero}>
@@ -194,7 +194,6 @@ const styles = StyleSheet.create({
     padding: Spacing.xl, alignItems: 'center',
     borderWidth: 1, borderColor: 'rgba(249,200,70,0.3)',
   },
-  prizeEmoji: { fontSize: 58, marginBottom: 8 },
   prizeTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '800', marginBottom: 18, textAlign: 'center' },
   valueRatioHero: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   valueRatioSide: { alignItems: 'center' },

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity, useWindowDimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity, useWindowDimensions, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Defs, Pattern, Circle as SvgCircle, Rect } from 'react-native-svg';
@@ -12,12 +12,12 @@ import { fetchRecentWinners, RecentWinner } from '../../src/services/draws';
 import { requestNotificationPermission } from '../../src/services/notifications';
 
 const FALLBACK_WINS = [
-  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: 25, retailValue: 2400, emoji: '👜' },
-  { handle: '@dan.west', item: 'Rolex Submariner', ticketPrice: 50, retailValue: 8500, emoji: '⌚' },
-  { handle: '@chloe_j', item: 'Designer Closet Bundle', ticketPrice: 40, retailValue: 8600, emoji: '👗' },
+  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: 25, retailValue: 2400, image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80' },
+  { handle: '@dan.west', item: 'Rolex Submariner', ticketPrice: 50, retailValue: 8500, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=100&q=80' },
+  { handle: '@chloe_j', item: 'Designer Closet Bundle', ticketPrice: 40, retailValue: 8600, image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=100&q=80' },
 ];
 
-type SplashWin = { handle: string; item: string; ticketPrice: number; retailValue: number; emoji: string; };
+type SplashWin = { handle: string; item: string; ticketPrice: number; retailValue: number; image: string; };
 
 const SOCIAL_PROOF = [
   '🎉 1,247 people watching tonight',
@@ -134,7 +134,7 @@ export default function SplashScreen() {
         <RNAnimated.View style={winnerOpacity ? { opacity: winnerOpacity } : {}}>
           <View style={styles.winnerRow}>
             <View style={styles.winnerEmojiBox}>
-              <Text style={styles.winnerEmoji}>{currentWin.emoji}</Text>
+              <Image source={{ uri: currentWin.image }} style={styles.winnerImage} resizeMode="cover" />
             </View>
             <View style={styles.winnerInfo}>
               <Text style={styles.winnerHandle}>{currentWin.handle}</Text>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(249,200,70,0.08)', alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(249,200,70,0.15)',
   },
-  winnerEmoji: { fontSize: 28 },
+  winnerImage: { width: 50, height: 50, borderRadius: 8 },
   winnerInfo: { flex: 1 },
   winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.base, color: Colors.white, lineHeight: 18 },
   winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },

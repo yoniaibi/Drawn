@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Stop, Rect, Circle } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
@@ -83,7 +83,11 @@ export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {
           </Svg>
           {(draw.bundleItems ?? []).slice(0, 3).map((item, i) => (
             <View key={i} style={[styles.bundleCell, { backgroundColor: `rgba(${45 + i * 25},15,${60 + i * 15},0.7)` }]}>
-              <Text style={styles.bundleEmoji}>{item.emoji}</Text>
+              {item.image ? (
+                <Image source={{ uri: item.image }} style={styles.bundleImage} resizeMode="cover" />
+              ) : (
+                <View style={[styles.bundleImage, { backgroundColor: 'rgba(139,92,246,0.2)' }]} />
+              )}
               {wide && <Text style={styles.bundleItemName} numberOfLines={1}>{item.name}</Text>}
             </View>
           ))}
@@ -97,13 +101,19 @@ export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {
         </View>
       ) : (
         <View style={styles.imageBox}>
+          {draw.image ? (
+            <Image source={{ uri: draw.image }} style={styles.itemImage} resizeMode="cover" />
+          ) : (
+            <View style={styles.imagePlaceholder} />
+          )}
+
           <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
             <Defs>
               <LinearGradient id={`imgGrad-${draw.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                <Stop offset="0%" stopColor="#1a0d35" stopOpacity="1" />
-                <Stop offset="45%" stopColor="#120a2a" stopOpacity="1" />
+                <Stop offset="0%" stopColor="#1a0d35" stopOpacity="0.7" />
+                <Stop offset="45%" stopColor="#120a2a" stopOpacity="0.3" />
                 <Stop offset="55%" stopColor="#8B5CF6" stopOpacity="0.06" />
-                <Stop offset="100%" stopColor="#0a0618" stopOpacity="1" />
+                <Stop offset="100%" stopColor="#0a0618" stopOpacity="0.8" />
               </LinearGradient>
               <LinearGradient id={`shimmer-${draw.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
                 <Stop offset="48%" stopColor="#8B5CF6" stopOpacity="0" />
@@ -114,8 +124,6 @@ export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {
             <Rect x="0" y="0" width="100%" height="100%" fill={`url(#imgGrad-${draw.id})`} />
             <Rect x="0" y="0" width="100%" height="100%" fill={`url(#shimmer-${draw.id})`} />
           </Svg>
-
-          <Text style={styles.emoji}>{draw.emoji}</Text>
 
           {/* Prize value */}
           <View style={styles.valueBadge}>
@@ -201,7 +209,7 @@ const styles = StyleSheet.create({
   imageBox: { height: 92, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   bundleStrip: { flexDirection: 'row', height: 74, position: 'relative', overflow: 'hidden' },
   bundleCell: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  bundleEmoji: { fontSize: 22 },
+  bundleImage: { width: 44, height: 44, borderRadius: 8 },
   bundleItemName: { fontSize: 6, color: Colors.textTertiary, textAlign: 'center', paddingHorizontal: 2 },
   bundleMore: { backgroundColor: 'rgba(15,10,30,0.7)' },
   bundleMoreText: { fontSize: 12, fontWeight: '800', color: Colors.gold },
@@ -212,7 +220,8 @@ const styles = StyleSheet.create({
   },
   bundleBadgeText: { fontSize: 6.5, fontWeight: '800', color: Colors.violet },
 
-  emoji: { fontSize: 36 },
+  itemImage: { width: '100%', height: '100%', position: 'absolute' },
+  imagePlaceholder: { width: 60, height: 60, borderRadius: 8, backgroundColor: 'rgba(139,92,246,0.2)' },
   valueBadge: {
     position: 'absolute', top: 5, right: 5,
     backgroundColor: 'rgba(249,200,70,0.9)', borderRadius: 6,

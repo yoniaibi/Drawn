@@ -6,7 +6,7 @@ export interface Draw {
   title: string;
   seller: string;
   sellerAvatar: string;
-  emoji: string;
+  image?: string;
   retailValue: number;
   ticketPrice: number; // pence
   totalTickets: number;
@@ -23,7 +23,7 @@ export interface Draw {
 }
 
 export interface BundleItem {
-  emoji: string;
+  image?: string;
   name: string;
   retailValue: number;
 }
@@ -57,7 +57,7 @@ export const MOCK_DRAWS: Draw[] = [
     title: 'Chanel Classic Flap',
     seller: '@sophiestyle',
     sellerAvatar: 'S',
-    emoji: '👜',
+    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80',
     retailValue: 2400,
     ticketPrice: 25,
     totalTickets: 2000,
@@ -76,7 +76,7 @@ export const MOCK_DRAWS: Draw[] = [
     title: 'Rolex Submariner',
     seller: '@marcus_t',
     sellerAvatar: 'M',
-    emoji: '⌚',
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
     retailValue: 8500,
     ticketPrice: 50,
     totalTickets: 1000,
@@ -95,7 +95,7 @@ export const MOCK_DRAWS: Draw[] = [
     title: "Soph's entire designer closet",
     seller: '@sophiestyle',
     sellerAvatar: 'S',
-    emoji: '👗',
+    image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=400&q=80',
     retailValue: 8600,
     ticketPrice: 40,
     totalTickets: 4000,
@@ -106,12 +106,12 @@ export const MOCK_DRAWS: Draw[] = [
     description: 'Clearing out for a fresh start. 28 pieces — all designer, all barely worn. Authenticated by a personal stylist before listing.',
     isBundle: true,
     bundleItems: [
-      { emoji: '👜', name: 'Chanel Classic Flap', retailValue: 2400 },
-      { emoji: '👠', name: 'Bottega Veneta Heels', retailValue: 1800 },
-      { emoji: '🕶️', name: 'Gucci Sunglasses', retailValue: 380 },
-      { emoji: '⌚', name: 'Tag Heuer Aquaracer', retailValue: 1200 },
-      { emoji: '💍', name: 'Tiffany & Co Bracelet', retailValue: 620 },
-      { emoji: '🧴', name: 'Hermès Beauty Set', retailValue: 340 },
+      { image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80', name: 'Chanel Classic Flap', retailValue: 2400 },
+      { image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=400&q=80', name: 'Bottega Veneta Heels', retailValue: 1800 },
+      { image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?auto=format&fit=crop&w=400&q=80', name: 'Gucci Sunglasses', retailValue: 380 },
+      { image: 'https://images.unsplash.com/photo-1548171915-e79a6a8bfee5?auto=format&fit=crop&w=400&q=80', name: 'Tag Heuer Aquaracer', retailValue: 1200 },
+      { image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=400&q=80', name: 'Tiffany & Co Bracelet', retailValue: 620 },
+      { image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=400&q=80', name: 'Hermès Beauty Set', retailValue: 340 },
     ],
     closesAt: getTonightAt9pm(),
     myTickets: 8,
@@ -122,7 +122,7 @@ export const MOCK_DRAWS: Draw[] = [
     title: 'MacBook Pro 16"',
     seller: '@tech_drops',
     sellerAvatar: 'T',
-    emoji: '💻',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80',
     retailValue: 2399,
     ticketPrice: 30,
     totalTickets: 3000,
@@ -141,7 +141,7 @@ export const MOCK_DRAWS: Draw[] = [
     title: 'Jordan 1 Retro High OG',
     seller: '@kicks_leeds',
     sellerAvatar: 'K',
-    emoji: '👟',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
     retailValue: 280,
     ticketPrice: 10,
     totalTickets: 3000,
@@ -160,7 +160,7 @@ export const MOCK_DRAWS: Draw[] = [
     title: 'Off-White x Nike Dunk Low',
     seller: '@hype_archive',
     sellerAvatar: 'H',
-    emoji: '👟',
+    image: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&w=400&q=80',
     retailValue: 950,
     ticketPrice: 15,
     totalTickets: 5000,
@@ -179,7 +179,7 @@ export const MOCK_DRAWS: Draw[] = [
     title: 'Supreme Box Logo Hoodie',
     seller: '@archive_uk',
     sellerAvatar: 'A',
-    emoji: '🧥',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?auto=format&fit=crop&w=400&q=80',
     retailValue: 480,
     ticketPrice: 10,
     totalTickets: 2000,
@@ -201,7 +201,7 @@ export const MOCK_WINNER = {
   drawId: 'draw-001',
   winnerHandle: '@sophie_k',
   item: 'Chanel Classic Flap',
-  emoji: '👜',
+  image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80',
   ticketPrice: 25,
   retailValue: 2400,
   sellerEarned: 1008,

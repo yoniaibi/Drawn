@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  Animated as RNAnimated, ActivityIndicator,
+  Animated as RNAnimated, ActivityIndicator, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -170,7 +170,7 @@ export default function HomeScreen() {
   });
 
   const winnersPool = recentWinners.length > 0 ? recentWinners : [
-    { handle: '@chloe_j', item: 'Chanel Classic Flap', emoji: '👜', ticketPrice: 25, retailValue: 2400 },
+    { handle: '@chloe_j', item: 'Chanel Classic Flap', image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80', ticketPrice: 25, retailValue: 2400 },
   ];
   const winner = winnersPool[winnerIdx % winnersPool.length];
   const forYouDraw = draws.find(d => d.status === 'open' && d.myTickets === 0 && d.retailValue >= 400);
@@ -254,7 +254,6 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.heroBody}>
-              <Text style={styles.heroEmoji}>{featuredDraw.emoji}</Text>
               <View style={styles.heroInfo}>
                 <Text style={styles.heroTitle}>{featuredDraw.title}</Text>
                 <Text style={styles.heroSeller}>{featuredDraw.seller}</Text>
@@ -296,7 +295,7 @@ export default function HomeScreen() {
             <Text style={styles.winnerItem} numberOfLines={1}>{winner.item}</Text>
           </View>
           <View style={styles.winnerRight}>
-            <Text style={styles.winnerEmoji}>{winner.emoji}</Text>
+            <Image source={{ uri: (winner as any).image || '' }} style={styles.winnerImg} resizeMode="cover" />
             <Text style={styles.winnerPrice}>{winner.ticketPrice}p ticket</Text>
             <Text style={styles.winnerValue}>£{winner.retailValue.toLocaleString()}</Text>
           </View>
@@ -342,7 +341,9 @@ export default function HomeScreen() {
                 {forYouDraw.ticketPrice}p ticket · £{forYouDraw.retailValue.toLocaleString()} prize
               </Text>
             </View>
-            <Text style={styles.forYouEmoji}>{forYouDraw.emoji}</Text>
+            {forYouDraw.image ? (
+              <Image source={{ uri: forYouDraw.image }} style={{ width: 60, height: 60, borderRadius: 10 }} resizeMode="cover" />
+            ) : null}
           </TouchableOpacity>
         )}
 
@@ -466,7 +467,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: Spacing.md, paddingBottom: Spacing.md, gap: 14,
   },
-  heroEmoji: { fontSize: 64 },
   heroInfo: { flex: 1, gap: 3 },
   heroTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, lineHeight: 24 },
   heroSeller: { fontSize: FontSizes.xs, color: Colors.textSecondary },
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
   winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.md, color: Colors.white, lineHeight: 18 },
   winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
   winnerRight: { alignItems: 'flex-end', paddingLeft: 10, gap: 2 },
-  winnerEmoji: { fontSize: 22 },
+  winnerImg: { width: 44, height: 44, borderRadius: 8 },
   winnerPrice: { fontSize: 9, color: Colors.textSecondary },
   winnerValue: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '800' },
 
@@ -526,7 +526,6 @@ const styles = StyleSheet.create({
   forYouKicker: { fontSize: 8, color: Colors.lilac, fontWeight: '800', letterSpacing: 1, marginBottom: 4 },
   forYouTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700', marginBottom: 2 },
   forYouSub: { fontSize: FontSizes.xs, color: Colors.textSecondary },
-  forYouEmoji: { fontSize: 40 },
 
   // Filters
   liveRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
