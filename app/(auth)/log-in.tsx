@@ -49,7 +49,7 @@ export default function LogInScreen() {
         {/* Social proof strip */}
         <View style={styles.proofStrip}>
           <View style={styles.proofDot} />
-          <Text style={styles.proofText}>Join 12,000+ people watching tonight</Text>
+          <Text style={styles.proofText}>Draw closes every night at 9pm</Text>
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}

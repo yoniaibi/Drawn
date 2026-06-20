@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, Modal, Pressable, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, Modal, Pressable, Share, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence } from 'react-native-reanimated';
@@ -70,12 +70,7 @@ export default function DrawDetailScreen() {
   const isVeryLow = remaining < 200;
   const isLow = remaining < 500;
 
-  const heroBg = draw.isBundle ? '#2D1B00'
-    : draw.emoji === '⌚' ? '#0A1E38'
-    : draw.emoji === '👜' || draw.emoji === '👗' ? '#2A0D3A'
-    : draw.emoji === '💻' ? '#0A1530'
-    : draw.emoji === '👟' ? '#0A2518'
-    : '#1A0D42';
+  const heroBg = draw.isBundle ? '#2D1B00' : '#1A0D42';
 
   const [buyerIdx, setBuyerIdx] = useState(0);
   const [trustVisible, setTrustVisible] = useState(false);
@@ -99,9 +94,9 @@ export default function DrawDetailScreen() {
   // Rotate buyer ticker
   useEffect(() => {
     const intervalId = setInterval(() => {
-      RNAnimated.timing(buyerOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+      RNAnimated.timing(buyerOpacity, { toValue: 0, duration: 300, useNativeDriver: false }).start(() => {
         setBuyerIdx(i => (i + 1) % BUYER_TICKERS.length);
-        RNAnimated.timing(buyerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+        RNAnimated.timing(buyerOpacity, { toValue: 1, duration: 300, useNativeDriver: false }).start();
       });
     }, 3000);
     return () => clearInterval(intervalId);
@@ -138,7 +133,11 @@ export default function DrawDetailScreen() {
           <Text style={styles.viewersText}>{viewers} viewing</Text>
         </View>
 
-        <Text style={styles.heroEmoji}>{draw.emoji}</Text>
+        {draw.image ? (
+          <Image source={{ uri: draw.image }} style={styles.heroImage} resizeMode="cover" />
+        ) : (
+          <View style={styles.heroImagePlaceholder} />
+        )}
 
         {/* Value ratio overlay */}
         <View style={styles.heroValueBox}>
@@ -198,8 +197,8 @@ export default function DrawDetailScreen() {
             <Ionicons name="warning" size={14} color={isVeryLow ? Colors.danger : Colors.warning} />
             <Text style={[styles.scarcityText, { color: isVeryLow ? Colors.danger : Colors.warning }]}>
               {isVeryLow
-                ? `🚨 Only ${remaining} tickets left — drawing soon!`
-                : `⚡ ${remaining} tickets remaining · filling fast`}
+                ? `Only ${remaining} tickets left — drawing soon`
+                : `${remaining} tickets remaining · filling fast`}
             </Text>
           </Animated.View>
         )}
@@ -219,7 +218,7 @@ export default function DrawDetailScreen() {
           />
           <View style={styles.thresholdBottom}>
             <Text style={[styles.thresholdMet, { color: progress >= draw.minThreshold ? Colors.gold : Colors.textSecondary }]}>
-              {progress >= draw.minThreshold ? '✅ Threshold met · draws tonight' : `${Math.round(draw.minThreshold * 100)}% needed to draw`}
+              {progress >= draw.minThreshold ? 'Threshold met · draws tonight' : `${Math.round(draw.minThreshold * 100)}% needed to draw`}
             </Text>
             <Text style={styles.pctSold}>{Math.round(progress * 100)}% sold</Text>
           </View>
@@ -271,7 +270,11 @@ export default function DrawDetailScreen() {
             <Text style={styles.bundleTitle}>What's included ({draw.bundleItems.length} items)</Text>
             {draw.bundleItems.map((item, i) => (
               <View key={i} style={styles.bundleRow}>
-                <Text style={styles.bundleEmoji}>{item.emoji}</Text>
+                {item.image ? (
+                  <Image source={{ uri: item.image }} style={styles.bundleItemImage} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.bundleItemImage, { backgroundColor: 'rgba(139,92,246,0.2)' }]} />
+                )}
                 <Text style={styles.bundleName}>{item.name}</Text>
                 <Text style={styles.bundleVal}>£{item.retailValue.toLocaleString()}</Text>
               </View>
@@ -286,7 +289,11 @@ export default function DrawDetailScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.similarRow}>
               {similarDraws.map(d => (
                 <TouchableOpacity key={d.id} style={styles.similarCard} onPress={() => router.push(`/draw/${d.id}` as any)}>
-                  <Text style={styles.similarEmoji}>{d.emoji}</Text>
+                  {d.image ? (
+                    <Image source={{ uri: d.image }} style={styles.similarImage} resizeMode="cover" />
+                  ) : (
+                    <View style={[styles.similarImage, { backgroundColor: 'rgba(139,92,246,0.2)' }]} />
+                  )}
                   <Text style={styles.similarName} numberOfLines={2}>{d.title}</Text>
                   <Text style={styles.similarPrice}>{d.ticketPrice}p → £{d.retailValue.toLocaleString()}</Text>
                   <View style={[styles.similarStatusDot, { backgroundColor: d.status === 'closing_tonight' ? Colors.pink : Colors.lilac }]} />
@@ -304,13 +311,15 @@ export default function DrawDetailScreen() {
             <View style={styles.trustHandle} />
             <Text style={styles.trustTitle}>How we verify</Text>
             {[
-              { icon: '📦', step: 'Seller ships to us', desc: 'Every item is sent to our London warehouse before going live.' },
-              { icon: '🔍', step: 'Authenticity check', desc: "Our team inspects condition, brand, and authenticates within 24 hours of receipt." },
-              { icon: '🔒', step: 'Secure storage', desc: 'The item is held in our secure facility until the draw completes.' },
-              { icon: '🚚', step: 'Direct to winner', desc: 'We ship straight to the winner — tracked, insured, next-day delivery.' },
+              { icon: 'cube-outline' as const, step: 'Seller ships to us', desc: 'Every item is sent to our London warehouse before going live.' },
+              { icon: 'search-outline' as const, step: 'Authenticity check', desc: "Our team inspects condition, brand, and authenticates within 24 hours of receipt." },
+              { icon: 'lock-closed-outline' as const, step: 'Secure storage', desc: 'The item is held in our secure facility until the draw completes.' },
+              { icon: 'car-outline' as const, step: 'Direct to winner', desc: 'We ship straight to the winner — tracked, insured, next-day delivery.' },
             ].map(s => (
               <View key={s.step} style={styles.trustStep}>
-                <Text style={styles.trustStepIcon}>{s.icon}</Text>
+                <View style={styles.trustStepIconBox}>
+                  <Ionicons name={s.icon} size={20} color={Colors.lilac} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.trustStepTitle}>{s.step}</Text>
                   <Text style={styles.trustStepDesc}>{s.desc}</Text>
@@ -329,7 +338,7 @@ export default function DrawDetailScreen() {
       <View style={styles.cta}>
         {isLow && (
           <Text style={styles.ctaScarcity}>
-            {isVeryLow ? `🚨 Only ${remaining} tickets left!` : `⚡ ${remaining} remaining`}
+            {isVeryLow ? `Only ${remaining} tickets left` : `${remaining} remaining`}
           </Text>
         )}
         <PrimaryButton
@@ -339,14 +348,14 @@ export default function DrawDetailScreen() {
         <TouchableOpacity
           style={styles.shareBtn}
           onPress={() => Share.share({
-            message: `I'm entering to win ${draw.emoji} ${draw.title} on DRAWN for just ${draw.ticketPrice}p a ticket. Use my link to get a free entry: https://drawn.app/draw/${draw.id}?ref=${handle}`,
+            message: `I'm entering to win ${draw.title} on DRAWN for just ${draw.ticketPrice}p a ticket. Use my link to get a free entry: https://drawn.app/draw/${draw.id}?ref=${handle}`,
           })}
           activeOpacity={0.8}
         >
-          <Text style={styles.shareBtnText}>🎁 Share & get a free ticket</Text>
+          <Text style={styles.shareBtnText}>Share & get a free ticket</Text>
         </TouchableOpacity>
         <View style={styles.shareCallout}>
-          <Text style={styles.shareCalloutText}>🎁 Share this draw with a friend — when they sign up, you both get 1 free ticket</Text>
+          <Text style={styles.shareCalloutText}>Share this draw with a friend — when they sign up, you both get 1 free ticket</Text>
         </View>
         <TouchableOpacity onPress={() => setPostalVisible(true)} activeOpacity={0.7}>
           <Text style={styles.ctaSub}>Enter for free by post — tap for instructions</Text>
@@ -424,7 +433,8 @@ const styles = StyleSheet.create({
   },
   viewersDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
   viewersText: { fontSize: 9, color: Colors.white, fontWeight: '600' },
-  heroEmoji: { fontSize: 110 },
+  heroImage: { width: '100%', height: '100%', position: 'absolute' },
+  heroImagePlaceholder: { width: '100%', height: '100%', backgroundColor: 'rgba(139,92,246,0.15)' },
   heroValueBox: {
     position: 'absolute', bottom: 12, left: 12,
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -457,7 +467,7 @@ const styles = StyleSheet.create({
   trustHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: Colors.darkBorder, alignSelf: 'center', marginBottom: Spacing.lg },
   trustTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, marginBottom: Spacing.lg, textAlign: 'center' },
   trustStep: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: Spacing.md },
-  trustStepIcon: { fontSize: 26, width: 36, textAlign: 'center' },
+  trustStepIconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center' },
   trustStepTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700', marginBottom: 3 },
   trustStepDesc: { fontSize: FontSizes.xs, color: Colors.textSecondary, lineHeight: 17 },
   trustFooter: {
@@ -526,7 +536,7 @@ const styles = StyleSheet.create({
   bundleCard: { backgroundColor: Colors.darkCard, borderRadius: Radius.md, padding: Spacing.md },
   bundleTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700', marginBottom: 10 },
   bundleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: Colors.darkBorder },
-  bundleEmoji: { fontSize: 18 },
+  bundleItemImage: { width: 32, height: 32, borderRadius: 6 },
   bundleName: { flex: 1, fontSize: FontSizes.xs, color: Colors.textSecondary },
   bundleVal: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '700' },
 
@@ -537,7 +547,7 @@ const styles = StyleSheet.create({
     width: 130, backgroundColor: Colors.darkCard, borderRadius: Radius.md,
     padding: Spacing.sm, borderWidth: 1, borderColor: Colors.darkBorder, position: 'relative',
   },
-  similarEmoji: { fontSize: 28, marginBottom: 6 },
+  similarImage: { width: '100%', height: 70, borderRadius: 8, marginBottom: 6 },
   similarName: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '600', lineHeight: 15, marginBottom: 4 },
   similarPrice: { fontSize: 9, color: Colors.gold, fontWeight: '600' },
   similarStatusDot: { position: 'absolute', top: 8, right: 8, width: 6, height: 6, borderRadius: 3 },
