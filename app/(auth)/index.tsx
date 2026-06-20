@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity, useWindowDimensions, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Defs, Pattern, Circle as SvgCircle, Rect } from 'react-native-svg';
@@ -33,8 +33,8 @@ export default function SplashScreen() {
   const [time, setTime] = useState(getCountdownTo9pm());
   const [winnerIdx, setWinnerIdx] = useState(0);
   const [proofIdx, setProofIdx] = useState(0);
-  const winnerOpacity = useRef(new RNAnimated.Value(1)).current;
-  const proofOpacity = useRef(new RNAnimated.Value(1)).current;
+  const winnerOpacity = useRef(Platform.OS !== 'web' ? new RNAnimated.Value(1) : null).current;
+  const proofOpacity = useRef(Platform.OS !== 'web' ? new RNAnimated.Value(1) : null).current;
   const [recentWins, setRecentWins] = useState<SplashWin[]>(FALLBACK_WINS);
 
   useEffect(() => {
@@ -51,10 +51,14 @@ export default function SplashScreen() {
   // Rotate winner showcase
   useEffect(() => {
     const id = setInterval(() => {
-      RNAnimated.timing(winnerOpacity, { toValue: 0, duration: 350, useNativeDriver: true }).start(() => {
+      if (winnerOpacity) {
+        RNAnimated.timing(winnerOpacity, { toValue: 0, duration: 350, useNativeDriver: false }).start(() => {
+          setWinnerIdx(i => (i + 1) % recentWins.length);
+          RNAnimated.timing(winnerOpacity, { toValue: 1, duration: 350, useNativeDriver: false }).start();
+        });
+      } else {
         setWinnerIdx(i => (i + 1) % recentWins.length);
-        RNAnimated.timing(winnerOpacity, { toValue: 1, duration: 350, useNativeDriver: true }).start();
-      });
+      }
     }, 3500);
     return () => clearInterval(id);
   }, [recentWins.length]);
@@ -62,10 +66,14 @@ export default function SplashScreen() {
   // Rotate social proof
   useEffect(() => {
     const id = setInterval(() => {
-      RNAnimated.timing(proofOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
+      if (proofOpacity) {
+        RNAnimated.timing(proofOpacity, { toValue: 0, duration: 250, useNativeDriver: false }).start(() => {
+          setProofIdx(i => (i + 1) % SOCIAL_PROOF.length);
+          RNAnimated.timing(proofOpacity, { toValue: 1, duration: 250, useNativeDriver: false }).start();
+        });
+      } else {
         setProofIdx(i => (i + 1) % SOCIAL_PROOF.length);
-        RNAnimated.timing(proofOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
-      });
+      }
     }, 2500);
     return () => clearInterval(id);
   }, []);
@@ -108,7 +116,7 @@ export default function SplashScreen() {
       {/* Animated social proof ticker */}
       <View style={styles.proofTicker}>
         <View style={styles.proofDot} />
-        <RNAnimated.Text style={[styles.proofText, { opacity: proofOpacity }]}>
+        <RNAnimated.Text style={[styles.proofText, proofOpacity ? { opacity: proofOpacity } : {}]}>
           {SOCIAL_PROOF[proofIdx]}
         </RNAnimated.Text>
       </View>
@@ -123,7 +131,7 @@ export default function SplashScreen() {
           </Text>
         </View>
 
-        <RNAnimated.View style={{ opacity: winnerOpacity }}>
+        <RNAnimated.View style={winnerOpacity ? { opacity: winnerOpacity } : {}}>
           <View style={styles.winnerRow}>
             <View style={styles.winnerEmojiBox}>
               <Text style={styles.winnerEmoji}>{currentWin.emoji}</Text>
