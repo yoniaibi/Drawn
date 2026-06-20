@@ -27,7 +27,7 @@
       "expo-secure-store"
     ],
     "experiments": {
-      "baseUrl": "/Drawn"
+      "baseUrl": "/Drawn/webapp"
     }
   }
 }
