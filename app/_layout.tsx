@@ -69,7 +69,11 @@ export default function RootLayout() {
     if (fontsLoaded && !loading) SplashScreen.hideAsync();
   }, [fontsLoaded, loading]);
 
-  if (!fontsLoaded || loading) return null;
+  if (!fontsLoaded || loading) return (
+    <View style={{ flex: 1, backgroundColor: '#0F0A1E', alignItems: 'center', justifyContent: 'center' }}>
+      <Text style={{ color: '#F472B6', fontFamily: 'sans-serif', fontSize: 18, letterSpacing: 2 }}>DRAWN</Text>
+    </View>
+  );
 
   return (
     <ErrorBoundary>
