@@ -74,7 +74,7 @@ export default function SellerDashboardScreen() {
           <ActivityIndicator color={Colors.lilac} style={{ marginTop: Spacing.xl }} />
         ) : draws.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyEmoji}>📦</Text>
+            <Ionicons name="cube-outline" size={40} color={Colors.textTertiary} />
             <Text style={styles.emptyTitle}>No draws yet</Text>
             <Text style={styles.emptySub}>List your first item to start earning.</Text>
           </View>
@@ -86,7 +86,9 @@ export default function SellerDashboardScreen() {
             return (
               <TouchableOpacity key={draw.id} style={styles.drawCard} onPress={() => router.push(`/draw/${draw.id}`)}>
                 <View style={styles.drawTop}>
-                  <Text style={styles.drawEmoji}>{draw.emoji}</Text>
+                  <View style={styles.drawIconBox}>
+                    <Ionicons name="ticket-outline" size={18} color={Colors.lilac} />
+                  </View>
                   <View style={styles.drawInfo}>
                     <Text style={styles.drawTitle} numberOfLines={1}>{draw.title}</Text>
                     <View style={styles.statusRow}>
@@ -127,7 +129,7 @@ const styles = StyleSheet.create({
   sectionLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, letterSpacing: 0.8, marginBottom: 12 },
   drawCard: { backgroundColor: Colors.darkCard, borderRadius: Radius.md, padding: Spacing.md, marginBottom: 10, gap: 8 },
   drawTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  drawEmoji: { fontSize: 24 },
+  drawIconBox: { width: 36, height: 36, borderRadius: 8, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center' },
   drawInfo: { flex: 1 },
   drawTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '600' },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
@@ -135,8 +137,7 @@ const styles = StyleSheet.create({
   drawStatus: { fontSize: FontSizes.xs, textTransform: 'capitalize' },
   drawEarning: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.gold },
   drawProgress: { fontSize: FontSizes.xs, color: Colors.textTertiary },
-  emptyCard: { alignItems: 'center', padding: Spacing.xxl, gap: 8 },
-  emptyEmoji: { fontSize: 40, marginBottom: 4 },
+  emptyCard: { alignItems: 'center', padding: Spacing.xxl, gap: 10 },
   emptyTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
   emptySub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center' },
 });

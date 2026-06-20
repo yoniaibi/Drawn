@@ -35,15 +35,10 @@ const LIVE_TICKERS = [
 ];
 
 
-const DAILY_REWARDS = [
-  { emoji: '🎟️', title: 'Free entry added!', body: "We've added a free entry to tonight's Chanel Flap draw. Just for showing up." },
-  { emoji: '⚡', title: 'Early-bird bonus', body: "You're one of the first 100 in today. We've topped up your wallet by 50p." },
-  { emoji: '🏆', title: 'Loyalty reward', body: "You've been on a streak. Here's an extra ticket on us for tonight's draw." },
-];
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { streak, isNewDay } = useStreak();
+  const { streak } = useStreak();
   const [filter, setFilter] = useState('Tonight');
   const [tickerIdx, setTickerIdx] = useState(0);
   const [winnerIdx, setWinnerIdx] = useState(0);
@@ -53,10 +48,6 @@ export default function HomeScreen() {
   const [loadingDraws, setLoadingDraws] = useState(true);
   const [wins, setWins] = useState<WinResult[]>([]);
   const [recentWinners, setRecentWinners] = useState<RecentWinner[]>([]);
-  const [dailyRewardVisible, setDailyRewardVisible] = useState(false);
-  const [dailyReward] = useState(DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)]);
-  // Local sold-count state for live ticking
-  const [liveSold, setLiveSold] = useState<Record<string, number>>({});
 
   const tickerOpacity = useRef(new RNAnimated.Value(1)).current;
   const winnerSlide = useRef(new RNAnimated.Value(0)).current;
@@ -77,6 +68,21 @@ export default function HomeScreen() {
   const myCount = draws.filter(d => d.myTickets > 0).length;
   const featuredDraw = draws.find(d => d.status === 'closing_tonight' && !d.isBundle) ?? draws[0];
 
+  async function toggleSave(id: string) {
+    const isSaved = savedIds.has(id);
+    setSavedIds(prev => {
+      const next = new Set(prev);
+      isSaved ? next.delete(id) : next.add(id);
+      return next;
+    });
+    if (!user) return;
+    if (isSaved) {
+      await supabase.from('draw_watches').delete().eq('user_id', user.id).eq('draw_id', id);
+    } else {
+      await supabase.from('draw_watches').upsert({ user_id: user.id, draw_id: id }, { onConflict: 'user_id,draw_id' });
+    }
+  }
+
   // Fetch draws + check for wins + recent winners
   useEffect(() => {
     fetchDraws().then(result => {
@@ -86,6 +92,9 @@ export default function HomeScreen() {
     fetchRecentWinners().then(setRecentWinners);
     if (user?.id) {
       checkForWins(user.id).then(setWins);
+      supabase.from('draw_watches').select('draw_id').eq('user_id', user.id).then(({ data }) => {
+        if (data) setSavedIds(new Set(data.map((r: any) => r.draw_id)));
+      });
     }
 
     // Real-time ticket count updates for all draws
@@ -111,31 +120,6 @@ export default function HomeScreen() {
     return () => { channel.unsubscribe(); };
   }, [user?.id]);
 
-  // Show daily reward banner on new day (subtle — not a blocking modal)
-  useEffect(() => {
-    if (isNewDay) {
-      const t = setTimeout(() => setDailyRewardVisible(true), 1500);
-      return () => clearTimeout(t);
-    }
-  }, [isNewDay]);
-
-  // Live ticking: increment sold counts on closing_tonight draws
-  useEffect(() => {
-    const tick = setInterval(() => {
-      setDraws(prev => {
-        const tonightDraws = prev.filter(d => d.status === 'closing_tonight');
-        if (!tonightDraws.length) return prev;
-        const target = tonightDraws[Math.floor(Math.random() * tonightDraws.length)];
-        const increment = 1 + Math.floor(Math.random() * 4); // 1–4 tickets
-        return prev.map(d =>
-          d.id === target.id && d.ticketsSold < d.totalTickets - 5
-            ? { ...d, ticketsSold: d.ticketsSold + increment }
-            : d
-        );
-      });
-    }, 18000 + Math.random() * 12000); // every 18–30 seconds
-    return () => clearInterval(tick);
-  }, []);
 
   // Rotate live ticker
   useEffect(() => {
@@ -222,19 +206,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Daily reward banner — subtle, dismissible */}
-        {dailyRewardVisible && (
-          <View style={styles.dailyBanner}>
-            <Text style={styles.dailyBannerEmoji}>{dailyReward.emoji}</Text>
-            <View style={styles.dailyBannerInfo}>
-              <Text style={styles.dailyBannerTitle}>{dailyReward.title}</Text>
-              {streak >= 2 && <Text style={styles.dailyBannerStreak}>{streak} day streak</Text>}
-            </View>
-            <TouchableOpacity onPress={() => setDailyRewardVisible(false)} style={styles.dailyBannerClose}>
-              <Ionicons name="close" size={14} color={Colors.textTertiary} />
-            </TouchableOpacity>
-          </View>
-        )}
 
         {/* HERO featured draw */}
         {featuredDraw && (
@@ -369,18 +340,14 @@ export default function HomeScreen() {
           )}
           {!loadingDraws && filtered.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>🎟️</Text>
+              <Ionicons name="search-outline" size={28} color={Colors.textTertiary} />
               <Text style={styles.emptyText}>No draws match this filter right now</Text>
             </View>
           )}
           {!loadingDraws && filtered.map((draw, i) => {
             const saveProps = {
               saved: savedIds.has(draw.id),
-              onSave: (id: string) => setSavedIds(prev => {
-                const next = new Set(prev);
-                next.has(id) ? next.delete(id) : next.add(id);
-                return next;
-              }),
+              onSave: toggleSave,
             };
             if (draw.isBundle) {
               return (
@@ -560,7 +527,6 @@ const styles = StyleSheet.create({
   },
   loadingText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
   emptyState: { alignItems: 'center', paddingVertical: 40, gap: 8 },
-  emptyEmoji: { fontSize: 32 },
   emptyText: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center' },
 
   bottomProof: { paddingHorizontal: Spacing.lg, paddingBottom: 24, alignItems: 'center' },
@@ -579,17 +545,4 @@ const styles = StyleSheet.create({
   winBannerTitle: { fontSize: FontSizes.base, color: Colors.gold, fontWeight: '800' },
   winBannerSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
 
-  // Daily reward banner (subtle, dismissible strip)
-  dailyBanner: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    marginHorizontal: Spacing.md, marginBottom: Spacing.sm,
-    backgroundColor: 'rgba(139,92,246,0.1)', borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md, paddingVertical: 10,
-    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
-  },
-  dailyBannerEmoji: { fontSize: 20 },
-  dailyBannerInfo: { flex: 1 },
-  dailyBannerTitle: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
-  dailyBannerStreak: { fontSize: 9, color: Colors.gold, marginTop: 1 },
-  dailyBannerClose: { padding: 4 },
 });

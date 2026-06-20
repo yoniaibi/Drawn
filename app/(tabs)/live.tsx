@@ -87,7 +87,7 @@ function FloatEmoji({ emoji, x, onDone }: { emoji: string; x: number; onDone: ()
 
 export default function LiveScreen() {
   const router = useRouter();
-  const { handle: myHandle } = useAuthStore();
+  const { handle: myHandle, isLoggedIn } = useAuthStore();
 
   const [time, setTime] = useState(getCountdownTo9pm());
   const [viewerCount, setViewerCount] = useState(47);
@@ -124,7 +124,7 @@ export default function LiveScreen() {
     channel.on('presence', { event: 'sync' }, () => {
       const state = channel.presenceState();
       const count = Object.keys(state).length;
-      if (count > 0) setViewerCount(c => Math.max(c, count + Math.floor(Math.random() * 80) + 40));
+      if (count > 0) setViewerCount(count);
     });
 
     channel.subscribe(async (status) => {
@@ -349,6 +349,12 @@ export default function LiveScreen() {
             </View>
 
             {/* Chat input */}
+            {!isLoggedIn ? (
+              <TouchableOpacity style={styles.chatLoginPrompt} onPress={() => router.push('/(auth)/log-in' as any)}>
+                <Ionicons name="lock-closed-outline" size={14} color={Colors.textTertiary} />
+                <Text style={styles.chatLoginText}>Log in to join the chat</Text>
+              </TouchableOpacity>
+            ) : (
             <View style={styles.chatInputRow}>
               <TextInput
                 style={styles.chatInput}
@@ -369,7 +375,9 @@ export default function LiveScreen() {
                 <Ionicons name="send" size={15} color={inputText.trim() ? Colors.white : Colors.textTertiary} />
               </TouchableOpacity>
             </View>
-          </View>
+            )}
+
+          </View>{/* end chatBox */}
 
           {/* Tonight's draws */}
           <Text style={styles.sectionLabel}>TONIGHT'S DRAWS</Text>
@@ -502,6 +510,12 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.darkBorder,
   },
   reactionEmoji: { fontSize: 18 },
+
+  chatLoginPrompt: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
+    paddingVertical: 12, borderTopWidth: 1, borderTopColor: Colors.darkBorder,
+  },
+  chatLoginText: { fontSize: FontSizes.xs, color: Colors.textTertiary },
 
   // Text input row
   chatInputRow: {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
@@ -135,7 +135,13 @@ export default function ListReviewScreen() {
         </Text>
 
         <View style={styles.previewCard}>
-          <Text style={styles.previewEmoji}>{draft.emoji}</Text>
+          {draft.images && draft.images[0] ? (
+            <Image source={{ uri: draft.images[0] }} style={styles.previewImage} resizeMode="cover" />
+          ) : (
+            <View style={styles.previewIconBox}>
+              <Ionicons name={draft.type === 'bundle' ? 'bag-outline' : 'shirt-outline'} size={36} color={Colors.lilac} />
+            </View>
+          )}
           <Text style={styles.previewTitle}>{draft.title || 'Untitled item'}</Text>
           <Text style={styles.previewSub}>
             {draft.condition ? `${draft.condition.replace('_', ' ')} · ` : ''}
@@ -208,7 +214,11 @@ const styles = StyleSheet.create({
     padding: Spacing.xl, alignItems: 'center', marginBottom: Spacing.md,
     borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
   },
-  previewEmoji: { fontSize: 52, marginBottom: 10 },
+  previewImage: { width: 160, height: 120, borderRadius: Radius.md, marginBottom: 12 },
+  previewIconBox: {
+    width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(139,92,246,0.12)',
+    alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+  },
   previewTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700', textAlign: 'center' },
   previewSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 4, textTransform: 'capitalize' },
   previewDesc: { fontSize: FontSizes.xs, color: Colors.textTertiary, marginTop: 6, textAlign: 'center', lineHeight: 17 },

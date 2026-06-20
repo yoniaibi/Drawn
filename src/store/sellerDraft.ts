@@ -3,6 +3,7 @@ import { create } from 'zustand';
 interface SellerDraft {
   type: 'single' | 'bundle' | null;
   emoji: string;
+  images: string[]; // local URIs or data URIs
   title: string;
   description: string;
   condition: string | null;
@@ -13,6 +14,7 @@ interface SellerDraft {
   clearDraft: () => void;
   setType: (t: 'single' | 'bundle') => void;
   setEmoji: (emoji: string) => void;
+  setImages: (images: string[]) => void;
   setDetails: (title: string, description: string, condition: string) => void;
   setPricing: (price: number, qty: number, retailValue: number) => void;
 }
@@ -20,6 +22,7 @@ interface SellerDraft {
 const DEFAULTS = {
   type: null as 'single' | 'bundle' | null,
   emoji: '👜',
+  images: [] as string[],
   title: '',
   description: '',
   condition: null as string | null,
@@ -36,6 +39,8 @@ export const useSellerDraft = create<SellerDraft>((set) => ({
   setType: (t) => set({ type: t, emoji: t === 'bundle' ? '🛍️' : '👜' }),
 
   setEmoji: (emoji) => set({ emoji }),
+
+  setImages: (images) => set({ images }),
 
   setDetails: (title, description, condition) => set({ title, description, condition }),
 

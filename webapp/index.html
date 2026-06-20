@@ -5,41 +5,33 @@
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>DRAWN</title>
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
     <style id="expo-reset">
-      html, body { height: 100%; }
-      body { overflow: hidden; }
-      #root { display: flex; height: 100%; flex: 1; }
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
     </style>
   </head>
-  <body style="background:#0F0A1E">
-    <div id="err" style="display:none;padding:20px;font-family:monospace;color:#F472B6;position:fixed;top:0;left:0;right:0;bottom:0;overflow:auto;z-index:9999;background:#0F0A1E">
-      <h2 style="font-size:16px;margin-bottom:8px">JS Error</h2>
-      <pre id="err-msg" style="color:#fff;font-size:13px;white-space:pre-wrap;word-break:break-all"></pre>
-    </div>
-    <script>
-      function showErr(msg) {
-        var el = document.getElementById('err');
-        var pre = document.getElementById('err-msg');
-        if (el && pre) { pre.textContent = msg; el.style.display = 'block'; }
-      }
-      window.onerror = function(msg, src, line, col, err) {
-        showErr((err ? err.message + '\n\n' + err.stack : msg) + '\n\nSrc: ' + src + ':' + line + ':' + col);
-        return true;
-      };
-      window.addEventListener('unhandledrejection', function(e) {
-        showErr('Promise rejection:\n' + (e.reason && e.reason.stack ? e.reason.stack : String(e.reason)));
-      });
-    </script>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="loading-msg" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#F472B6;font-family:sans-serif;font-size:18px;letter-spacing:2px">DRAWN</div>
+
+  <body>
+    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <!-- The root element for your Expo app. -->
     <div id="root"></div>
-    <script>
-      var _obs = new MutationObserver(function() {
-        var msg = document.getElementById('loading-msg');
-        if (msg && document.getElementById('root').children.length > 0) { msg.style.display = 'none'; _obs.disconnect(); }
-      });
-      _obs.observe(document.getElementById('root'), { childList: true });
-    </script>
-  <script src="/Drawn/webapp/_expo/static/js/web/entry-5d14ef544d33cf3182d0052b360d0c8b.js" defer></script>
+  <script src="/Drawn/webapp/_expo/static/js/web/entry-db0f3546f8250bef245fe7173963be69.js" defer></script>
 </body>
 </html>
