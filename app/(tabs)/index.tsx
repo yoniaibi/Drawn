@@ -23,15 +23,16 @@ import { useAuthStore } from '../../src/store';
 const FILTERS = ['Tonight 🔥', 'Hot', 'High value', 'Bundles', 'Just listed', '♡ Saved'];
 
 const LIVE_TICKERS = [
-  '@jade_m just bought 3 tickets · Chanel Flap',
-  '@ryan.k grabbed 10 tickets · Rolex Submariner',
-  '@priya__ just joined · Designer Closet',
-  '@tom_w bought 5 more · MacBook Pro',
-  '1,247 people are watching tonight',
-  '@chloe_j added 15 tickets · Chanel Flap',
-  'Rolex draw is 97% full 🔥',
-  '@ellie.b joined the Designer Closet draw',
-  'Threshold hit on Chanel Flap — draw is running tonight ✅',
+  '👀 1,247 people watching right now',
+  '🎟️ @jade_m just bought 3 tickets · Chanel Flap',
+  '🔥 Rolex Submariner is 97% full',
+  '🎟️ @ryan.k grabbed 10 tickets · Rolex',
+  '✅ Threshold hit on Chanel Flap — draw confirmed tonight',
+  '🎟️ @priya__ just joined · Designer Closet',
+  '👜 Chanel Flap draw closes in 2h',
+  '🎟️ @chloe_j added 15 tickets · Chanel Flap',
+  '🔒 All items verified before listing',
+  '⚡ @tom_w bought 5 more · MacBook Pro',
 ];
 
 

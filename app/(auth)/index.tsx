@@ -20,11 +20,13 @@ const FALLBACK_WINS = [
 type SplashWin = { handle: string; item: string; ticketPrice: number; retailValue: number; image: string; };
 
 const SOCIAL_PROOF = [
-  '🎉 1,247 people watching tonight',
-  '🏆 23 winners this week',
-  '💜 £127,000 in prizes drawn so far',
-  '⚡ Seller payouts within 24 hours',
+  '👀 1,247 people watching tonight',
+  '🥇 23 items won this week',
+  '💰 £127,000 in prizes drawn so far',
+  '🎟️ Free postal entry on every draw',
   '👜 Chanel Flap won for 25p tonight',
+  '⚡ Sellers paid within 24 hours',
+  '🔒 Every item verified before listing',
 ];
 
 export default function SplashScreen() {
