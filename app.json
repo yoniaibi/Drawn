@@ -25,6 +25,9 @@
       "expo-router",
       "expo-font",
       "expo-secure-store"
-    ]
+    ],
+    "experiments": {
+      "baseUrl": "/Drawn/app"
+    }
   }
 }
