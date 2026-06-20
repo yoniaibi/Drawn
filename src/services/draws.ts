@@ -162,7 +162,7 @@ export async function fetchMyTickets(userId: string): Promise<Draw[]> {
 export interface WinResult {
   drawId: string;
   drawTitle: string;
-  drawEmoji: string;
+  drawImage?: string;
   retailValue: number;
   completedAt: string;
 }
@@ -171,7 +171,7 @@ export async function checkForWins(userId: string): Promise<WinResult[]> {
   try {
     const { data, error } = await supabase
       .from('draws')
-      .select('id, title, emoji, retail_value, completed_at')
+      .select('id, title, image_url, retail_value, completed_at')
       .eq('winner_user_id', userId)
       .eq('status', 'completed')
       .order('completed_at', { ascending: false })
@@ -182,7 +182,7 @@ export async function checkForWins(userId: string): Promise<WinResult[]> {
     return data.map(d => ({
       drawId: d.id,
       drawTitle: d.title,
-      drawEmoji: d.emoji,
+      drawImage: d.image_url,
       retailValue: d.retail_value,
       completedAt: d.completed_at ?? '',
     }));

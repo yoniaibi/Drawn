@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, Modal, Pressable, Clipboard, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, Modal, Pressable, Clipboard, Animated, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -83,7 +83,8 @@ export default function AccountScreen() {
             </View>
             {streak >= 1 && (
               <View style={styles.streakBadge}>
-                <Text style={styles.streakBadgeText}>🔥 {streak} day streak</Text>
+                <Ionicons name="flame-outline" size={10} color={Colors.pink} />
+                <Text style={styles.streakBadgeText}>{streak} day streak</Text>
               </View>
             )}
           </View>
@@ -113,7 +114,7 @@ export default function AccountScreen() {
               <View style={styles.statDivider} />
               <View style={[styles.stat]}>
                 <Text style={[styles.statVal, { color: Colors.gold }]}>{stats.wins}</Text>
-                <Text style={styles.statLabel}>Won 🏆</Text>
+                <Text style={styles.statLabel}>Won</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.stat}>
@@ -132,15 +133,17 @@ export default function AccountScreen() {
             <Text style={styles.sectionTitle}>Achievements</Text>
             <View style={[styles.badgesGrid, { marginTop: 8 }]}>
               {[
-                { emoji: '✦', label: 'Founding Member', unlocked: true, color: Colors.gold, progress: 1, max: 1, unit: '' },
-                { emoji: '🎟️', label: 'First Entry', unlocked: (stats.totalTickets ?? 0) >= 1, color: Colors.lilac, progress: Math.min(stats.totalTickets ?? 0, 1), max: 1, unit: 'ticket' },
-                { emoji: '🔥', label: '3-Day Streak', unlocked: streak >= 3, color: Colors.pink, progress: Math.min(streak, 3), max: 3, unit: 'days' },
-                { emoji: '🏆', label: 'First Win', unlocked: (stats.wins ?? 0) >= 1, color: Colors.gold, progress: Math.min(stats.wins ?? 0, 1), max: 1, unit: 'win' },
-                { emoji: '🎯', label: '25 Tickets', unlocked: (stats.totalTickets ?? 0) >= 25, color: Colors.lilac, progress: Math.min(stats.totalTickets ?? 0, 25), max: 25, unit: 'tickets' },
-                { emoji: '💎', label: 'Big Winner', unlocked: (stats.totalWon ?? 0) >= 100000, color: Colors.gold, progress: Math.min(stats.totalWon ?? 0, 100000), max: 100000, unit: '' },
+                { icon: 'star-outline' as const, label: 'Founding Member', unlocked: true, color: Colors.gold, progress: 1, max: 1, unit: '' },
+                { icon: 'ticket-outline' as const, label: 'First Entry', unlocked: (stats.totalTickets ?? 0) >= 1, color: Colors.lilac, progress: Math.min(stats.totalTickets ?? 0, 1), max: 1, unit: 'ticket' },
+                { icon: 'flame-outline' as const, label: '3-Day Streak', unlocked: streak >= 3, color: Colors.pink, progress: Math.min(streak, 3), max: 3, unit: 'days' },
+                { icon: 'trophy-outline' as const, label: 'First Win', unlocked: (stats.wins ?? 0) >= 1, color: Colors.gold, progress: Math.min(stats.wins ?? 0, 1), max: 1, unit: 'win' },
+                { icon: 'layers-outline' as const, label: '25 Tickets', unlocked: (stats.totalTickets ?? 0) >= 25, color: Colors.lilac, progress: Math.min(stats.totalTickets ?? 0, 25), max: 25, unit: 'tickets' },
+                { icon: 'diamond-outline' as const, label: 'Big Winner', unlocked: (stats.totalWon ?? 0) >= 100000, color: Colors.gold, progress: Math.min(stats.totalWon ?? 0, 100000), max: 100000, unit: '' },
               ].map(b => (
                 <View key={b.label} style={[styles.badge, !b.unlocked && styles.badgeLocked]}>
-                  <Text style={[styles.badgeEmoji, !b.unlocked && { opacity: 0.3 }]}>{b.emoji}</Text>
+                  <View style={[styles.badgeIconBox, { backgroundColor: b.color + '18', opacity: b.unlocked ? 1 : 0.3 }]}>
+                    <Ionicons name={b.icon} size={18} color={b.color} />
+                  </View>
                   <Text style={[styles.badgeLabel, !b.unlocked && { color: Colors.textTertiary }]} numberOfLines={1}>{b.label}</Text>
                   {!b.unlocked && (
                     <View style={{ width: '100%', marginTop: 4 }}>
@@ -172,7 +175,9 @@ export default function AccountScreen() {
             </View>
             {wins.length === 0 ? (
               <View style={styles.noWinsCard}>
-                <Text style={styles.noWinsEmoji}>🎯</Text>
+                <View style={styles.noWinsIconBox}>
+                  <Ionicons name="trophy-outline" size={28} color={Colors.textTertiary} />
+                </View>
                 <Text style={styles.noWinsTitle}>No wins yet</Text>
                 <Text style={styles.noWinsSub}>Enter more draws to boost your chances. Winners are drawn every night at 9pm.</Text>
                 <TouchableOpacity style={styles.noWinsBtn} onPress={() => router.push('/(tabs)' as any)}>
@@ -182,7 +187,13 @@ export default function AccountScreen() {
             ) : (
               wins.map((w) => (
                 <TouchableOpacity key={w.drawId} style={styles.winCard} onPress={() => router.push(`/live/winner/${w.drawId}` as any)}>
-                  <Text style={styles.winEmoji}>{w.drawEmoji}</Text>
+                  {w.drawImage ? (
+                    <Image source={{ uri: w.drawImage }} style={styles.winImage} resizeMode="cover" />
+                  ) : (
+                    <View style={[styles.winImage, { backgroundColor: 'rgba(249,200,70,0.1)' }]}>
+                      <Ionicons name="trophy-outline" size={20} color={Colors.gold} />
+                    </View>
+                  )}
                   <View style={styles.winInfo}>
                     <Text style={styles.winItem}>{w.drawTitle}</Text>
                     <Text style={styles.winDate}>{w.completedAt ? new Date(w.completedAt).toLocaleDateString() : 'Recently'}</Text>
@@ -199,7 +210,7 @@ export default function AccountScreen() {
         {/* Referral CTA */}
         <View style={styles.referralCard}>
           <View style={styles.referralLeft}>
-            <Text style={styles.referralTitle}>Invite friends, earn tickets 🎫</Text>
+            <Text style={styles.referralTitle}>Invite friends, earn credit</Text>
             <Text style={styles.referralSub}>
               Share your code and get <Text style={styles.referralBold}>£1 credit</Text> for every friend who joins
             </Text>
@@ -296,6 +307,7 @@ const styles = StyleSheet.create({
   },
   memberBadgeText: { fontSize: 8, color: Colors.gold, fontWeight: '800', letterSpacing: 1 },
   streakBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: 'rgba(244,114,182,0.12)', borderRadius: Radius.pill,
     paddingHorizontal: 10, paddingVertical: 3,
     borderWidth: 1, borderColor: 'rgba(244,114,182,0.25)',
@@ -328,7 +340,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkCard, borderRadius: Radius.md, padding: Spacing.lg,
     alignItems: 'center', gap: 6, borderWidth: 1, borderColor: Colors.darkBorder,
   },
-  noWinsEmoji: { fontSize: 32, marginBottom: 4 },
+  noWinsIconBox: { width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   noWinsTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
   noWinsSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'center', lineHeight: 16 },
   noWinsBtn: {
@@ -340,9 +352,9 @@ const styles = StyleSheet.create({
   winCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: Colors.darkCard, borderRadius: Radius.md, padding: Spacing.md,
-    borderWidth: 1, borderColor: 'rgba(249,200,70,0.15)',
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.15)', marginBottom: 8,
   },
-  winEmoji: { fontSize: 28 },
+  winImage: { width: 44, height: 44, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   winInfo: { flex: 1 },
   winItem: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '600' },
   winDate: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
@@ -381,10 +393,8 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: Colors.darkBorder, position: 'relative', minWidth: 90,
   },
   badgeLocked: { opacity: 0.6 },
-  badgeEmoji: { fontSize: 22 },
+  badgeIconBox: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
   badgeLabel: { fontSize: 9, color: Colors.white, fontWeight: '700', textAlign: 'center', letterSpacing: 0.2 },
-  badgeLockIcon: { position: 'absolute', top: 4, right: 4 },
-  badgeLockText: { fontSize: 8 },
   badgeProgress: { fontSize: 7, color: Colors.textTertiary, marginTop: 2, textAlign: 'center' },
   badgeCheck: { borderRadius: 10, padding: 3, marginTop: 2 },
 
