@@ -165,34 +165,47 @@ export default function LiveWheelScreen() {
         <View style={styles.prizeIcon}>
           {draw.image
             ? <Image source={{ uri: draw.image }} style={styles.prizeImg} />
-            : <Ionicons name="gift-outline" size={28} color={Colors.lilac} />}
+            : <Ionicons name="gift-outline" size={28} color={Colors.gold} />}
         </View>
         <View style={styles.prizeInfo}>
           <Text style={styles.prizeTitle}>{draw.title}</Text>
-          <Text style={styles.prizeSub}>£{draw.retailValue.toLocaleString()} prize · {draw.ticketPrice}p per ticket</Text>
+          <Text style={styles.prizeSub}>{draw.ticketPrice}p per ticket</Text>
+        </View>
+        <View style={styles.prizeValueBox}>
+          <Text style={styles.prizeValueLabel}>VALUE</Text>
+          <Text style={styles.prizeValue}>£{draw.retailValue.toLocaleString()}</Text>
         </View>
         {draw.myTickets > 0 && (
           <View style={styles.youBadge}>
-            <Text style={styles.youText}>You: {draw.myTickets}</Text>
+            <Text style={styles.youText}>🎟 {draw.myTickets}</Text>
           </View>
         )}
       </View>
 
       {/* Stats */}
       <View style={styles.counters}>
-        <View style={styles.counter}>
-          <Text style={styles.counterVal}>{viewers.toLocaleString()}</Text>
+        <View style={[styles.counter, styles.counterPink]}>
+          <View style={styles.counterIcon}>
+            <Ionicons name="eye" size={14} color={Colors.pink} />
+          </View>
+          <Text style={[styles.counterVal, { color: Colors.pink }]}>{viewers.toLocaleString()}</Text>
           <Text style={styles.counterLabel}>watching</Text>
         </View>
-        <View style={styles.counter}>
-          <Text style={styles.counterVal}>{draw.ticketsSold.toLocaleString()}</Text>
+        <View style={[styles.counter, styles.counterLilac]}>
+          <View style={styles.counterIcon}>
+            <Ionicons name="ticket" size={14} color={Colors.lilac} />
+          </View>
+          <Text style={[styles.counterVal, { color: Colors.lilac }]}>{draw.ticketsSold.toLocaleString()}</Text>
           <Text style={styles.counterLabel}>tickets</Text>
         </View>
-        <View style={styles.counter}>
+        <View style={[styles.counter, styles.counterGold]}>
+          <View style={styles.counterIcon}>
+            <Ionicons name="trophy" size={14} color={Colors.gold} />
+          </View>
           <Text style={[styles.counterVal, { color: Colors.gold }]}>
             £{draw.retailValue.toLocaleString()}
           </Text>
-          <Text style={styles.counterLabel}>prize value</Text>
+          <Text style={styles.counterLabel}>prize</Text>
         </View>
       </View>
 
@@ -210,7 +223,7 @@ export default function LiveWheelScreen() {
           ))}
         </View>
 
-        <Text style={styles.reactLabel}>React with everyone</Text>
+        <Text style={styles.reactLabel}>React live with everyone</Text>
         <View style={styles.reactionRow}>
           {QUICK_REACTIONS.map(e => (
             <TouchableOpacity
@@ -252,29 +265,37 @@ const styles = StyleSheet.create({
 
   prizeRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: Colors.royal, borderRadius: Radius.md, padding: Spacing.md, marginBottom: 10,
+    backgroundColor: 'rgba(249,200,70,0.06)', borderRadius: Radius.md, padding: Spacing.md, marginBottom: 10,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)',
   },
-  prizeIcon: { width: 44, height: 44, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  prizeImg: { width: 44, height: 44, borderRadius: 10 },
+  prizeIcon: { width: 52, height: 52, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(249,200,70,0.2)' },
+  prizeImg: { width: 52, height: 52, borderRadius: 12 },
   prizeInfo: { flex: 1 },
   prizeTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700' },
   prizeSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
-  youBadge: { backgroundColor: Colors.pink, borderRadius: Radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
+  prizeValueBox: { alignItems: 'flex-end' },
+  prizeValueLabel: { fontSize: 8, color: Colors.gold, letterSpacing: 0.8, fontWeight: '700', opacity: 0.7 },
+  prizeValue: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.gold },
+  youBadge: { position: 'absolute', top: -8, right: 8, backgroundColor: Colors.pink, borderRadius: Radius.pill, paddingHorizontal: 10, paddingVertical: 3 },
   youText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
 
   counters: { flexDirection: 'row', gap: 8, marginBottom: 14 },
-  counter: { flex: 1, backgroundColor: Colors.ink, borderRadius: Radius.md, padding: Spacing.sm, alignItems: 'center' },
+  counter: { flex: 1, borderRadius: Radius.md, padding: Spacing.sm, alignItems: 'center', gap: 2, borderWidth: 1 },
+  counterPink: { backgroundColor: 'rgba(244,114,182,0.08)', borderColor: 'rgba(244,114,182,0.2)' },
+  counterLilac: { backgroundColor: 'rgba(139,92,246,0.08)', borderColor: 'rgba(139,92,246,0.2)' },
+  counterGold: { backgroundColor: 'rgba(249,200,70,0.08)', borderColor: 'rgba(249,200,70,0.2)' },
+  counterIcon: { width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
   counterVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '800' },
-  counterLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+  counterLabel: { fontSize: 9, color: Colors.textTertiary },
 
   reactionsWrap: { position: 'relative' },
   floatLayer: { position: 'absolute', left: 0, right: 0, bottom: 60, height: 160, overflow: 'hidden' },
-  reactLabel: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', marginBottom: 8, letterSpacing: 0.5 },
-  reactionRow: { flexDirection: 'row', justifyContent: 'center', gap: 10 },
+  reactLabel: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', marginBottom: 8, letterSpacing: 0.8, textTransform: 'uppercase' },
+  reactionRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
   reactionBtn: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
+    width: 50, height: 50, borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
   },
-  reactionEmoji: { fontSize: 22 },
+  reactionEmoji: { fontSize: 24 },
 });

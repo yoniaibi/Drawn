@@ -6,10 +6,10 @@ import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 
 const PERKS = [
-  { icon: 'cash-outline', text: 'Get paid within 24h of the draw' },
-  { icon: 'shield-checkmark-outline', text: 'Items held in custody — buyers trust you instantly' },
-  { icon: 'people-outline', text: 'Every draw gets thousands of eyes at 9pm' },
-  { icon: 'pricetag-outline', text: 'First draw commission-free (founding sellers only)' },
+  { icon: 'cash-outline', text: 'Get paid within 24h of the draw', color: '#4ADE80', bg: 'rgba(74,222,128,0.1)', border: 'rgba(74,222,128,0.25)' },
+  { icon: 'shield-checkmark-outline', text: 'Items held in custody — buyers trust you instantly', color: '#7DD3FC', bg: 'rgba(125,211,252,0.1)', border: 'rgba(125,211,252,0.25)' },
+  { icon: 'people-outline', text: 'Every draw gets thousands of eyes at 9pm', color: Colors.lilac, bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.25)' },
+  { icon: 'pricetag-outline', text: 'First draw commission-free (founding sellers only)', color: Colors.gold, bg: 'rgba(249,200,70,0.1)', border: 'rgba(249,200,70,0.25)' },
 ];
 
 export default function SellerGateScreen() {
@@ -32,8 +32,8 @@ export default function SellerGateScreen() {
         <View style={styles.perks}>
           {PERKS.map((p, i) => (
             <View key={i} style={styles.perkRow}>
-              <View style={styles.perkIcon}>
-                <Ionicons name={p.icon as any} size={20} color={Colors.lilac} />
+              <View style={[styles.perkIcon, { backgroundColor: p.bg, borderColor: p.border }]}>
+                <Ionicons name={p.icon as any} size={22} color={p.color} />
               </View>
               <Text style={styles.perkText}>{p.text}</Text>
             </View>
@@ -62,6 +62,6 @@ const styles = StyleSheet.create({
   sub: { fontSize: FontSizes.base, color: Colors.textSecondary, lineHeight: 22, marginBottom: Spacing.xl },
   perks: { gap: 14, marginBottom: Spacing.xl },
   perkRow: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
-  perkIcon: { width: 40, height: 40, borderRadius: Radius.sm, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
-  perkText: { flex: 1, fontSize: FontSizes.base, color: Colors.textSecondary, lineHeight: 22, paddingTop: 8 },
+  perkIcon: { width: 48, height: 48, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  perkText: { flex: 1, fontSize: FontSizes.base, color: Colors.textSecondary, lineHeight: 22, paddingTop: 12 },
 });

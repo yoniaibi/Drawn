@@ -79,6 +79,25 @@ export default function SellerApplyScreen() {
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Hero */}
+        <View style={styles.hero}>
+          <View style={styles.heroIconBox}>
+            <Ionicons name="storefront" size={30} color={Colors.lilac} />
+          </View>
+          <View style={styles.heroStep}>
+            <View style={[styles.heroStepDot, { backgroundColor: Colors.lilac }]} />
+            <View style={styles.heroStepLine} />
+            <View style={[styles.heroStepDot, { backgroundColor: 'rgba(139,92,246,0.4)' }]} />
+            <View style={styles.heroStepLine} />
+            <View style={[styles.heroStepDot, { backgroundColor: 'rgba(139,92,246,0.2)' }]} />
+          </View>
+          <View style={styles.heroLabels}>
+            <Text style={styles.heroLabelActive}>Apply</Text>
+            <Text style={styles.heroLabel}>Verify ID</Text>
+            <Text style={styles.heroLabel}>List item</Text>
+          </View>
+        </View>
+
         <Text style={styles.title}>Seller application</Text>
         <Text style={styles.sub}>Takes less than 2 minutes. We'll review and get back to you within 24 hours.</Text>
 
@@ -129,6 +148,20 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg, paddingTop: 56 },
   back: { paddingHorizontal: Spacing.lg, marginBottom: 8 },
   content: { padding: Spacing.lg, paddingBottom: 40 },
+
+  hero: { alignItems: 'center', marginBottom: Spacing.xl, gap: 10 },
+  heroIconBox: {
+    width: 68, height: 68, borderRadius: 34,
+    backgroundColor: 'rgba(139,92,246,0.12)', borderWidth: 1, borderColor: 'rgba(139,92,246,0.25)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  heroStep: { flexDirection: 'row', alignItems: 'center', gap: 0 },
+  heroStepDot: { width: 10, height: 10, borderRadius: 5 },
+  heroStepLine: { width: 40, height: 2, backgroundColor: 'rgba(139,92,246,0.25)' },
+  heroLabels: { flexDirection: 'row', gap: 28 },
+  heroLabelActive: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '700', textAlign: 'center', width: 44 },
+  heroLabel: { fontSize: FontSizes.xs, color: Colors.textTertiary, textAlign: 'center', width: 44 },
+
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 6 },
   sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20, marginBottom: Spacing.xl },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 14, fontWeight: '700' },
