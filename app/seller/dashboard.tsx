@@ -11,15 +11,25 @@ import { fetchSellerDraws, fetchSellerStats, SellerStats } from '../../src/servi
 import type { Draw } from '../../src/mocks';
 
 const STATUS_COLOR: Record<string, string> = {
+  pending: Colors.textSecondary,
   open: Colors.lilac,
   closing_tonight: Colors.pink,
   completed: Colors.gold,
   cancelled: Colors.danger,
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  pending: 'Awaiting verification',
+  open: 'Open',
+  closing_tonight: 'Closing tonight',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
+
 export default function SellerDashboardScreen() {
   const router = useRouter();
-  const { user, handle } = useAuthStore();
+  const { user, handle, isSeller } = useAuthStore();
+  const isVerified = (useAuthStore.getState().profile as any)?.seller_verified ?? false;
 
   const [draws, setDraws] = useState<Draw[]>([]);
   const [stats, setStats] = useState<SellerStats>({ totalEarned: 0, pendingPayout: 0 });
@@ -45,6 +55,20 @@ export default function SellerDashboardScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Seller Dashboard</Text>
         <Text style={styles.handle}>{handle}</Text>
+
+        {/* Verification status banner */}
+        {!isVerified && (
+          <TouchableOpacity style={styles.verifyBanner} onPress={() => router.push('/seller/kyc')}>
+            <View style={styles.verifyBannerLeft}>
+              <Ionicons name="shield-outline" size={18} color={Colors.gold} />
+              <View>
+                <Text style={styles.verifyBannerTitle}>Identity not yet verified</Text>
+                <Text style={styles.verifyBannerSub}>Verify your ID so your draws can go live</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={Colors.gold} />
+          </TouchableOpacity>
+        )}
 
         {/* Earnings cards */}
         <View style={styles.earningsRow}>
@@ -94,7 +118,7 @@ export default function SellerDashboardScreen() {
                     <View style={styles.statusRow}>
                       <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
                       <Text style={[styles.drawStatus, { color: statusColor }]}>
-                        {draw.status.replace('_', ' ')}
+                        {STATUS_LABEL[draw.status] ?? draw.status.replace('_', ' ')}
                       </Text>
                     </View>
                   </View>
@@ -118,7 +142,16 @@ const styles = StyleSheet.create({
   back: { paddingHorizontal: Spacing.lg, marginBottom: 8 },
   content: { padding: Spacing.lg, paddingBottom: 40 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white },
-  handle: { fontSize: FontSizes.sm, color: Colors.textSecondary, marginBottom: Spacing.lg },
+  handle: { fontSize: FontSizes.sm, color: Colors.textSecondary, marginBottom: Spacing.md },
+  verifyBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: 'rgba(249,200,70,0.08)', borderRadius: Radius.md,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)',
+    padding: Spacing.md, marginBottom: Spacing.lg,
+  },
+  verifyBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
+  verifyBannerTitle: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '700' },
+  verifyBannerSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
   earningsRow: { flexDirection: 'row', gap: 10, marginBottom: Spacing.lg },
   earningsCard: {
     flex: 1, backgroundColor: Colors.darkCard, borderRadius: Radius.lg, padding: Spacing.md,

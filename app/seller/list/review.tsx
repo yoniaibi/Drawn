@@ -64,7 +64,7 @@ export default function ListReviewScreen() {
         ticket_price: draft.ticketPrice,
         total_tickets: draft.totalTickets,
         tickets_sold: 0,
-        status: 'open',
+        status: 'pending',
         retail_value: draft.retailValue,
         min_threshold: 0.6,
         description: draft.description,
@@ -95,8 +95,8 @@ export default function ListReviewScreen() {
         </View>
         <Text style={styles.successHeading}>Draw submitted!</Text>
         <Text style={styles.successSub}>
-          Ship your item to us within 3 days using the prepaid label we'll send to your email.
-          Once received and verified, your draw goes live.
+          Your draw is pending verification. Ship your item using the prepaid label we'll send to your email.
+          Once we verify your identity and receive the item, your draw goes live.
         </Text>
         <View style={styles.successSteps}>
           {[
