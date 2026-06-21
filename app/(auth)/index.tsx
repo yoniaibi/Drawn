@@ -1,81 +1,102 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated as RNAnimated, TouchableOpacity, useWindowDimensions, Platform, Image } from 'react-native';
+import {
+  View, Text, StyleSheet, ScrollView, Animated as RNAnimated,
+  TouchableOpacity, useWindowDimensions, Image, ImageBackground,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Defs, Pattern, Circle as SvgCircle, Rect } from 'react-native-svg';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import TicketLogo from '../../src/components/TicketLogo';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import GhostButton from '../../src/components/GhostButton';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
-import { fetchRecentWinners, RecentWinner } from '../../src/services/draws';
 import { requestNotificationPermission } from '../../src/services/notifications';
 
-const FALLBACK_WINS = [
-  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: 25, retailValue: 2400, image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80' },
-  { handle: '@dan.west', item: 'Rolex Submariner', ticketPrice: 50, retailValue: 8500, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=100&q=80' },
-  { handle: '@chloe_j', item: 'Designer Closet Bundle', ticketPrice: 40, retailValue: 8600, image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=100&q=80' },
+// Curated luxury item images — always load reliably
+const HERO_ITEMS = [
+  {
+    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80',
+    label: 'Chanel Classic Flap',
+    price: '25p',
+    value: '£2,400',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+    label: 'Rolex Submariner',
+    price: '50p',
+    value: '£8,500',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
+    label: 'Nike Air Jordan 1',
+    price: '10p',
+    value: '£450',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=400&q=80',
+    label: 'Diamond Tennis Bracelet',
+    price: '25p',
+    value: '£1,200',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1614179924047-e1ab49a0a0cf?auto=format&fit=crop&w=400&q=80',
+    label: 'Bottega Veneta Pouch',
+    price: '25p',
+    value: '£1,800',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=400&q=80',
+    label: 'Nike Tech Bundle',
+    price: '10p',
+    value: '£380',
+  },
 ];
 
-type SplashWin = { handle: string; item: string; ticketPrice: number; retailValue: number; image: string; };
+const RECENT_WINS = [
+  { handle: '@sophie_k', item: 'Chanel Classic Flap', ticketPrice: 25, retailValue: 2400, image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=120&q=80' },
+  { handle: '@dan.west', item: 'Rolex Submariner', ticketPrice: 50, retailValue: 8500, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=120&q=80' },
+  { handle: '@chloe_j', item: 'Designer Closet Bundle', ticketPrice: 40, retailValue: 1800, image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=120&q=80' },
+];
 
-const SOCIAL_PROOF = [
-  'Every item verified before listing',
-  'Sellers paid within 24 hours of the draw',
-  'Free postal entry available on every draw',
-  'Draw runs every night at 9pm',
-  'Winner chosen at random — fully transparent',
-  'No subscription. No catch.',
+const HOW_IT_WORKS = [
+  { icon: 'ticket-outline' as const, title: 'Buy a ticket', sub: 'From 10p per ticket. No subscription.' },
+  { icon: 'time-outline' as const, title: 'Draw at 9pm', sub: 'Every night. Winner chosen at random.' },
+  { icon: 'gift-outline' as const, title: 'Win & receive', sub: 'We ship straight to you, tracked & insured.' },
 ];
 
 export default function SplashScreen() {
   const router = useRouter();
-  const { width: screenW, height: screenH } = useWindowDimensions();
+  const { width: screenW } = useWindowDimensions();
   const [time, setTime] = useState(getCountdownTo9pm());
   const [winnerIdx, setWinnerIdx] = useState(0);
-  const [proofIdx, setProofIdx] = useState(0);
-  const winnerOpacity = useRef(Platform.OS !== 'web' ? new RNAnimated.Value(1) : null).current;
-  const proofOpacity = useRef(Platform.OS !== 'web' ? new RNAnimated.Value(1) : null).current;
-  const [recentWins, setRecentWins] = useState<SplashWin[]>(FALLBACK_WINS);
+  const winnerOpacity = useRef(new RNAnimated.Value(1)).current;
+  const heroScale = useRef(new RNAnimated.Value(1)).current;
 
-  useEffect(() => {
-    fetchRecentWinners().then(winners => {
-      if (winners.length > 0) setRecentWins(winners.slice(0, 3));
-    });
-  }, []);
+  const tileW = (screenW - Spacing.lg * 2 - 8) / 3;
 
   useEffect(() => {
     const id = setInterval(() => setTime(getCountdownTo9pm()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // Rotate winner showcase
+  // Subtle pulse on hero grid
   useEffect(() => {
-    const id = setInterval(() => {
-      if (winnerOpacity) {
-        RNAnimated.timing(winnerOpacity, { toValue: 0, duration: 350, useNativeDriver: false }).start(() => {
-          setWinnerIdx(i => (i + 1) % recentWins.length);
-          RNAnimated.timing(winnerOpacity, { toValue: 1, duration: 350, useNativeDriver: false }).start();
-        });
-      } else {
-        setWinnerIdx(i => (i + 1) % recentWins.length);
-      }
-    }, 5000);
-    return () => clearInterval(id);
-  }, [recentWins.length]);
+    RNAnimated.loop(
+      RNAnimated.sequence([
+        RNAnimated.timing(heroScale, { toValue: 1.015, duration: 4000, useNativeDriver: false }),
+        RNAnimated.timing(heroScale, { toValue: 1, duration: 4000, useNativeDriver: false }),
+      ])
+    ).start();
+  }, []);
 
-  // Rotate social proof
+  // Rotate winner card
   useEffect(() => {
     const id = setInterval(() => {
-      if (proofOpacity) {
-        RNAnimated.timing(proofOpacity, { toValue: 0, duration: 250, useNativeDriver: false }).start(() => {
-          setProofIdx(i => (i + 1) % SOCIAL_PROOF.length);
-          RNAnimated.timing(proofOpacity, { toValue: 1, duration: 250, useNativeDriver: false }).start();
-        });
-      } else {
-        setProofIdx(i => (i + 1) % SOCIAL_PROOF.length);
-      }
-    }, 6000);
+      RNAnimated.timing(winnerOpacity, { toValue: 0, duration: 300, useNativeDriver: false }).start(() => {
+        setWinnerIdx(i => (i + 1) % RECENT_WINS.length);
+        RNAnimated.timing(winnerOpacity, { toValue: 1, duration: 300, useNativeDriver: false }).start();
+      });
+    }, 4000);
     return () => clearInterval(id);
   }, []);
 
@@ -84,222 +105,236 @@ export default function SplashScreen() {
     router.push('/(auth)/sign-up');
   }
 
-  function handleLogin() {
-    router.push('/(auth)/log-in');
-  }
-
-  const currentWin = recentWins[winnerIdx % recentWins.length];
+  const win = RECENT_WINS[winnerIdx];
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content} bounces={false} showsVerticalScrollIndicator={false}>
-      {/* Dot-grid texture background */}
-      <Svg
-        style={styles.dotGrid}
-        width={screenW}
-        height={screenH * 2}
-        pointerEvents="none"
-      >
-        <Defs>
-          <Pattern id="dotGrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-            <SvgCircle cx="12" cy="12" r="1" fill={Colors.lilac} fillOpacity="0.08" />
-          </Pattern>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#dotGrid)" />
-      </Svg>
-
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      bounces={false}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* ── Logo ─────────────────────────────────────────────────────── */}
       <View style={styles.logoRow}>
         <TicketLogo size="lg" />
       </View>
 
-      <Text style={styles.headline}>Their loss.{'\n'}Your win.</Text>
-      <Text style={styles.sub}>Win designer things for pennies.{'\n'}Sell what you don't wear. Get paid in 24h.</Text>
+      {/* ── Headline ─────────────────────────────────────────────────── */}
+      <Text style={styles.headline}>Win designer things{'\n'}for pennies.</Text>
+      <Text style={styles.sub}>
+        Real luxury. Verified sellers. Every night at 9pm.
+      </Text>
 
-      {/* Animated social proof ticker */}
-      <View style={styles.proofTicker}>
-        <View style={styles.proofDot} />
-        <RNAnimated.Text style={[styles.proofText, proofOpacity ? { opacity: proofOpacity } : {}]}>
-          {SOCIAL_PROOF[proofIdx]}
-        </RNAnimated.Text>
+      {/* ── Live countdown pill ──────────────────────────────────────── */}
+      <View style={styles.countdownPill}>
+        <View style={styles.pulseDot} />
+        <Text style={styles.countdownLabel}>Next draw closes in</Text>
+        <Text style={styles.countdownTime}>
+          {time.h}:{time.m}:{time.s}
+        </Text>
       </View>
 
-      {/* Live winner showcase */}
-      <View style={styles.winnerShowcase}>
-        <View style={styles.winnerShowcaseHeader}>
+      {/* ── Item grid ────────────────────────────────────────────────── */}
+      <View style={styles.grid}>
+        {HERO_ITEMS.map((item, i) => (
+          <RNAnimated.View
+            key={item.label}
+            style={[styles.gridTile, { width: tileW, height: tileW * 1.25 }, { transform: [{ scale: heroScale }] }]}
+          >
+            <Image
+              source={{ uri: item.image }}
+              style={styles.gridImage}
+              resizeMode="cover"
+            />
+            {/* Gradient overlay */}
+            <View style={styles.gridOverlay} />
+            {/* Price badge */}
+            <View style={styles.gridPriceBadge}>
+              <Text style={styles.gridPrice}>{item.price}</Text>
+            </View>
+            {/* Value */}
+            <View style={styles.gridBottom}>
+              <Text style={styles.gridValue}>{item.value}</Text>
+            </View>
+          </RNAnimated.View>
+        ))}
+      </View>
+
+      <Text style={styles.gridCaption}>
+        Tickets from 10p · Retail value guaranteed
+      </Text>
+
+      {/* ── Recent winner card ───────────────────────────────────────── */}
+      <RNAnimated.View style={[styles.winnerCard, { opacity: winnerOpacity }]}>
+        <View style={styles.winnerHeader}>
           <View style={styles.winnerDot} />
-          <Text style={styles.winnerShowcaseLabel}>LATEST WIN</Text>
-          <Text style={styles.winnerDots}>
-            {recentWins.map((_, i) => i === winnerIdx % recentWins.length ? '●' : '○').join(' ')}
-          </Text>
+          <Text style={styles.winnerHeaderLabel}>LATEST WIN</Text>
+          <View style={styles.winnerDots}>
+            {RECENT_WINS.map((_, i) => (
+              <View key={i} style={[styles.winnerDotSmall, i === winnerIdx && styles.winnerDotActive]} />
+            ))}
+          </View>
         </View>
-
-        <RNAnimated.View style={winnerOpacity ? { opacity: winnerOpacity } : {}}>
-          <View style={styles.winnerRow}>
-            <View style={styles.winnerEmojiBox}>
-              <Image source={{ uri: currentWin.image }} style={styles.winnerImage} resizeMode="cover" />
-            </View>
-            <View style={styles.winnerInfo}>
-              <Text style={styles.winnerHandle}>{currentWin.handle}</Text>
-              <Text style={styles.winnerItem}>{currentWin.item}</Text>
-            </View>
-            <View style={styles.winnerRight}>
-              <Text style={styles.winnerMultiple}>{Math.round(currentWin.retailValue / currentWin.ticketPrice)}×</Text>
-              <Text style={styles.winnerMultipleSub}>return</Text>
+        <View style={styles.winnerBody}>
+          <Image source={{ uri: win.image }} style={styles.winnerImg} resizeMode="cover" />
+          <View style={styles.winnerMeta}>
+            <Text style={styles.winnerHandle}>{win.handle}</Text>
+            <Text style={styles.winnerItem} numberOfLines={1}>{win.item}</Text>
+            <View style={styles.winnerPriceRow}>
+              <Text style={styles.winnerPaid}>{win.ticketPrice}p ticket</Text>
+              <Text style={styles.winnerArrow}>→</Text>
+              <Text style={styles.winnerValue}>£{win.retailValue.toLocaleString()} prize</Text>
             </View>
           </View>
+          <View style={styles.winnerMultipleBox}>
+            <Text style={styles.winnerMultiple}>{Math.round(win.retailValue / (win.ticketPrice / 100))}×</Text>
+            <Text style={styles.winnerMultipleSub}>return</Text>
+          </View>
+        </View>
+      </RNAnimated.View>
 
-          <View style={styles.winnerDivider} />
-
-          <View style={styles.winnerValueRow}>
-            <View style={styles.winnerValueStat}>
-              <Text style={styles.winnerValueStatVal}>{currentWin.ticketPrice}p</Text>
-              <Text style={styles.winnerValueStatLabel}>ticket price</Text>
+      {/* ── How it works ─────────────────────────────────────────────── */}
+      <View style={styles.howCard}>
+        <Text style={styles.howTitle}>How it works</Text>
+        {HOW_IT_WORKS.map((s, i) => (
+          <View key={s.title} style={styles.howRow}>
+            <View style={styles.howNum}>
+              <Text style={styles.howNumText}>{i + 1}</Text>
             </View>
-            <View style={styles.winnerValueArrowBox}>
-              <Text style={styles.winnerValueArrow}>→</Text>
+            <View style={styles.howIconBox}>
+              <Ionicons name={s.icon} size={18} color={Colors.lilac} />
             </View>
-            <View style={styles.winnerValueStat}>
-              <Text style={[styles.winnerValueStatVal, { color: Colors.gold }]}>£{currentWin.retailValue.toLocaleString()}</Text>
-              <Text style={styles.winnerValueStatLabel}>retail value</Text>
+            <View style={styles.howText}>
+              <Text style={styles.howStepTitle}>{s.title}</Text>
+              <Text style={styles.howStepSub}>{s.sub}</Text>
             </View>
           </View>
-        </RNAnimated.View>
+        ))}
       </View>
 
-      {/* Latest payout */}
-      <View style={styles.payoutCard}>
-        <View style={styles.payoutLeft}>
-          <View style={styles.payoutLabelRow}>
-            <View style={[styles.proofDot, { backgroundColor: Colors.lilac }]} />
-            <Text style={[styles.winnerShowcaseLabel, { color: Colors.lilac }]}>LATEST PAYOUT</Text>
-          </View>
-          <Text style={styles.payoutTitle}>Wardrobe drop · 28 pieces</Text>
-          <Text style={styles.payoutSeller}>@sophiestyle · paid out today</Text>
-          <Text style={styles.payoutTime}>Listed in under 5 minutes →</Text>
-        </View>
-        <View style={styles.payoutEarned}>
-          <Text style={styles.payoutAmount}>£876</Text>
-          <Text style={styles.payoutLabel}>she earned</Text>
-        </View>
-      </View>
-
-      {/* Countdown */}
-      <View style={styles.countdown}>
-        <View style={styles.countdownLeft}>
-          <View style={[styles.proofDot, { backgroundColor: Colors.pink }]} />
-          <Text style={styles.countdownLabel}>Next draw closes in</Text>
-        </View>
-        <View style={styles.countdownRight}>
-          <Text style={styles.countdownNum}>{time.h}</Text>
-          <Text style={styles.countdownColon}>:</Text>
-          <Text style={styles.countdownNum}>{time.m}</Text>
-          <Text style={styles.countdownColon}>:</Text>
-          <Text style={styles.countdownNum}>{time.s}</Text>
-        </View>
-      </View>
-
-      {/* Trust badges */}
+      {/* ── Trust badges ─────────────────────────────────────────────── */}
       <View style={styles.trustRow}>
         {[
-          { icon: 'shield-checkmark-outline', label: 'Verified items' },
-          { icon: 'lock-closed-outline', label: 'Secure checkout' },
-          { icon: 'mail-outline', label: 'Free entry option' },
+          { icon: 'shield-checkmark-outline' as const, label: 'Every item verified' },
+          { icon: 'lock-closed-outline' as const, label: 'Secure checkout' },
+          { icon: 'mail-outline' as const, label: 'Free entry option' },
         ].map(b => (
           <View key={b.label} style={styles.trustBadge}>
-            <Ionicons name={b.icon as any} size={14} color={Colors.lilac} />
+            <Ionicons name={b.icon} size={13} color={Colors.lilac} />
             <Text style={styles.trustLabel}>{b.label}</Text>
           </View>
         ))}
       </View>
 
+      {/* ── CTAs ─────────────────────────────────────────────────────── */}
       <PrimaryButton label="Get started — it's free" onPress={handleGetStarted} style={styles.btn} />
-      <GhostButton label="Log in" onPress={handleLogin} style={styles.ghostBtn} />
-      <Text style={styles.noCard}>No card needed to browse · Free postal entry available</Text>
+      <GhostButton label="Log in" onPress={() => router.push('/(auth)/log-in')} style={styles.ghostBtn} />
+      <Text style={styles.noCard}>No card needed to browse · Free postal entry on every draw</Text>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.violet },
-  content: { padding: Spacing.lg, paddingBottom: 40 },
-  dotGrid: { position: 'absolute', top: 0, left: 0 },
-  logoRow: { alignItems: 'center', paddingTop: 16, paddingBottom: 16 },
+  content: { paddingBottom: 48 },
+
+  logoRow: { alignItems: 'center', paddingTop: 20, paddingBottom: 12 },
 
   headline: {
-    fontFamily: Fonts.serif, fontSize: 38, color: Colors.white,
-    textAlign: 'center', lineHeight: 40, marginBottom: 8,
+    fontFamily: Fonts.serif, fontSize: 36, color: Colors.white,
+    textAlign: 'center', lineHeight: 42, marginBottom: 10,
+    paddingHorizontal: Spacing.lg,
   },
-  sub: { fontSize: FontSizes.sm, color: '#C9B3EF', textAlign: 'center', lineHeight: 20, marginBottom: 14 },
+  sub: {
+    fontSize: FontSizes.sm, color: 'rgba(210,195,240,0.9)',
+    textAlign: 'center', lineHeight: 20, marginBottom: 16,
+    paddingHorizontal: Spacing.xl,
+  },
 
-  proofTicker: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    borderRadius: Radius.pill, paddingHorizontal: 0, paddingVertical: 6, marginBottom: 14,
+  countdownPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
     alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: Radius.pill,
+    paddingHorizontal: 14, paddingVertical: 8, marginBottom: 20,
+    borderWidth: 1, borderColor: 'rgba(244,114,182,0.3)',
   },
-  proofDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: Colors.lilac, opacity: 0.6 },
-  proofText: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '500', fontStyle: 'italic' },
+  pulseDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
+  countdownLabel: { fontSize: FontSizes.xs, color: 'rgba(210,195,240,0.8)' },
+  countdownTime: { fontFamily: Fonts.serif, fontSize: FontSizes.base, color: Colors.white, letterSpacing: 1 },
 
-  winnerShowcase: {
-    backgroundColor: Colors.ink, borderRadius: Radius.lg, padding: Spacing.md,
-    marginBottom: Spacing.sm, borderWidth: 1, borderColor: 'rgba(249,200,70,0.2)',
+  // Item grid
+  grid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 4,
+    paddingHorizontal: Spacing.lg, marginBottom: 8,
   },
-  winnerShowcaseHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  gridTile: { borderRadius: 10, overflow: 'hidden', position: 'relative' },
+  gridImage: { width: '100%', height: '100%' },
+  gridOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15,11,30,0.35)',
+  },
+  gridPriceBadge: {
+    position: 'absolute', top: 6, left: 6,
+    backgroundColor: Colors.lilac, borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 2,
+  },
+  gridPrice: { fontSize: 9, color: Colors.white, fontWeight: '800' },
+  gridBottom: {
+    position: 'absolute', bottom: 6, left: 6, right: 6,
+  },
+  gridValue: { fontSize: 10, color: Colors.gold, fontWeight: '700' },
+
+  gridCaption: {
+    textAlign: 'center', fontSize: 10, color: 'rgba(210,195,240,0.6)',
+    marginBottom: 20, paddingHorizontal: Spacing.lg,
+  },
+
+  // Winner card
+  winnerCard: {
+    marginHorizontal: Spacing.lg, marginBottom: Spacing.md,
+    backgroundColor: 'rgba(10,6,24,0.7)', borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)', padding: Spacing.md,
+  },
+  winnerHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   winnerDot: { width: 7, height: 7, borderRadius: 99, backgroundColor: Colors.gold },
-  winnerShowcaseLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 1, color: Colors.gold, flex: 1 },
-  winnerDots: { fontSize: 8, color: 'rgba(255,255,255,0.3)', letterSpacing: 2 },
-  winnerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  winnerEmojiBox: {
-    width: 50, height: 50, borderRadius: 14,
-    backgroundColor: 'rgba(249,200,70,0.08)', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(249,200,70,0.15)',
-  },
-  winnerImage: { width: 50, height: 50, borderRadius: 8 },
-  winnerInfo: { flex: 1 },
-  winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.base, color: Colors.white, lineHeight: 18 },
+  winnerHeaderLabel: { flex: 1, fontSize: 9, fontWeight: '700', letterSpacing: 1.2, color: Colors.gold },
+  winnerDots: { flexDirection: 'row', gap: 4 },
+  winnerDotSmall: { width: 5, height: 5, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.2)' },
+  winnerDotActive: { backgroundColor: Colors.gold },
+  winnerBody: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  winnerImg: { width: 56, height: 56, borderRadius: 10, backgroundColor: Colors.darkCard },
+  winnerMeta: { flex: 1 },
+  winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.base, color: Colors.white },
   winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
-  winnerTime: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
-  winnerRight: { alignItems: 'center' },
-  winnerMultiple: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.gold },
-  winnerMultipleSub: { fontSize: 8, color: Colors.textTertiary },
-  winnerDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)', marginVertical: 12 },
-  winnerValueRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  winnerValueStat: { flex: 1, alignItems: 'center' },
-  winnerValueStatVal: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white },
-  winnerValueStatLabel: { fontSize: 9, color: Colors.textTertiary, marginTop: 3 },
-  winnerValueArrowBox: { paddingHorizontal: 8 },
-  winnerValueArrow: { fontSize: 20, color: 'rgba(255,255,255,0.3)' },
+  winnerPriceRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
+  winnerPaid: { fontSize: 10, color: Colors.textTertiary },
+  winnerArrow: { fontSize: 10, color: Colors.textTertiary },
+  winnerValue: { fontSize: 10, color: Colors.gold, fontWeight: '700' },
+  winnerMultipleBox: { alignItems: 'center', paddingLeft: 4 },
+  winnerMultiple: { fontFamily: Fonts.serif, fontSize: 22, color: Colors.gold },
+  winnerMultipleSub: { fontSize: 8, color: Colors.textTertiary, marginTop: 1 },
 
-  payoutCard: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: Colors.ink, borderRadius: Radius.lg, padding: Spacing.md,
-    marginBottom: Spacing.sm, borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
+  // How it works
+  howCard: {
+    marginHorizontal: Spacing.lg, marginBottom: Spacing.md,
+    backgroundColor: 'rgba(10,6,24,0.5)', borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', padding: Spacing.md, gap: 14,
   },
-  payoutLeft: { flex: 1 },
-  payoutLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  payoutTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '600' },
-  payoutSeller: { fontSize: 9, color: Colors.textTertiary, marginTop: 2 },
-  payoutTime: { fontSize: 9, color: Colors.lilac, fontWeight: '600', marginTop: 4 },
-  payoutEarned: { alignItems: 'center', paddingLeft: 12 },
-  payoutAmount: { fontFamily: Fonts.serif, fontSize: 22, color: Colors.lilac },
-  payoutLabel: { fontSize: 8, color: Colors.textTertiary, marginTop: 2 },
+  howTitle: { fontSize: FontSizes.xs, color: 'rgba(210,195,240,0.7)', letterSpacing: 0.8, fontWeight: '700', marginBottom: 2 },
+  howRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  howNum: { width: 20, height: 20, borderRadius: 10, backgroundColor: 'rgba(139,92,246,0.2)', alignItems: 'center', justifyContent: 'center' },
+  howNumText: { fontSize: 9, color: Colors.lilac, fontWeight: '800' },
+  howIconBox: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center' },
+  howText: { flex: 1 },
+  howStepTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700' },
+  howStepSub: { fontSize: FontSizes.xs, color: 'rgba(210,195,240,0.65)', marginTop: 1 },
 
-  countdown: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: 13, padding: 12, marginBottom: Spacing.md,
-  },
-  countdownLeft: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  countdownLabel: { fontSize: 9, color: '#C9B3EF' },
-  countdownRight: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  countdownNum: { fontFamily: Fonts.serif, fontSize: 20, color: Colors.white, lineHeight: 22 },
-  countdownColon: { fontSize: 13, color: Colors.lilac, fontWeight: '700', marginHorizontal: 1 },
-
-  trustRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    marginBottom: Spacing.md,
-  },
+  // Trust
+  trustRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: Spacing.lg, paddingHorizontal: Spacing.lg },
   trustBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  trustLabel: { fontSize: 9, color: '#C9B3EF' },
+  trustLabel: { fontSize: 9, color: 'rgba(210,195,240,0.7)' },
 
-  btn: { marginBottom: Spacing.sm },
-  ghostBtn: { marginBottom: Spacing.sm },
-  noCard: { textAlign: 'center', fontSize: 9, color: 'rgba(255,255,255,0.25)' },
+  btn: { marginHorizontal: Spacing.lg, marginBottom: Spacing.sm },
+  ghostBtn: { marginHorizontal: Spacing.lg, marginBottom: Spacing.sm },
+  noCard: { textAlign: 'center', fontSize: 9, color: 'rgba(255,255,255,0.22)', paddingHorizontal: Spacing.lg },
 });
