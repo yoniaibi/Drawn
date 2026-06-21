@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Defs, RadialGradient, LinearGradient, Stop, Rect, Circle } from 'react-native-svg';
 import { Colors, Fonts } from '../theme';
 
 interface Props {
@@ -8,71 +7,43 @@ interface Props {
 }
 
 const sizes = {
-  sm: { word: 13, height: 22, stubPad: 6, dotSize: 3 },
-  md: { word: 18, height: 30, stubPad: 8, dotSize: 4 },
-  lg: { word: 24, height: 40, stubPad: 11, dotSize: 5 },
+  sm: { word: 13, height: 22, stubPad: 6, dot: 3, stubFontMain: 6.5, stubFontSub: 6.5 },
+  md: { word: 18, height: 30, stubPad: 9, dot: 4, stubFontMain: 8, stubFontSub: 8 },
+  lg: { word: 24, height: 42, stubPad: 12, dot: 5, stubFontMain: 10, stubFontSub: 10 },
 };
 
 export default function TicketLogo({ size = 'md' }: Props) {
   const s = sizes[size];
   const perfCount = 5;
-  // Perforation holes: evenly spaced along height
-  const perfHoles = Array.from({ length: perfCount }, (_, i) => ({
-    cy: ((i + 1) / (perfCount + 1)) * s.height,
-  }));
-  const holeR = s.dotSize * 0.55;
+  const radius = s.height * 0.22;
 
   return (
     <View style={[styles.wrap, { height: s.height }]}>
-      {/* Left "drawn" section with radial gradient */}
-      <View style={[styles.main, { borderRadius: s.height * 0.22 }]}>
-        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-          <Defs>
-            <RadialGradient id="mainGrad" cx="40%" cy="40%" r="80%">
-              <Stop offset="0%" stopColor="#3d2580" stopOpacity="1" />
-              <Stop offset="100%" stopColor="#120b30" stopOpacity="1" />
-            </RadialGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#mainGrad)" />
-        </Svg>
+      {/* Left "drawn" section */}
+      <View style={[
+        styles.main,
+        { paddingHorizontal: s.stubPad, borderRadius: radius, borderTopRightRadius: 0, borderBottomRightRadius: 0 },
+      ]}>
         <Text style={[styles.word, { fontSize: s.word }]}>drawn</Text>
       </View>
 
-      {/* Perforation join — SVG circles overlaid on the seam */}
-      <View style={[styles.perf, { width: s.dotSize + 4 }]}>
-        <Svg width={s.dotSize + 4} height={s.height} style={StyleSheet.absoluteFill}>
-          <Defs>
-            <LinearGradient id="perfBg" x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor="#120b30" stopOpacity="1" />
-              <Stop offset="100%" stopColor="#1e1535" stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#perfBg)" />
-          {perfHoles.map((h, i) => (
-            <Circle
-              key={i}
-              cx={(s.dotSize + 4) / 2}
-              cy={h.cy}
-              r={holeR}
-              fill="rgba(0,0,0,0.55)"
-            />
-          ))}
-        </Svg>
+      {/* Perforation seam */}
+      <View style={[styles.perf, { width: s.dot + 6 }]}>
+        {Array.from({ length: perfCount }).map((_, i) => (
+          <View
+            key={i}
+            style={[styles.hole, { width: s.dot, height: s.dot, borderRadius: s.dot / 2 }]}
+          />
+        ))}
       </View>
 
-      {/* Stub (9PM) with lilac gradient */}
-      <View style={[styles.stub, { paddingHorizontal: s.stubPad, borderRadius: s.height * 0.22 }]}>
-        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-          <Defs>
-            <LinearGradient id="stubGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <Stop offset="0%" stopColor="#a78bfa" stopOpacity="1" />
-              <Stop offset="100%" stopColor="#7c3aed" stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#stubGrad)" />
-        </Svg>
-        <Text style={styles.stubLine1}>9PM</Text>
-        <Text style={styles.stubLine2}>LIVE</Text>
+      {/* Stub (9PM LIVE) */}
+      <View style={[
+        styles.stub,
+        { paddingHorizontal: s.stubPad, borderRadius: radius, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
+      ]}>
+        <Text style={[styles.stubLine1, { fontSize: s.stubFontMain }]}>9PM</Text>
+        <Text style={[styles.stubLine2, { fontSize: s.stubFontSub }]}>LIVE</Text>
       </View>
     </View>
   );
@@ -80,30 +51,39 @@ export default function TicketLogo({ size = 'md' }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', alignItems: 'stretch' },
+
   main: {
-    backgroundColor: Colors.ink,
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
+    backgroundColor: '#1e1040',
     justifyContent: 'center',
-    paddingHorizontal: 10,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.35)',
+    borderRightWidth: 0,
   },
   word: {
     fontFamily: Fonts.serif,
     color: Colors.white,
     letterSpacing: -0.5,
   },
+
   perf: {
-    justifyContent: 'center',
-    overflow: 'hidden',
+    backgroundColor: '#18102e',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(139,92,246,0.25)',
   },
+  hole: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+
   stub: {
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
+    backgroundColor: Colors.lilac,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
   },
-  stubLine1: { fontSize: 7, fontWeight: '800', color: Colors.white, letterSpacing: 0.5 },
-  stubLine2: { fontSize: 7, fontWeight: '800', color: Colors.gold, letterSpacing: 0.5 },
+  stubLine1: { fontWeight: '800', color: Colors.white, letterSpacing: 0.5 },
+  stubLine2: { fontWeight: '800', color: Colors.gold, letterSpacing: 0.5 },
 });
