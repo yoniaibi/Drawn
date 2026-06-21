@@ -86,11 +86,17 @@ export default function SellerDashboardScreen() {
           </View>
         </View>
 
-        <PrimaryButton
-          label="+ List a new item"
-          onPress={() => router.push('/seller/list/type')}
-          style={{ marginBottom: Spacing.xl }}
-        />
+        <View style={styles.actionRow}>
+          <PrimaryButton
+            label="+ List a new item"
+            onPress={() => router.push('/seller/list/type')}
+            style={{ flex: 1 }}
+          />
+          <TouchableOpacity style={styles.payoutBtn} onPress={() => router.push('/seller/payout' as any)}>
+            <Ionicons name="cash-outline" size={16} color={Colors.gold} />
+            <Text style={styles.payoutBtnText}>Payouts</Text>
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.sectionLabel}>YOUR DRAWS</Text>
 
@@ -108,27 +114,35 @@ export default function SellerDashboardScreen() {
             const earned = Math.round(draw.ticketsSold * draw.ticketPrice * 0.846);
             const statusColor = STATUS_COLOR[draw.status] ?? Colors.textSecondary;
             return (
-              <TouchableOpacity key={draw.id} style={styles.drawCard} onPress={() => router.push(`/draw/${draw.id}`)}>
-                <View style={styles.drawTop}>
-                  <View style={styles.drawIconBox}>
-                    <Ionicons name="ticket-outline" size={18} color={Colors.lilac} />
-                  </View>
-                  <View style={styles.drawInfo}>
-                    <Text style={styles.drawTitle} numberOfLines={1}>{draw.title}</Text>
-                    <View style={styles.statusRow}>
-                      <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-                      <Text style={[styles.drawStatus, { color: statusColor }]}>
-                        {STATUS_LABEL[draw.status] ?? draw.status.replace('_', ' ')}
-                      </Text>
+              <View key={draw.id} style={styles.drawCard}>
+                <TouchableOpacity onPress={() => router.push(`/draw/${draw.id}` as any)}>
+                  <View style={styles.drawTop}>
+                    <View style={styles.drawIconBox}>
+                      <Ionicons name="ticket-outline" size={18} color={Colors.lilac} />
                     </View>
+                    <View style={styles.drawInfo}>
+                      <Text style={styles.drawTitle} numberOfLines={1}>{draw.title}</Text>
+                      <View style={styles.statusRow}>
+                        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+                        <Text style={[styles.drawStatus, { color: statusColor }]}>
+                          {STATUS_LABEL[draw.status] ?? draw.status.replace('_', ' ')}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.drawEarning}>{formatTicketPrice(earned)}</Text>
                   </View>
-                  <Text style={styles.drawEarning}>{formatTicketPrice(earned)}</Text>
-                </View>
-                <ProgressBar progress={progress} height={4} />
-                <Text style={styles.drawProgress}>
-                  {draw.ticketsSold.toLocaleString()} / {draw.totalTickets.toLocaleString()} tickets · {Math.round(progress * 100)}%
-                </Text>
-              </TouchableOpacity>
+                  <ProgressBar progress={progress} height={4} />
+                  <Text style={styles.drawProgress}>
+                    {draw.ticketsSold.toLocaleString()} / {draw.totalTickets.toLocaleString()} tickets · {Math.round(progress * 100)}%
+                  </Text>
+                </TouchableOpacity>
+                {draw.status === 'pending' && (
+                  <TouchableOpacity style={styles.editBtn} onPress={() => router.push(`/seller/item/${draw.id}` as any)}>
+                    <Ionicons name="pencil-outline" size={13} color={Colors.textSecondary} />
+                    <Text style={styles.editBtnText}>Edit listing</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             );
           })
         )}
@@ -173,4 +187,9 @@ const styles = StyleSheet.create({
   emptyCard: { alignItems: 'center', padding: Spacing.xxl, gap: 10 },
   emptyTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
   emptySub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center' },
+  actionRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: Spacing.xl },
+  payoutBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(249,200,70,0.1)', borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(249,200,70,0.3)', paddingHorizontal: Spacing.md, paddingVertical: 12 },
+  payoutBtnText: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '600' },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingTop: 4 },
+  editBtnText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
 });
