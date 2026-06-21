@@ -6,14 +6,17 @@ export interface Profile {
   handle: string;
   avatar_letter: string;
   is_seller: boolean;
+  seller_verified: boolean;
+  kyc_submitted: boolean;
   wallet_balance: number; // pence
+  notify_before_close: boolean;
   created_at: string;
 }
 
 export interface Draw {
   id: string;
   title: string;
-  emoji: string;
+  image_url?: string | null;
   seller_id: string;
   seller_handle: string;
   seller_avatar: string;
@@ -21,7 +24,7 @@ export interface Draw {
   ticket_price: number; // pence
   total_tickets: number;
   tickets_sold: number;
-  status: DrawStatus;
+  status: DrawStatus | 'pending';
   retail_value: number; // pence
   min_threshold: number; // 0–1
   description: string;
@@ -37,7 +40,7 @@ export interface Draw {
 export interface BundleItem {
   id: string;
   draw_id: string;
-  emoji: string;
+  image_url?: string | null;
   name: string;
   retail_value: number;
 }

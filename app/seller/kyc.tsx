@@ -61,7 +61,7 @@ export default function KycScreen() {
 
       if (insertErr) throw new Error(insertErr.message);
 
-      await supabase.from('profiles').update({ kyc_submitted: true } as any).eq('id', user.id);
+      await supabase.from('profiles').update({ kyc_submitted: true }).eq('id', user.id);
       setDone(true);
     } catch (e: any) {
       setError(e.message ?? 'Something went wrong. Please try again.');

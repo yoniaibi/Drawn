@@ -20,7 +20,7 @@ const AVATAR_EMOJIS = [
 export default function AccountScreen() {
   const router = useRouter();
   const { user, handle, avatar, walletBalance, isSeller, logout } = useAuthStore();
-  const isVerified = (useAuthStore.getState().profile as any)?.seller_verified ?? false;
+  const isVerified = useAuthStore.getState().profile?.seller_verified ?? false;
   const { streak } = useStreak();
 
   const [stats, setStats] = useState<UserStats | null>(null);

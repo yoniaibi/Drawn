@@ -31,7 +31,7 @@ function derived(profile: Profile | null, session: Session | null) {
     handle: profile?.handle ?? '@you',
     avatar: profile?.avatar_letter ?? 'Y',
     walletBalance: profile?.wallet_balance ?? 0,
-    notifyBeforeClose: (profile as any)?.notify_before_close ?? true,
+    notifyBeforeClose: profile?.notify_before_close ?? true,
   };
 }
 

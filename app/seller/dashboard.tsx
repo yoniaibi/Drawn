@@ -29,7 +29,7 @@ const STATUS_LABEL: Record<string, string> = {
 export default function SellerDashboardScreen() {
   const router = useRouter();
   const { user, handle, isSeller } = useAuthStore();
-  const isVerified = (useAuthStore.getState().profile as any)?.seller_verified ?? false;
+  const isVerified = useAuthStore.getState().profile?.seller_verified ?? false;
 
   const [draws, setDraws] = useState<Draw[]>([]);
   const [stats, setStats] = useState<SellerStats>({ totalEarned: 0, pendingPayout: 0 });

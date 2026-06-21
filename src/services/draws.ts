@@ -21,7 +21,7 @@ export function mapDraw(db: DBDraw, myTickets = 0, bundleItems?: DBBundleItem[])
     title: db.title,
     seller: db.seller_handle,
     sellerAvatar: db.seller_avatar,
-    image: (db as any).image_url ?? undefined,
+    image: db.image_url ?? undefined,
     retailValue: Math.round(db.retail_value / 100), // DB stores pence; Draw.retailValue is display-pounds
     ticketPrice: db.ticket_price,
     totalTickets: db.total_tickets,
@@ -32,7 +32,7 @@ export function mapDraw(db: DBDraw, myTickets = 0, bundleItems?: DBBundleItem[])
     description: db.description,
     isBundle: db.is_bundle,
     bundleItems: bundleItems?.map(
-      (b): BundleItem => ({ image: (b as any).image_url ?? undefined, name: b.name, retailValue: b.retail_value })
+      (b): BundleItem => ({ image: b.image_url ?? undefined, name: b.name, retailValue: b.retail_value })
     ),
     closesAt: db.draw_date,
     myTickets,

@@ -88,13 +88,13 @@ export default function HomeScreen() {
     fetchDraws().then(result => {
       setDraws(result);
       setLoadingDraws(false);
-    });
-    fetchRecentWinners().then(setRecentWinners);
+    }).catch(() => setLoadingDraws(false));
+    fetchRecentWinners().then(setRecentWinners).catch(() => {});
     if (user?.id) {
-      checkForWins(user.id).then(setWins);
+      checkForWins(user.id).then(setWins).catch(() => {});
       supabase.from('draw_watches').select('draw_id').eq('user_id', user.id).then(({ data }) => {
         if (data) setSavedIds(new Set(data.map((r: any) => r.draw_id)));
-      });
+      }).catch(() => {});
     }
 
     // Real-time ticket count updates for all draws
