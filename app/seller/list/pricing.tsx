@@ -1,24 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import StepBar from '../../../src/components/StepBar';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
 import PrimaryButton from '../../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../../src/utils/countdown';
 import { useSellerDraft } from '../../../src/store/sellerDraft';
-
-const PRICES = [10, 25, 50, 100]; // pence
-const QUANTITIES = [500, 1000, 2000, 5000];
-
-function StepBar({ current, total }: { current: number; total: number }) {
-  return (
-    <View style={styles.stepBar}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View key={i} style={[styles.stepSegment, i + 1 <= current ? styles.stepActive : styles.stepInactive]} />
-      ))}
-    </View>
-  );
-}
+import { SELLER_FEE_MULTIPLIER, TICKET_PRICE_OPTIONS_PENCE as PRICES, TICKET_QUANTITY_OPTIONS as QUANTITIES } from '../../../src/constants';
 
 export default function ListPricingScreen() {
   const router = useRouter();
@@ -37,7 +26,7 @@ export default function ListPricingScreen() {
 
   const retailValuePence = Math.round(parseFloat(retailValueInput || '0') * 100);
   const totalRaise = price * qty;
-  const sellerGets = Math.round(totalRaise * 0.846);
+  const sellerGets = Math.round(totalRaise * SELLER_FEE_MULTIPLIER);
   const valueRatio = retailValuePence > 0 ? (retailValuePence / price).toFixed(0) : null;
   const canContinue = retailValueInput.trim().length > 0 && parseFloat(retailValueInput) > 0;
 
@@ -54,7 +43,6 @@ export default function ListPricingScreen() {
         </TouchableOpacity>
 
         <StepBar current={3} total={4} />
-        <Text style={styles.stepLabel}>Step 3 of 4</Text>
 
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Set your price</Text>
@@ -143,11 +131,6 @@ export default function ListPricingScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg, paddingTop: 56 },
   back: { paddingHorizontal: Spacing.lg, marginBottom: 12 },
-  stepBar: { flexDirection: 'row', gap: 4, paddingHorizontal: Spacing.lg, marginBottom: 6 },
-  stepSegment: { flex: 1, height: 3, borderRadius: 2 },
-  stepActive: { backgroundColor: Colors.lilac },
-  stepInactive: { backgroundColor: Colors.darkBorder },
-  stepLabel: { fontSize: 10, color: Colors.textTertiary, paddingHorizontal: Spacing.lg, marginBottom: Spacing.md, letterSpacing: 0.5 },
   content: { padding: Spacing.lg, paddingBottom: 40 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: Spacing.lg },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 16, fontWeight: '700' },

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Image, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import StepBar from '../../../src/components/StepBar';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
@@ -15,16 +16,6 @@ const CONDITIONS = [
 ];
 
 const MAX_PHOTOS = 4;
-
-function StepBar({ current, total }: { current: number; total: number }) {
-  return (
-    <View style={styles.stepBar}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View key={i} style={[styles.stepSegment, i + 1 <= current ? styles.stepActive : styles.stepInactive]} />
-      ))}
-    </View>
-  );
-}
 
 export default function ListPhotosScreen() {
   const router = useRouter();
@@ -91,7 +82,6 @@ export default function ListPhotosScreen() {
       </TouchableOpacity>
 
       <StepBar current={2} total={4} />
-      <Text style={styles.stepLabel}>Step 2 of 4</Text>
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Details & photos</Text>
@@ -169,11 +159,6 @@ export default function ListPhotosScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg, paddingTop: 56 },
   back: { paddingHorizontal: Spacing.lg, marginBottom: 12 },
-  stepBar: { flexDirection: 'row', gap: 4, paddingHorizontal: Spacing.lg, marginBottom: 6 },
-  stepSegment: { flex: 1, height: 3, borderRadius: 2 },
-  stepActive: { backgroundColor: Colors.lilac },
-  stepInactive: { backgroundColor: Colors.darkBorder },
-  stepLabel: { fontSize: 10, color: Colors.textTertiary, paddingHorizontal: Spacing.lg, marginBottom: Spacing.md, letterSpacing: 0.5 },
   content: { padding: Spacing.lg, paddingBottom: 40 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 6 },
   sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20, marginBottom: Spacing.lg },

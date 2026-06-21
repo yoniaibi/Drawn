@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import StepBar from '../../../src/components/StepBar';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
 import PrimaryButton from '../../../src/components/PrimaryButton';
@@ -8,16 +9,7 @@ import { formatTicketPrice } from '../../../src/utils/countdown';
 import { useSellerDraft } from '../../../src/store/sellerDraft';
 import { useAuthStore } from '../../../src/store';
 import { supabase } from '../../../src/lib/supabase';
-
-function StepBar({ current, total }: { current: number; total: number }) {
-  return (
-    <View style={styles.stepBar}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View key={i} style={[styles.stepSegment, i + 1 <= current ? styles.stepActive : styles.stepInactive]} />
-      ))}
-    </View>
-  );
-}
+import { SELLER_FEE_MULTIPLIER } from '../../../src/constants';
 
 export default function ListReviewScreen() {
   const router = useRouter();
@@ -29,7 +21,7 @@ export default function ListReviewScreen() {
   const [done, setDone] = useState(false);
 
   const totalRaise = draft.ticketPrice * draft.totalTickets;
-  const sellerGets = Math.round(totalRaise * 0.846);
+  const sellerGets = Math.round(totalRaise * SELLER_FEE_MULTIPLIER);
 
   // Map display condition back to DB enum
   const conditionMap: Record<string, string> = {
@@ -126,7 +118,6 @@ export default function ListReviewScreen() {
       </TouchableOpacity>
 
       <StepBar current={4} total={4} />
-      <Text style={styles.stepLabel}>Step 4 of 4</Text>
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Review & submit</Text>
@@ -201,11 +192,6 @@ export default function ListReviewScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg, paddingTop: 56 },
   back: { paddingHorizontal: Spacing.lg, marginBottom: 12 },
-  stepBar: { flexDirection: 'row', gap: 4, paddingHorizontal: Spacing.lg, marginBottom: 6 },
-  stepSegment: { flex: 1, height: 3, borderRadius: 2 },
-  stepActive: { backgroundColor: Colors.lilac },
-  stepInactive: { backgroundColor: Colors.darkBorder },
-  stepLabel: { fontSize: 10, color: Colors.textTertiary, paddingHorizontal: Spacing.lg, marginBottom: Spacing.md, letterSpacing: 0.5 },
   content: { padding: Spacing.lg, paddingBottom: 40 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 6 },
   sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20, marginBottom: Spacing.lg },

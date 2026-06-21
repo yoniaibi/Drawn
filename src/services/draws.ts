@@ -12,6 +12,20 @@ import {
   MOCK_MY_TICKETS,
   MOCK_WALLET,
 } from '../mocks';
+import { SELLER_FEE_MULTIPLIER } from '../constants';
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+async function fetchBundleMap(drawIds: string[]): Promise<Record<string, DBBundleItem[]>> {
+  if (drawIds.length === 0) return {};
+  const { data: items } = await supabase.from('bundle_items').select('*').in('draw_id', drawIds);
+  const map: Record<string, DBBundleItem[]> = {};
+  for (const item of items ?? []) {
+    if (!map[item.draw_id]) map[item.draw_id] = [];
+    map[item.draw_id].push(item);
+  }
+  return map;
+}
 
 // ─── Mappers ────────────────────────────────────────────────────────────────
 
@@ -74,22 +88,7 @@ export async function fetchDraws(): Promise<Draw[]> {
 
     if (error || !draws || draws.length === 0) return MOCK_DRAWS;
 
-    // Fetch bundle items for bundle draws
-    const bundleDrawIds = draws.filter(d => d.is_bundle).map(d => d.id);
-    let bundleMap: Record<string, DBBundleItem[]> = {};
-    if (bundleDrawIds.length > 0) {
-      const { data: items } = await supabase
-        .from('bundle_items')
-        .select('*')
-        .in('draw_id', bundleDrawIds);
-      if (items) {
-        for (const item of items) {
-          if (!bundleMap[item.draw_id]) bundleMap[item.draw_id] = [];
-          bundleMap[item.draw_id].push(item);
-        }
-      }
-    }
-
+    const bundleMap = await fetchBundleMap(draws.filter(d => d.is_bundle).map(d => d.id));
     return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
   } catch {
     return MOCK_DRAWS;
@@ -131,23 +130,9 @@ export async function fetchMyTickets(userId: string): Promise<Draw[]> {
     if (error || !tickets) return [];
     if (tickets.length === 0) return [];
 
-    // Bundle items for bundle draws
-    const bundleDrawIds = tickets
-      .filter(t => t.draws && (t.draws as DBDraw).is_bundle)
-      .map(t => (t.draws as DBDraw).id);
-    let bundleMap: Record<string, DBBundleItem[]> = {};
-    if (bundleDrawIds.length > 0) {
-      const { data: items } = await supabase
-        .from('bundle_items')
-        .select('*')
-        .in('draw_id', bundleDrawIds);
-      if (items) {
-        for (const item of items) {
-          if (!bundleMap[item.draw_id]) bundleMap[item.draw_id] = [];
-          bundleMap[item.draw_id].push(item);
-        }
-      }
-    }
+    const bundleMap = await fetchBundleMap(
+      tickets.filter(t => t.draws && (t.draws as DBDraw).is_bundle).map(t => (t.draws as DBDraw).id)
+    );
 
     return tickets
       .filter(t => t.draws != null)
@@ -265,21 +250,7 @@ export async function fetchSellerDraws(sellerId: string): Promise<Draw[]> {
 
     if (error || !draws || draws.length === 0) return [];
 
-    const bundleDrawIds = draws.filter(d => d.is_bundle).map(d => d.id);
-    let bundleMap: Record<string, DBBundleItem[]> = {};
-    if (bundleDrawIds.length > 0) {
-      const { data: items } = await supabase
-        .from('bundle_items')
-        .select('*')
-        .in('draw_id', bundleDrawIds);
-      if (items) {
-        for (const item of items) {
-          if (!bundleMap[item.draw_id]) bundleMap[item.draw_id] = [];
-          bundleMap[item.draw_id].push(item);
-        }
-      }
-    }
-
+    const bundleMap = await fetchBundleMap(draws.filter(d => d.is_bundle).map(d => d.id));
     return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
   } catch {
     return [];
@@ -303,7 +274,7 @@ export async function fetchSellerStats(sellerId: string): Promise<SellerStats> {
       .eq('status', 'completed');
 
     const pendingPayout = pendingDraws
-      ? pendingDraws.reduce((sum, d) => sum + Math.round(d.tickets_sold * d.ticket_price * 0.846), 0) - totalEarned
+      ? pendingDraws.reduce((sum, d) => sum + Math.round(d.tickets_sold * d.ticket_price * SELLER_FEE_MULTIPLIER), 0) - totalEarned
       : 0;
 
     return { totalEarned, pendingPayout: Math.max(0, pendingPayout) };

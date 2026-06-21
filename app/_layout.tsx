@@ -87,11 +87,15 @@ export default function RootLayout() {
         <Stack.Screen name="live/winner/[drawId]" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="purchase/[drawId]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="wallet/index" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="seller/gate" />
-        <Stack.Screen name="seller/apply" />
-        <Stack.Screen name="seller/kyc" />
-        <Stack.Screen name="seller/kyc-approved" />
-        <Stack.Screen name="seller/dashboard" />
+        <Stack.Screen name="seller/gate" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/apply" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/kyc" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/kyc-approved" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/payout" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/item/[drawId]" options={{ headerShown: false }} />
+        <Stack.Screen name="account/settings" options={{ headerShown: false }} />
+        <Stack.Screen name="account/orders" options={{ headerShown: false }} />
         <Stack.Screen name="share/[drawId]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notifications/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="search/index" options={{ presentation: 'modal' }} />

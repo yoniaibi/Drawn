@@ -1,22 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import StepBar from '../../../src/components/StepBar';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
 import { useSellerDraft } from '../../../src/store/sellerDraft';
-
-function StepBar({ current, total }: { current: number; total: number }) {
-  return (
-    <View style={styles.stepBar}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View
-          key={i}
-          style={[styles.stepSegment, i + 1 <= current ? styles.stepActive : styles.stepInactive]}
-        />
-      ))}
-    </View>
-  );
-}
 
 export default function ListTypeScreen() {
   const router = useRouter();
@@ -34,7 +22,6 @@ export default function ListTypeScreen() {
       </TouchableOpacity>
 
       <StepBar current={1} total={4} />
-      <Text style={styles.stepLabel}>Step 1 of 4</Text>
 
       <View style={styles.content}>
         <Text style={styles.title}>What are you listing?</Text>
