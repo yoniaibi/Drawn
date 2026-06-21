@@ -124,10 +124,10 @@ export default function LogInScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: Spacing.lg, paddingBottom: 40 },
+  content: { padding: Spacing.lg, paddingBottom: 48 },
   back: { marginBottom: 20, alignSelf: 'flex-start' },
-  title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 4 },
-  sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 16, lineHeight: 18 },
+  title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 6 },
+  sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, marginBottom: 18, lineHeight: 20 },
 
   proofStrip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -144,12 +144,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm,
     lineHeight: 16,
   },
-  passwordHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 },
-  label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4 },
-  forgotText: { fontSize: FontSizes.xs, color: Colors.lilac },
+  passwordHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 18 },
+  label: { fontSize: 10, color: Colors.textSecondary, letterSpacing: 0.8, fontWeight: '600', marginBottom: 6, marginTop: 18 },
+  forgotText: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '600' },
   input: {
-    backgroundColor: Colors.darkCard, borderRadius: Radius.sm, borderWidth: 1, borderColor: Colors.darkBorder,
-    padding: 12, fontSize: FontSizes.sm, color: Colors.white, marginBottom: 2,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.darkBorder,
+    paddingHorizontal: 14, paddingVertical: 13, fontSize: FontSizes.sm, color: Colors.white, marginBottom: 2,
   },
   pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   eye: { padding: 8 },

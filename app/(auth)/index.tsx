@@ -131,6 +131,17 @@ export default function SplashScreen() {
         </Text>
       </View>
 
+      {/* ── Early CTA so it's visible without scrolling ──────────────── */}
+      <PrimaryButton
+        label={starting ? 'Starting…' : "Get started — it's free"}
+        onPress={handleGetStarted}
+        disabled={starting}
+        style={styles.earlyBtn}
+      />
+      <TouchableOpacity onPress={() => router.push('/(auth)/log-in')} style={styles.earlyLogin}>
+        <Text style={styles.earlyLoginText}>Already have an account? <Text style={styles.earlyLoginLink}>Log in →</Text></Text>
+      </TouchableOpacity>
+
       {/* ── Item grid ────────────────────────────────────────────────── */}
       <View style={styles.grid}>
         {HERO_ITEMS.map((item, i) => (
@@ -357,6 +368,11 @@ const styles = StyleSheet.create({
   },
   trustBadge: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   trustLabel: { fontSize: 9.5, color: 'rgba(210,195,240,0.75)', fontWeight: '500' },
+
+  earlyBtn: { marginHorizontal: Spacing.lg, marginBottom: 8 },
+  earlyLogin: { alignItems: 'center', marginBottom: Spacing.xl },
+  earlyLoginText: { fontSize: FontSizes.xs, color: 'rgba(210,195,240,0.6)' },
+  earlyLoginLink: { color: Colors.lilac, fontWeight: '700' },
 
   btn: { marginHorizontal: Spacing.lg, marginBottom: Spacing.sm },
   ghostBtn: { marginHorizontal: Spacing.lg, marginBottom: Spacing.sm },

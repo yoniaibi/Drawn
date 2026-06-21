@@ -204,25 +204,25 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: Spacing.lg, paddingBottom: 40 },
+  content: { padding: Spacing.lg, paddingBottom: 48 },
   back: { marginBottom: 20, alignSelf: 'flex-start' },
-  title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 4 },
-  sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 14 },
-  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 6 },
+  sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, marginBottom: 18, lineHeight: 20 },
+  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },
   stat: {
     flex: 1, backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.md,
-    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', padding: Spacing.sm, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', paddingVertical: 10, paddingHorizontal: 6, alignItems: 'center',
   },
-  statVal: { fontFamily: Fonts.serif, fontSize: FontSizes.md, color: Colors.lilac, fontWeight: '700' },
-  statLabel: { fontSize: 9, color: Colors.textTertiary, marginTop: 2, textAlign: 'center' },
+  statVal: { fontSize: FontSizes.md, color: Colors.lilac, fontWeight: '800' },
+  statLabel: { fontSize: 9.5, color: Colors.textTertiary, marginTop: 3, textAlign: 'center' },
   error: {
-    fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12,
-    backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm,
+    fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 14,
+    backgroundColor: 'rgba(226,75,74,0.1)', padding: 12, borderRadius: Radius.sm, lineHeight: 18,
   },
-  label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 10 },
+  label: { fontSize: 10, color: Colors.textSecondary, letterSpacing: 0.8, fontWeight: '600', marginBottom: 6, marginTop: 14 },
   input: {
-    backgroundColor: Colors.darkCard, borderRadius: Radius.sm, borderWidth: 1, borderColor: Colors.darkBorder,
-    padding: 12, fontSize: FontSizes.sm, color: Colors.white, marginBottom: 2,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.darkBorder,
+    paddingHorizontal: 14, paddingVertical: 13, fontSize: FontSizes.sm, color: Colors.white, marginBottom: 2,
   },
   pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   eye: { padding: 8 },

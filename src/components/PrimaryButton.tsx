@@ -61,7 +61,7 @@ export default function PrimaryButton({ label, onPress, loading, disabled, style
       <Pressable
         style={[
           styles.btn,
-          !isPink && { backgroundColor: bg },
+          { backgroundColor: bg },
           { opacity: disabled || loading ? 0.55 : 1 },
         ]}
         onPress={onPress}

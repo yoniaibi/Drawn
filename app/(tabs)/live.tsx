@@ -11,7 +11,7 @@ import Animated, {
   withSequence, Easing, withSpring, runOnJS,
 } from 'react-native-reanimated';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { MOCK_DRAWS, Draw } from '../../src/mocks';
+import { Draw } from '../../src/mocks';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import PrizeWheel from '../../src/components/PrizeWheel';
 import { getCountdownTo9pm } from '../../src/utils/countdown';
@@ -105,7 +105,7 @@ export default function LiveScreen() {
   const floatIdRef = useRef(0);
   const reactionAreaRef = useRef<View>(null);
 
-  const [allDraws, setAllDraws] = useState<Draw[]>(MOCK_DRAWS);
+  const [allDraws, setAllDraws] = useState<Draw[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
