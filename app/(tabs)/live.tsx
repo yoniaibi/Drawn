@@ -212,13 +212,7 @@ export default function LiveScreen() {
     return () => clearInterval(id);
   }, []);
 
-  // Viewer count drift
-  useEffect(() => {
-    const base = Math.max(800, tonightDraws.reduce((s, d) => s + d.ticketsSold, 0));
-    setViewerCount(Math.round(base * 0.012 + 20));
-    const id = setInterval(() => setViewerCount(v => Math.max(20, v + Math.floor(Math.random() * 3) - 1)), 8000);
-    return () => clearInterval(id);
-  }, [tonightDraws.length]);
+  // Viewer count comes purely from Supabase Presence (see channel.on 'presence' handler above)
 
   // Hype ticker
   useEffect(() => {

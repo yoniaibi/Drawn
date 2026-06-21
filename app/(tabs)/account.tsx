@@ -45,6 +45,8 @@ export default function AccountScreen() {
     });
   }, [user]);
 
+  const FOUNDING_CUTOFF = new Date('2026-09-01');
+  const isFoundingMember = user?.created_at ? new Date(user.created_at) < FOUNDING_CUTOFF : false;
   const referralCode = 'DRAWN-' + (handle ?? 'YOU').replace('@', '').toUpperCase().slice(0, 5);
   const [copied, setCopied] = useState(false);
 
@@ -78,9 +80,11 @@ export default function AccountScreen() {
           </TouchableOpacity>
           <Text style={styles.handle}>{handle}</Text>
           <View style={styles.badgeRow}>
-            <View style={styles.memberBadge}>
-              <Text style={styles.memberBadgeText}>✦ FOUNDING MEMBER</Text>
-            </View>
+            {isFoundingMember && (
+              <View style={styles.memberBadge}>
+                <Text style={styles.memberBadgeText}>✦ FOUNDING MEMBER</Text>
+              </View>
+            )}
             {streak >= 1 && (
               <View style={styles.streakBadge}>
                 <Ionicons name="flame-outline" size={10} color={Colors.pink} />
@@ -119,7 +123,7 @@ export default function AccountScreen() {
               <View style={styles.statDivider} />
               <View style={styles.stat}>
                 <Text style={[styles.statVal, { color: Colors.lilac }]}>
-                  {stats.totalWon > 0 ? `£${(stats.totalWon / 100).toFixed(0)}` : '£0'}
+                  {stats.totalWon > 0 ? `£${(stats.totalWon / 100).toFixed(0)}` : '—'}
                 </Text>
                 <Text style={styles.statLabel}>Won total</Text>
               </View>
@@ -133,7 +137,7 @@ export default function AccountScreen() {
             <Text style={styles.sectionTitle}>Achievements</Text>
             <View style={[styles.badgesGrid, { marginTop: 8 }]}>
               {[
-                { icon: 'star-outline' as const, label: 'Founding Member', unlocked: true, color: Colors.gold, progress: 1, max: 1, unit: '' },
+                { icon: 'star-outline' as const, label: 'Founding Member', unlocked: isFoundingMember, color: Colors.gold, progress: isFoundingMember ? 1 : 0, max: 1, unit: '' },
                 { icon: 'ticket-outline' as const, label: 'First Entry', unlocked: (stats.totalTickets ?? 0) >= 1, color: Colors.lilac, progress: Math.min(stats.totalTickets ?? 0, 1), max: 1, unit: 'ticket' },
                 { icon: 'flame-outline' as const, label: '3-Day Streak', unlocked: streak >= 3, color: Colors.pink, progress: Math.min(streak, 3), max: 3, unit: 'days' },
                 { icon: 'trophy-outline' as const, label: 'First Win', unlocked: (stats.wins ?? 0) >= 1, color: Colors.gold, progress: Math.min(stats.wins ?? 0, 1), max: 1, unit: 'win' },

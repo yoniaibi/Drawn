@@ -8,15 +8,15 @@ import type { Draw } from '../../src/mocks';
 import { fetchDraws } from '../../src/services/draws';
 import DrawCard from '../../src/components/DrawCard';
 
-const CHIPS = ['All', 'Tonight 🔥', 'Bundles', 'High Value', 'Just listed'];
+const CHIPS = ['All', 'Tonight', 'Bundles', 'High Value', 'Just listed'];
 
 const TRENDING = [
-  { label: 'Chanel', emoji: '👜' },
-  { label: 'Rolex', emoji: '⌚' },
-  { label: 'Jordan 1', emoji: '👟' },
-  { label: 'Supreme', emoji: '🧢' },
-  { label: 'Bottega', emoji: '💼' },
-  { label: 'MacBook', emoji: '💻' },
+  { label: 'Chanel' },
+  { label: 'Rolex' },
+  { label: 'Jordan 1' },
+  { label: 'Supreme' },
+  { label: 'Bottega' },
+  { label: 'MacBook' },
 ];
 
 const RECENT_SEARCHES_KEY = 'drawn_recent_searches';
@@ -46,7 +46,7 @@ export default function SearchScreen() {
 
   const results = useMemo(() => {
     let pool = allDraws;
-    if (chip === 'Tonight 🔥') pool = pool.filter(d => d.status === 'closing_tonight');
+    if (chip === 'Tonight') pool = pool.filter(d => d.status === 'closing_tonight');
     else if (chip === 'Bundles') pool = pool.filter(d => d.isBundle);
     else if (chip === 'High Value') pool = pool.filter(d => d.retailValue >= 500);
     else if (chip === 'Just listed') pool = pool.filter(d => d.status === 'open');
@@ -145,7 +145,6 @@ export default function SearchScreen() {
                     style={styles.trendingChip}
                     onPress={() => handleSearch(t.label)}
                   >
-                    <Text style={styles.trendingEmoji}>{t.emoji}</Text>
                     <Text style={styles.trendingLabel}>{t.label}</Text>
                     {i < 3 && (
                       <View style={styles.hotBadge}>
@@ -168,13 +167,13 @@ export default function SearchScreen() {
 
         {!loading && !showEmpty && results.length === 0 && (
           <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>🔍</Text>
+            <Ionicons name="search-outline" size={36} color={Colors.textTertiary} style={{ marginBottom: 4 }} />
             <Text style={styles.emptyTitle}>No draws match</Text>
             <Text style={styles.emptySub}>Try "{query.split(' ')[0]}" or browse trending above</Text>
             <View style={styles.emptySuggestions}>
               {TRENDING.slice(0, 3).map(t => (
                 <TouchableOpacity key={t.label} style={styles.emptySuggestionChip} onPress={() => handleSearch(t.label)}>
-                  <Text style={styles.emptySuggestionText}>{t.emoji} {t.label}</Text>
+                  <Text style={styles.emptySuggestionText}>{t.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>

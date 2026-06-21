@@ -167,7 +167,7 @@ export default function PurchaseScreen() {
       {/* Success banner */}
       {flow === 'success' && (
         <RNAnimated.View style={[styles.successBanner, { opacity: bannerOpacity }]}>
-          <Text style={styles.successBannerText}>You're in! Good luck tonight.</Text>
+          <Text style={styles.successBannerText}>You're in! Good luck at 9pm.</Text>
         </RNAnimated.View>
       )}
 
@@ -223,7 +223,7 @@ export default function PurchaseScreen() {
       <View style={styles.qtySection}>
         <Text style={styles.sectionLabel}>HOW MANY TICKETS?</Text>
         <View style={styles.quickRow}>
-          {QUICK_AMOUNTS.map(n => (
+          {QUICK_AMOUNTS.filter(n => n <= maxAllowed).map(n => (
             <TouchableOpacity
               key={n}
               style={[styles.quickBtn, qty === n && styles.quickBtnOn]}

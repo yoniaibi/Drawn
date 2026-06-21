@@ -14,6 +14,7 @@ interface AuthState {
   handle: string;
   avatar: string;
   walletBalance: number;
+  notifyBeforeClose: boolean;
   // actions
   setSession: (session: Session | null) => void;
   setProfile: (profile: Profile | null) => void;
@@ -30,6 +31,7 @@ function derived(profile: Profile | null, session: Session | null) {
     handle: profile?.handle ?? '@you',
     avatar: profile?.avatar_letter ?? 'Y',
     walletBalance: profile?.wallet_balance ?? 0,
+    notifyBeforeClose: (profile as any)?.notify_before_close ?? true,
   };
 }
 
@@ -43,6 +45,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   handle: '@you',
   avatar: 'Y',
   walletBalance: 0,
+  notifyBeforeClose: true,
 
   setSession: (session) =>
     set((s) => ({

@@ -19,6 +19,10 @@ export default function LogInScreen() {
       setError('Please enter your email and password.');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
     setError('');
     setLoading(true);
 

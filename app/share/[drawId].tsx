@@ -164,14 +164,7 @@ export default function ShareScreen() {
           <Text style={styles.btnSecondaryText}>Copy link</Text>
         </TouchableOpacity>
 
-        {/* Stories — coming soon */}
-        <TouchableOpacity style={styles.btnDisabled} disabled>
-          <Ionicons name="logo-instagram" size={18} color={Colors.textSecondary} style={{ marginRight: 8 }} />
-          <Text style={styles.btnDisabledText}>Share to Stories</Text>
-          <View style={styles.comingSoonBadge}>
-            <Text style={styles.comingSoonText}>Coming soon</Text>
-          </View>
-        </TouchableOpacity>
+
       </ScrollView>
     </View>
   );

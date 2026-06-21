@@ -20,7 +20,7 @@ function getOddsColor(pct: number) {
 
 export default function TicketsScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, notifyBeforeClose } = useAuthStore();
   const [myTickets, setMyTickets] = useState<Draw[]>(MOCK_MY_TICKETS);
   const [loading, setLoading] = useState(true);
 
@@ -33,16 +33,18 @@ export default function TicketsScreen() {
     fetchMyTickets(user.id).then(async result => {
       setMyTickets(result);
       setLoading(false);
-      const granted = await requestNotificationPermission();
-      if (granted) {
-        const highestValue = result.length > 0
-          ? result.reduce((max, d) => d.retailValue > max.retailValue ? d : max, result[0])
-          : null;
-        const totalCount = result.reduce((s, d) => s + d.myTickets, 0);
-        await scheduleDailyDrawReminder(
-          highestValue ? `£${highestValue.retailValue.toLocaleString()} ${highestValue.title}` : undefined,
-          totalCount > 0 ? totalCount : undefined,
-        );
+      if (notifyBeforeClose) {
+        const granted = await requestNotificationPermission();
+        if (granted) {
+          const highestValue = result.length > 0
+            ? result.reduce((max, d) => d.retailValue > max.retailValue ? d : max, result[0])
+            : null;
+          const totalCount = result.reduce((s, d) => s + d.myTickets, 0);
+          await scheduleDailyDrawReminder(
+            highestValue ? `£${highestValue.retailValue.toLocaleString()} ${highestValue.title}` : undefined,
+            totalCount > 0 ? totalCount : undefined,
+          );
+        }
       }
     });
 

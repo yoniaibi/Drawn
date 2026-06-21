@@ -13,13 +13,6 @@ import { fetchDrawById, fetchDraws } from '../../src/services/draws';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/store';
 
-const BUYER_TICKERS = [
-  '@sophie_k just bought 5 tickets',
-  '@dan.w grabbed 3 tickets',
-  '@priya__ added 10 tickets',
-  '@mike_j bought 2 tickets',
-  '@chloe just joined the draw',
-];
 
 
 export default function DrawDetailScreen() {
@@ -57,7 +50,7 @@ export default function DrawDetailScreen() {
   if (!draw) {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-        <Text style={{ fontSize: 40 }}>🎟️</Text>
+        <Ionicons name="alert-circle-outline" size={40} color={Colors.textTertiary} />
         <Text style={{ color: Colors.white, fontSize: FontSizes.base, fontWeight: '700' }}>Draw not found</Text>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={{ color: Colors.lilac, fontSize: FontSizes.sm }}>Go back</Text>
@@ -72,11 +65,9 @@ export default function DrawDetailScreen() {
 
   const heroBg = draw.isBundle ? '#2D1B00' : '#1A0D42';
 
-  const [buyerIdx, setBuyerIdx] = useState(0);
   const [trustVisible, setTrustVisible] = useState(false);
   const [postalVisible, setPostalVisible] = useState(false);
   const [watching, setWatching] = useState(false);
-  const buyerOpacity = useRef(new RNAnimated.Value(1)).current;
   const { user, handle } = useAuthStore();
 
   // Pulse for scarcity
@@ -91,16 +82,6 @@ export default function DrawDetailScreen() {
   }, [isLow]);
   const pulseStyle = useAnimatedStyle(() => ({ opacity: pulseOpacity.value }));
 
-  // Rotate buyer ticker
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      RNAnimated.timing(buyerOpacity, { toValue: 0, duration: 300, useNativeDriver: false }).start(() => {
-        setBuyerIdx(i => (i + 1) % BUYER_TICKERS.length);
-        RNAnimated.timing(buyerOpacity, { toValue: 1, duration: 300, useNativeDriver: false }).start();
-      });
-    }, 3000);
-    return () => clearInterval(intervalId);
-  }, []);
 
   const viewers = Math.round(draw.ticketsSold * 0.012 + 4);
 
@@ -155,14 +136,6 @@ export default function DrawDetailScreen() {
       </View>
 
       <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
-        {/* Live buyer ticker */}
-        <View style={styles.buyerTicker}>
-          <View style={styles.buyerDot} />
-          <RNAnimated.Text style={[styles.buyerTickerText, { opacity: buyerOpacity }]} numberOfLines={1}>
-            {BUYER_TICKERS[buyerIdx]}
-          </RNAnimated.Text>
-        </View>
-
         <View style={styles.titleRow}>
           <Text style={styles.title}>{draw.title}</Text>
           <TouchableOpacity
@@ -479,13 +452,6 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   bodyContent: { padding: Spacing.lg, paddingBottom: 120, gap: 14 },
 
-  buyerTicker: {
-    flexDirection: 'row', alignItems: 'center', gap: 7,
-    backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.sm,
-    padding: 8, borderWidth: 1, borderColor: 'rgba(139,92,246,0.15)',
-  },
-  buyerDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.lilac },
-  buyerTickerText: { fontSize: FontSizes.xs, color: Colors.textSecondary, flex: 1 },
 
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, flex: 1, lineHeight: 30 },
