@@ -1,15 +1,17 @@
 // Supabase Edge Function — runs every night at 9pm via pg_cron
 // Deploy: npx supabase functions deploy run-draws
+// Set secret: npx supabase secrets set DRAW_ENGINE_SECRET=<random-string>
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
+// No CORS headers — this is an internal cron endpoint, not browser-facing
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+  // Verify shared secret — prevents unauthenticated invocations
+  const secret = req.headers.get('x-draw-secret');
+  const expectedSecret = Deno.env.get('DRAW_ENGINE_SECRET');
+  if (!expectedSecret || secret !== expectedSecret) {
+    return new Response('Unauthorized', { status: 401 });
+  }
 
   // Service-role client — bypasses RLS so we can write winner data
   const supabase = createClient(
@@ -27,7 +29,7 @@ serve(async (req) => {
 
   if (fetchErr) {
     return new Response(JSON.stringify({ error: fetchErr.message }), {
-      status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 500, headers: { 'Content-Type': 'application/json' },
     });
   }
 
@@ -122,6 +124,6 @@ serve(async (req) => {
 
   return new Response(
     JSON.stringify({ ran: results.length, results, timestamp: new Date().toISOString() }),
-    { headers: { ...CORS, 'Content-Type': 'application/json' } },
+    { headers: { 'Content-Type': 'application/json' } },
   );
 });
