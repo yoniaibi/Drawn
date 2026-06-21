@@ -66,6 +66,7 @@ export default function AccountScreen() {
   const MENU = [
     { label: 'My wallet', icon: 'wallet-outline', route: '/wallet', sub: 'Top up & see transactions' },
     { label: 'My orders', icon: 'receipt-outline', route: '/account/orders', sub: 'Draws entered & wins' },
+    { label: 'Saved draws', icon: 'bookmark-outline', route: '/saved', sub: 'Your watchlist' },
     { label: 'Notifications', icon: 'notifications-outline', route: '/notifications', sub: 'Draw alerts & win notifications' },
     { label: 'Settings', icon: 'settings-outline', route: '/account/settings', sub: 'Handle, email, preferences' },
     ...(!isSeller

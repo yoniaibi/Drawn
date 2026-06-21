@@ -10,6 +10,16 @@ import DrawCard from '../../src/components/DrawCard';
 
 const CHIPS = ['All', 'Tonight', 'Bundles', 'High Value', 'Just listed'];
 
+const BROWSE_CATEGORIES = [
+  { label: 'Fashion', emoji: '👗' },
+  { label: 'Sneakers', emoji: '👟' },
+  { label: 'Watches', emoji: '⌚' },
+  { label: 'Bags', emoji: '👜' },
+  { label: 'Jewellery', emoji: '💎' },
+  { label: 'Tech', emoji: '📱' },
+  { label: 'Art', emoji: '🎨' },
+];
+
 const TRENDING = [
   { label: 'Chanel' },
   { label: 'Rolex' },
@@ -156,6 +166,23 @@ export default function SearchScreen() {
               </View>
             </View>
 
+            {/* Browse by category */}
+            <View style={styles.discoverySection}>
+              <Text style={styles.discoverySectionTitle}>BROWSE BY CATEGORY</Text>
+              <View style={styles.categoryGrid}>
+                {BROWSE_CATEGORIES.map(cat => (
+                  <TouchableOpacity
+                    key={cat.label}
+                    style={styles.categoryTile}
+                    onPress={() => router.push(`/browse/${cat.label.toLowerCase()}` as any)}
+                  >
+                    <Text style={styles.categoryEmoji}>{cat.emoji}</Text>
+                    <Text style={styles.categoryLabel}>{cat.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             {/* All draws browsable */}
             <Text style={styles.browseTitle}>All draws</Text>
           </Animated.View>
@@ -279,6 +306,13 @@ const styles = StyleSheet.create({
   },
   hotBadgeText: { fontSize: 6, color: Colors.white, fontWeight: '800' },
 
+  categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  categoryTile: {
+    width: '22%', aspectRatio: 1, backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    borderWidth: 1, borderColor: Colors.darkBorder, alignItems: 'center', justifyContent: 'center', gap: 4,
+  },
+  categoryEmoji: { fontSize: 22 },
+  categoryLabel: { fontSize: 9, color: Colors.textSecondary, fontWeight: '600', textAlign: 'center' },
   browseTitle: {
     fontSize: FontSizes.xs, color: Colors.white, fontWeight: '600',
     marginBottom: 8, letterSpacing: 0.3,

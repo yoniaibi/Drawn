@@ -151,7 +151,7 @@ export default function DrawDetailScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.sellerRow}>
+        <TouchableOpacity style={styles.sellerRow} onPress={() => router.push(`/seller/profile/${draw.seller.replace('@', '')}` as any)} activeOpacity={0.7}>
           <View style={styles.sellerAvatar}>
             <Text style={styles.sellerAvatarText}>{draw.sellerAvatar}</Text>
           </View>
@@ -162,7 +162,8 @@ export default function DrawDetailScreen() {
               <Text style={styles.verifiedChipText}>VERIFIED</Text>
             </View>
           )}
-        </View>
+          <Ionicons name="chevron-forward" size={13} color={Colors.textTertiary} style={{ marginLeft: 'auto' }} />
+        </TouchableOpacity>
 
         {/* Scarcity warning */}
         {isLow && (
@@ -233,6 +234,12 @@ export default function DrawDetailScreen() {
           <Ionicons name="shield-checkmark-outline" size={14} color={Colors.lilac} />
           <Text style={styles.trustText}>How we verify authenticity</Text>
           <Ionicons name="chevron-forward" size={12} color={Colors.textTertiary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.qaBtn} onPress={() => router.push(`/draw/qa/${id}` as any)}>
+          <Ionicons name="chatbubble-outline" size={15} color={Colors.lilac} />
+          <Text style={styles.qaBtnText}>Ask the seller a question</Text>
+          <Ionicons name="chevron-forward" size={13} color={Colors.textTertiary} />
         </TouchableOpacity>
 
         <Text style={styles.desc}>{draw.description}</Text>
@@ -425,6 +432,13 @@ const styles = StyleSheet.create({
   },
   verifiedText: { fontSize: 8, fontWeight: '700', color: Colors.white },
 
+  qaBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    borderWidth: 1, borderColor: Colors.darkBorder,
+    padding: Spacing.md, marginBottom: Spacing.sm,
+  },
+  qaBtnText: { flex: 1, fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '600' },
   trustRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.md,

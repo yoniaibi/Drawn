@@ -96,6 +96,10 @@ export default function RootLayout() {
         <Stack.Screen name="seller/item/[drawId]" options={{ headerShown: false }} />
         <Stack.Screen name="account/settings" options={{ headerShown: false }} />
         <Stack.Screen name="account/orders" options={{ headerShown: false }} />
+        <Stack.Screen name="saved/index" options={{ headerShown: false }} />
+        <Stack.Screen name="browse/[category]" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/profile/[handle]" options={{ headerShown: false }} />
+        <Stack.Screen name="draw/qa/[drawId]" options={{ headerShown: false }} />
         <Stack.Screen name="share/[drawId]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notifications/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="search/index" options={{ presentation: 'modal' }} />
