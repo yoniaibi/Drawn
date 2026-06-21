@@ -1,8 +1,7 @@
 -- ============================================================
 -- DRAWN — Test User Seed
--- Run AFTER signing up these two accounts in the app:
---   Seller: seller@drawntest.com  / password: TestDraw99!
---   Buyer:  buyer@drawntest.com   / password: TestDraw99!
+-- Run AFTER creating two test accounts (sign up via app or Supabase Auth dashboard).
+-- Do NOT commit passwords or credentials to source control.
 --
 -- Steps:
 --   1. Sign up both accounts through the app (or Supabase Dashboard → Auth → Add user)

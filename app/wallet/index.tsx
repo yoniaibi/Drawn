@@ -38,46 +38,41 @@ export default function WalletScreen() {
 
   async function handleTopUp(amt: number) {
     setTopUpError(null);
-    addFunds(amt);
     setFlashedAmt(amt);
 
-    // Show confirmation chip
-    if (chipTimer.current) clearTimeout(chipTimer.current);
-    setLastAdded(amt);
-    RNAnimated.timing(chipOpacity, { toValue: 1, duration: 200, useNativeDriver: false }).start();
-
-    // Reset button flash after 1s
-    setTimeout(() => setFlashedAmt(null), 1000);
-
-    // Fade out chip after 2s
-    chipTimer.current = setTimeout(() => {
-      RNAnimated.timing(chipOpacity, { toValue: 0, duration: 400, useNativeDriver: false }).start(() => {
-        setLastAdded(null);
-      });
-    }, 2000);
-
-    // Persist to DB
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (currentUser) {
-        const { error: balErr } = await supabase
-          .from('profiles')
-          .update({ wallet_balance: walletBalance + amt })
-          .eq('id', currentUser.id);
-        if (balErr) throw balErr;
+      if (!currentUser) throw new Error('Not signed in');
 
-        const { error: txErr } = await supabase.from('wallet_transactions').insert({
-          user_id: currentUser.id,
-          amount: amt,
-          type: 'topup',
-          description: `Wallet top-up · ${formatTicketPrice(amt)}`,
-        });
-        if (txErr) throw txErr;
+      const { error: balErr } = await supabase
+        .from('profiles')
+        .update({ wallet_balance: walletBalance + amt })
+        .eq('id', currentUser.id);
+      if (balErr) throw balErr;
 
-        fetchWalletTransactions(currentUser.id).then(setTransactions);
-      }
+      const { error: txErr } = await supabase.from('wallet_transactions').insert({
+        user_id: currentUser.id,
+        amount: amt,
+        type: 'topup',
+        description: `Wallet top-up · ${formatTicketPrice(amt)}`,
+      });
+      if (txErr) throw txErr;
+
+      // Only update local balance after DB confirms
+      addFunds(amt);
+      fetchWalletTransactions(currentUser.id).then(setTransactions);
+
+      // Show confirmation chip
+      if (chipTimer.current) clearTimeout(chipTimer.current);
+      setLastAdded(amt);
+      RNAnimated.timing(chipOpacity, { toValue: 1, duration: 200, useNativeDriver: false }).start();
+      chipTimer.current = setTimeout(() => {
+        RNAnimated.timing(chipOpacity, { toValue: 0, duration: 400, useNativeDriver: false }).start(() => setLastAdded(null));
+      }, 2000);
     } catch {
-      setTopUpError('Top-up saved locally — sync will retry on next open.');
+      setTopUpError('Top-up failed — please try again.');
+    } finally {
+      setTimeout(() => setFlashedAmt(null), 1000);
     }
   }
 

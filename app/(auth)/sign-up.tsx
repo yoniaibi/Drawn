@@ -29,13 +29,8 @@ export default function SignUpScreen() {
     if (cleaned.length >= 3) {
       setHandleStatus('checking');
       handleCheckTimer.current = setTimeout(async () => {
-        const full = '@' + cleaned;
-        const { data } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('handle', full)
-          .maybeSingle();
-        setHandleStatus(data ? 'taken' : 'available');
+        const { data } = await supabase.rpc('is_handle_available', { candidate: '@' + cleaned });
+        setHandleStatus(data === true ? 'available' : 'taken');
       }, 500);
     }
   }
