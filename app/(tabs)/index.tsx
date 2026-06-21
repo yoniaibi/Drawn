@@ -44,7 +44,7 @@ export default function HomeScreen() {
   const [winnerIdx, setWinnerIdx] = useState(0);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const { user } = useAuthStore();
-  const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
+  const [draws, setDraws] = useState<Draw[]>([]);
   const [loadingDraws, setLoadingDraws] = useState(true);
   const [wins, setWins] = useState<WinResult[]>([]);
   const [recentWinners, setRecentWinners] = useState<RecentWinner[]>([]);
@@ -342,8 +342,12 @@ export default function HomeScreen() {
           )}
           {!loadingDraws && filtered.length === 0 && (
             <View style={styles.emptyState}>
-              <Ionicons name="search-outline" size={28} color={Colors.textTertiary} />
-              <Text style={styles.emptyText}>No draws match this filter right now</Text>
+              <Ionicons name={draws.length === 0 ? 'time-outline' : 'search-outline'} size={28} color={Colors.textTertiary} />
+              <Text style={styles.emptyText}>
+                {draws.length === 0
+                  ? 'No draws live yet — check back at 9pm tonight'
+                  : 'No draws match this filter right now'}
+              </Text>
             </View>
           )}
           {!loadingDraws && filtered.map((draw, i) => {

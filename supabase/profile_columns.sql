@@ -4,7 +4,8 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS interests           text[]   DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS preferred_sizes     text[]   DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS price_range         text     DEFAULT 'any',
-  ADD COLUMN IF NOT EXISTS notify_before_close boolean  DEFAULT true;
+  ADD COLUMN IF NOT EXISTS notify_before_close boolean  DEFAULT true,
+  ADD COLUMN IF NOT EXISTS kyc_submitted       boolean  DEFAULT false;
 
 -- Allow users to update their own profile preferences
 DO $$

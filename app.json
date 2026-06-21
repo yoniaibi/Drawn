@@ -13,13 +13,28 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.drawn.ios"
+      "bundleIdentifier": "app.drawn.ios",
+      "associatedDomains": [
+        "applinks:drawn.app",
+        "applinks:yoniaibi.github.io"
+      ]
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#2D1B69"
       },
-      "package": "app.drawn.android"
+      "package": "app.drawn.android",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "drawn.app" },
+            { "scheme": "https", "host": "yoniaibi.github.io", "pathPrefix": "/Drawn" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "expo-router",

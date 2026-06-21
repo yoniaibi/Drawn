@@ -194,6 +194,24 @@ export default function AccountScreen() {
           </View>
         )}
 
+        {/* ── Complete profile nudge (shown when interests not set) ─────── */}
+        {(useAuthStore.getState().profile as any)?.interests?.length === 0 && (
+          <TouchableOpacity
+            style={styles.profileNudge}
+            onPress={() => router.push('/(auth)/interests')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.profileNudgeLeft}>
+              <Ionicons name="person-circle-outline" size={18} color={Colors.lilac} />
+              <View>
+                <Text style={styles.profileNudgeTitle}>Personalise your feed</Text>
+                <Text style={styles.profileNudgeSub}>Tell us what you're into for better draws</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={Colors.lilac} />
+          </TouchableOpacity>
+        )}
+
         {/* ── Seller quick-actions (verified sellers only) ────────────── */}
         {isSeller && isVerified && (
           <View style={styles.sellerActions}>
@@ -462,6 +480,17 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(139,92,246,0.3)',
   },
   sellerActionSecondaryText: { fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '600' },
+
+  // Complete profile nudge
+  profileNudge: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.md,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.25)',
+    padding: Spacing.md, marginBottom: Spacing.lg,
+  },
+  profileNudgeLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
+  profileNudgeTitle: { fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '700' },
+  profileNudgeSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
 
   // KYC nudge
   kycNudge: {

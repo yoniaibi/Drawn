@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Animated as RNAnimated,
-  TouchableOpacity, useWindowDimensions, Image, ImageBackground,
+  TouchableOpacity, useWindowDimensions, Image, ImageBackground, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -62,6 +62,7 @@ export default function SplashScreen() {
   const router = useRouter();
   const { width: screenW } = useWindowDimensions();
   const [time, setTime] = useState(getCountdownTo9pm());
+  const [starting, setStarting] = useState(false);
   const [winnerIdx, setWinnerIdx] = useState(0);
   const winnerOpacity = useRef(new RNAnimated.Value(1)).current;
   const heroScale = useRef(new RNAnimated.Value(1)).current;
@@ -95,8 +96,10 @@ export default function SplashScreen() {
   }, []);
 
   async function handleGetStarted() {
+    setStarting(true);
     await requestNotificationPermission();
     router.push('/(auth)/sign-up');
+    setStarting(false);
   }
 
   const win = RECENT_WINS[winnerIdx];
@@ -226,7 +229,12 @@ export default function SplashScreen() {
       </View>
 
       {/* ── CTAs ─────────────────────────────────────────────────────── */}
-      <PrimaryButton label="Get started — it's free" onPress={handleGetStarted} style={styles.btn} />
+      <PrimaryButton
+        label={starting ? 'Starting…' : "Get started — it's free"}
+        onPress={handleGetStarted}
+        disabled={starting}
+        style={styles.btn}
+      />
       <GhostButton label="Log in" onPress={() => router.push('/(auth)/log-in')} style={styles.ghostBtn} />
       <Text style={styles.noCard}>No card needed to browse · Free postal entry on every draw</Text>
     </ScrollView>
