@@ -12,6 +12,12 @@ import { supabase } from '../../src/lib/supabase';
 import Confetti from '../../src/components/Confetti';
 import { getCountdownTo9pm, formatTicketPrice } from '../../src/utils/countdown';
 
+const RECENT_WINNERS = [
+  { handle: '@chloe_j', value: '£2,400', image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80' },
+  { handle: '@marcus_t', value: '£8,500', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=100&q=80' },
+  { handle: '@priya__', value: '£8,600', image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=100&q=80' },
+];
+
 type DrawData = {
   id: string;
   title: string;
@@ -158,7 +164,7 @@ export default function PurchaseSuccessScreen() {
         <View style={styles.oddsValueRow}>
           <Text style={styles.oddsValueText}>
             Paid <Text style={styles.oddsValueBold}>{formatTicketPrice(totalNum)}</Text>
-            {'  ·  '}could win <Text style={[styles.oddsValueBold, { color: Colors.gold }]}>£{d.retailValue.toLocaleString()}</Text>
+            {'  ·  '}could win <Text style={[styles.oddsValueBold, { color: Colors.gold }]}>£{draw.retailValue.toLocaleString()}</Text>
           </Text>
         </View>
       </Animated2.View>
@@ -178,7 +184,7 @@ export default function PurchaseSuccessScreen() {
       <Animated2.View style={[styles.winnersRow, cardStyle]}>
         <Text style={styles.winnersLabel}>Recent winners on Drawn</Text>
         <View style={styles.winnersChips}>
-          {OTHER_WINNERS.map((w, i) => (
+          {RECENT_WINNERS.map((w, i) => (
             <View key={i} style={styles.winnerChip}>
               <Image source={{ uri: w.image }} style={styles.winnerChipImage} resizeMode="cover" />
               <Text style={styles.winnerChipHandle}>{w.handle}</Text>

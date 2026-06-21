@@ -29,7 +29,9 @@ export default function SignUpScreen() {
     if (cleaned.length >= 3) {
       setHandleStatus('checking');
       handleCheckTimer.current = setTimeout(async () => {
-        const { data } = await supabase.rpc('is_handle_available', { candidate: '@' + cleaned });
+        const { data, error } = await supabase.rpc('is_handle_available', { candidate: '@' + cleaned });
+        // If the RPC doesn't exist yet or errors, fall back to idle (server enforces uniqueness via constraint)
+        if (error) { setHandleStatus('idle'); return; }
         setHandleStatus(data === true ? 'available' : 'taken');
       }, 500);
     }
@@ -49,7 +51,7 @@ export default function SignUpScreen() {
       return;
     }
     if (handleStatus === 'checking') {
-      setError('Please wait while we check handle availability.');
+      setError('Still checking handle availability — please wait a moment.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {

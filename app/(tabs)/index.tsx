@@ -92,8 +92,10 @@ export default function HomeScreen() {
     fetchRecentWinners().then(setRecentWinners).catch(() => {});
     if (user?.id) {
       checkForWins(user.id).then(setWins).catch(() => {});
-      supabase.from('draw_watches').select('draw_id').eq('user_id', user.id).then(({ data }) => {
-        if (data) setSavedIds(new Set(data.map((r: any) => r.draw_id)));
+      Promise.resolve(
+        supabase.from('draw_watches').select('draw_id').eq('user_id', user.id)
+      ).then(({ data }) => {
+        if (data) setSavedIds(new Set((data as any[]).map(r => r.draw_id)));
       }).catch(() => {});
     }
 

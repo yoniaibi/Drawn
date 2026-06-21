@@ -16,6 +16,7 @@ export interface Draw {
   condition: ConditionType;
   description: string;
   isBundle: boolean;
+  emoji?: string;
   category?: string;
   bundleItems?: BundleItem[];
   closesAt: string;

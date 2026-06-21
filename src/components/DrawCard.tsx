@@ -20,6 +20,7 @@ const URGENCY_COLORS = {
   closing_tonight: Colors.pink,
   live: Colors.gold,
   open: Colors.lilac,
+  pending: Colors.textTertiary,
   completed: Colors.textTertiary,
   cancelled: Colors.textTertiary,
 };
