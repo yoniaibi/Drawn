@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { getCountdownTo9pm } from '../../src/utils/countdown';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -13,6 +14,11 @@ export default function LogInScreen() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [time, setTime] = useState(getCountdownTo9pm());
+  useEffect(() => {
+    const id = setInterval(() => setTime(getCountdownTo9pm()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   async function handleLogin() {
     if (!email.trim() || !password) {
@@ -50,10 +56,11 @@ export default function LogInScreen() {
         <Text style={styles.title}>Welcome back</Text>
         <Text style={styles.sub}>Tonight's draw closes at 9pm — log in to check your tickets.</Text>
 
-        {/* Social proof strip */}
+        {/* Live countdown */}
         <View style={styles.proofStrip}>
           <View style={styles.proofDot} />
-          <Text style={styles.proofText}>Draw closes every night at 9pm</Text>
+          <Text style={styles.proofText}>Next draw closes in </Text>
+          <Text style={styles.proofTime}>{time.h}:{time.m}:{time.s}</Text>
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -124,12 +131,13 @@ const styles = StyleSheet.create({
 
   proofStrip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(139,92,246,0.1)', borderRadius: Radius.sm,
+    backgroundColor: 'rgba(244,114,182,0.08)', borderRadius: Radius.sm,
     paddingHorizontal: 12, paddingVertical: 8,
-    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', marginBottom: 20,
+    borderWidth: 1, borderColor: 'rgba(244,114,182,0.2)', marginBottom: 20,
   },
   proofDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
   proofText: { fontSize: FontSizes.xs, color: Colors.textSecondary },
+  proofTime: { fontSize: FontSizes.xs, color: Colors.pink, fontWeight: '700', letterSpacing: 0.5 },
 
   error: {
     fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12,
@@ -140,8 +148,8 @@ const styles = StyleSheet.create({
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4 },
   forgotText: { fontSize: FontSizes.xs, color: Colors.lilac },
   input: {
-    backgroundColor: Colors.darkBorder, borderRadius: Radius.sm,
-    padding: 10, fontSize: 11, color: Colors.white, marginBottom: 2,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.sm, borderWidth: 1, borderColor: Colors.darkBorder,
+    padding: 12, fontSize: FontSizes.sm, color: Colors.white, marginBottom: 2,
   },
   pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   eye: { padding: 8 },

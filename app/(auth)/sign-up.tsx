@@ -66,6 +66,19 @@ export default function SignUpScreen() {
         <Text style={styles.title}>Join DRAWN</Text>
         <Text style={styles.sub}>Win designer things for pennies.</Text>
 
+        <View style={styles.statsRow}>
+          {[
+            { value: '9pm', label: 'every night' },
+            { value: '10p', label: 'from per ticket' },
+            { value: '100%', label: 'verified sellers' },
+          ].map(s => (
+            <View key={s.label} style={styles.stat}>
+              <Text style={styles.statVal}>{s.value}</Text>
+              <Text style={styles.statLabel}>{s.label}</Text>
+            </View>
+          ))}
+        </View>
+
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Text style={styles.label}>FULL NAME</Text>
@@ -140,15 +153,22 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.lg, paddingBottom: 40 },
   back: { marginBottom: 20, alignSelf: 'flex-start' },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 4 },
-  sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 20 },
+  sub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginBottom: 14 },
+  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  stat: {
+    flex: 1, backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.md,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', padding: Spacing.sm, alignItems: 'center',
+  },
+  statVal: { fontFamily: Fonts.serif, fontSize: FontSizes.md, color: Colors.lilac, fontWeight: '700' },
+  statLabel: { fontSize: 9, color: Colors.textTertiary, marginTop: 2, textAlign: 'center' },
   error: {
     fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 12,
     backgroundColor: 'rgba(226,75,74,0.1)', padding: 10, borderRadius: Radius.sm,
   },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.5, marginBottom: 4, marginTop: 10 },
   input: {
-    backgroundColor: Colors.darkBorder, borderRadius: Radius.sm,
-    padding: 10, fontSize: 11, color: Colors.white, marginBottom: 2,
+    backgroundColor: Colors.darkCard, borderRadius: Radius.sm, borderWidth: 1, borderColor: Colors.darkBorder,
+    padding: 12, fontSize: FontSizes.sm, color: Colors.white, marginBottom: 2,
   },
   pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   eye: { padding: 8 },

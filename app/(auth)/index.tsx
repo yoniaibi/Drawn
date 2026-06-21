@@ -16,39 +16,33 @@ import { requestNotificationPermission } from '../../src/services/notifications'
 const HERO_ITEMS = [
   {
     image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80',
-    label: 'Chanel Classic Flap',
-    price: '25p',
-    value: '£2,400',
+    label: 'Chanel Classic Flap', price: '25p', value: '£2,400',
+    bg: 'rgba(180,100,160,0.55)', icon: '👜',
   },
   {
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
-    label: 'Rolex Submariner',
-    price: '50p',
-    value: '£8,500',
+    label: 'Rolex Submariner', price: '50p', value: '£8,500',
+    bg: 'rgba(80,120,160,0.55)', icon: '⌚',
   },
   {
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
-    label: 'Nike Air Jordan 1',
-    price: '10p',
-    value: '£450',
+    label: 'Air Jordan 1', price: '10p', value: '£450',
+    bg: 'rgba(200,80,80,0.55)', icon: '👟',
   },
   {
     image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=400&q=80',
-    label: 'Diamond Tennis Bracelet',
-    price: '25p',
-    value: '£1,200',
+    label: 'Tennis Bracelet', price: '25p', value: '£1,200',
+    bg: 'rgba(100,180,200,0.55)', icon: '💎',
   },
   {
     image: 'https://images.unsplash.com/photo-1614179924047-e1ab49a0a0cf?auto=format&fit=crop&w=400&q=80',
-    label: 'Bottega Veneta Pouch',
-    price: '25p',
-    value: '£1,800',
+    label: 'Bottega Veneta', price: '25p', value: '£1,800',
+    bg: 'rgba(160,140,80,0.55)', icon: '👛',
   },
   {
     image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=400&q=80',
-    label: 'Nike Tech Bundle',
-    price: '10p',
-    value: '£380',
+    label: 'Nike Tech Bundle', price: '10p', value: '£380',
+    bg: 'rgba(80,160,120,0.55)', icon: '🧥',
   },
 ];
 
@@ -139,8 +133,13 @@ export default function SplashScreen() {
         {HERO_ITEMS.map((item, i) => (
           <RNAnimated.View
             key={item.label}
-            style={[styles.gridTile, { width: tileW, height: tileW * 1.25 }, { transform: [{ scale: heroScale }] }]}
+            style={[styles.gridTile, { width: tileW, height: tileW * 1.25, backgroundColor: item.bg }, { transform: [{ scale: heroScale }] }]}
           >
+            {/* Fallback icon — shows behind image when it fails */}
+            <View style={styles.gridFallback}>
+              <Text style={styles.gridFallbackIcon}>{item.icon}</Text>
+              <Text style={styles.gridFallbackLabel} numberOfLines={1}>{item.label}</Text>
+            </View>
             <Image
               source={{ uri: item.image }}
               style={styles.gridImage}
@@ -268,7 +267,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg, marginBottom: 8,
   },
   gridTile: { borderRadius: 10, overflow: 'hidden', position: 'relative' },
-  gridImage: { width: '100%', height: '100%' },
+  gridFallback: {
+    ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', gap: 4, padding: 6,
+  },
+  gridFallbackIcon: { fontSize: 28 },
+  gridFallbackLabel: { fontSize: 8, color: 'rgba(255,255,255,0.8)', fontWeight: '700', textAlign: 'center' },
+  gridImage: { ...StyleSheet.absoluteFillObject as any },
   gridOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(15,11,30,0.35)',
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
   winnerDotSmall: { width: 5, height: 5, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.2)' },
   winnerDotActive: { backgroundColor: Colors.gold },
   winnerBody: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  winnerImg: { width: 56, height: 56, borderRadius: 10, backgroundColor: Colors.darkCard },
+  winnerImg: { width: 56, height: 56, borderRadius: 10, backgroundColor: 'rgba(180,100,160,0.4)' },
   winnerMeta: { flex: 1 },
   winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.base, color: Colors.white },
   winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
