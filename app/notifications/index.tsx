@@ -77,6 +77,7 @@ export default function NotificationsScreen() {
   const { user } = useAuthStore();
 
   const [items, setItems] = useState<NotifItem[]>([]);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,6 +96,10 @@ export default function NotificationsScreen() {
       setItems([...winNotifs, ...txnNotifs]);
     }).finally(() => setLoading(false));
   }, [user]);
+
+  function markRead(id: string) {
+    setReadIds(prev => new Set([...prev, id]));
+  }
 
   return (
     <View style={styles.screen}>
@@ -119,6 +124,7 @@ export default function NotificationsScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
           {items.map(n => {
+            const isRead = n.read || readIds.has(n.id);
             const { name: iconName, color: iconColor } = iconForType(n.type);
             return (
               <TouchableOpacity
@@ -126,12 +132,13 @@ export default function NotificationsScreen() {
                 style={[
                   styles.row,
                   { backgroundColor: bgForType(n.type), borderColor: borderForType(n.type) },
-                  !n.read && styles.rowUnread,
+                  !isRead && styles.rowUnread,
                 ]}
                 onPress={() => {
+                  markRead(n.id);
                   if (n.drawId) router.push(`/live/winner/${n.drawId}` as any);
                 }}
-                activeOpacity={n.drawId ? 0.8 : 1}
+                activeOpacity={0.8}
               >
                 <View style={[styles.iconBox, { backgroundColor: `${iconColor}22` }]}>
                   <Ionicons name={iconName as any} size={18} color={iconColor} />
@@ -142,7 +149,7 @@ export default function NotificationsScreen() {
                 </View>
                 <View style={styles.meta}>
                   <Text style={styles.time}>{n.time}</Text>
-                  {!n.read && <View style={styles.unreadDot} />}
+                  {!isRead && <View style={styles.unreadDot} />}
                 </View>
               </TouchableOpacity>
             );

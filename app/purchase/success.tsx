@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Share, Animated, Image,
+  View, Text, StyleSheet, TouchableOpacity, Share, Animated, Image, ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,26 +8,56 @@ import Animated2, {
   useSharedValue, useAnimatedStyle, withSpring, withDelay, withTiming, withSequence,
 } from 'react-native-reanimated';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { MOCK_DRAWS } from '../../src/mocks';
+import { supabase } from '../../src/lib/supabase';
 import Confetti from '../../src/components/Confetti';
 import { getCountdownTo9pm, formatTicketPrice } from '../../src/utils/countdown';
 
-const OTHER_WINNERS = [
-  { handle: '@chloe_j', value: '£2,400', image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80' },
-  { handle: '@marcus_t', value: '£8,500', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=100&q=80' },
-  { handle: '@priya__', value: '£8,600', image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=100&q=80' },
-];
+type DrawData = {
+  id: string;
+  title: string;
+  image: string;
+  retailValue: number;
+  totalTickets: number;
+  ticketPrice: number;
+  seller: string;
+  condition: string;
+};
 
 export default function PurchaseSuccessScreen() {
   const { drawId, qty, total } = useLocalSearchParams<{ drawId: string; qty: string; total: string }>();
   const router = useRouter();
-  const draw = MOCK_DRAWS.find(d => d.id === drawId);
+  const [draw, setDraw] = useState<DrawData | null>(null);
+  const [fetchDone, setFetchDone] = useState(false);
   const [time, setTime] = useState(getCountdownTo9pm());
 
   useEffect(() => {
     const id = setInterval(() => setTime(getCountdownTo9pm()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (!drawId) { setFetchDone(true); return; }
+    supabase
+      .from('draws')
+      .select('id, title, image_url, retail_value, total_tickets, ticket_price, seller_handle, condition')
+      .eq('id', drawId)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setDraw({
+            id: data.id,
+            title: data.title,
+            image: data.image_url ?? '',
+            retailValue: Math.round((data.retail_value ?? 0) / 100),
+            totalTickets: data.total_tickets ?? 1000,
+            ticketPrice: data.ticket_price ?? 10,
+            seller: data.seller_handle ?? '',
+            condition: data.condition ?? 'new',
+          });
+        }
+        setFetchDone(true);
+      });
+  }, [drawId]);
 
   // Entrance animations
   const emojiScale = useSharedValue(0);
@@ -48,6 +78,14 @@ export default function PurchaseSuccessScreen() {
   const cardStyle = useAnimatedStyle(() => ({ opacity: cardOpacity.value, transform: [{ translateY: cardTranslateY.value }] }));
   const oddsStyle = useAnimatedStyle(() => ({ opacity: oddsOpacity.value, transform: [{ scale: oddsScale.value }] }));
 
+  if (!fetchDone) {
+    return (
+      <View style={[styles.screen, { alignItems: 'center', justifyContent: 'center' }]}>
+        <ActivityIndicator color={Colors.lilac} size="large" />
+      </View>
+    );
+  }
+
   if (!draw) {
     return (
       <View style={styles.screen}>
@@ -60,15 +98,14 @@ export default function PurchaseSuccessScreen() {
     );
   }
 
-  const d = draw!;
   const qtyNum = parseInt(qty ?? '1');
-  const totalNum = parseInt(total ?? String(d.ticketPrice));
-  const oddsPercent = ((qtyNum / d.totalTickets) * 100).toFixed(2);
-  const returnMultiple = Math.round(d.retailValue * 100 / totalNum);
+  const totalNum = parseInt(total ?? String(draw.ticketPrice));
+  const oddsPercent = ((qtyNum / draw.totalTickets) * 100).toFixed(2);
+  const returnMultiple = Math.round(draw.retailValue * 100 / totalNum);
 
   function handleShare() {
     Share.share({
-      message: `I just entered the ${d.title} draw on Drawn for ${formatTicketPrice(totalNum)}. Could win £${d.retailValue.toLocaleString()} tonight at 9pm — drawn.app`,
+      message: `I just entered the ${draw!.title} draw on Drawn for ${formatTicketPrice(totalNum)}. Could win £${draw!.retailValue.toLocaleString()} tonight at 9pm — drawn.app`,
     });
   }
 
@@ -89,16 +126,16 @@ export default function PurchaseSuccessScreen() {
 
       {/* Big item image */}
       <Animated2.View style={emojiStyle}>
-        {d.image ? (
-          <Image source={{ uri: d.image }} style={styles.bigImage} resizeMode="cover" />
+        {draw.image ? (
+          <Image source={{ uri: draw.image }} style={styles.bigImage} resizeMode="cover" />
         ) : (
           <View style={styles.bigImage} />
         )}
       </Animated2.View>
 
       <Text style={styles.heading}>You're in!</Text>
-      <Text style={styles.subHeading}>{d.title}</Text>
-      <Text style={styles.seller}>{d.seller} · {d.condition.replace('_', ' ')}</Text>
+      <Text style={styles.subHeading}>{draw.title}</Text>
+      <Text style={styles.seller}>{draw.seller} · {draw.condition.replace('_', ' ')}</Text>
 
       {/* Odds card */}
       <Animated2.View style={[styles.oddsCard, oddsStyle]}>

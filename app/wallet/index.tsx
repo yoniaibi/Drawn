@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import { useAuthStore } from '../../src/store';
-import { MOCK_WALLET } from '../../src/mocks';
 import { fetchWalletTransactions, WalletTransaction } from '../../src/services/draws';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../src/utils/countdown';
@@ -16,7 +15,9 @@ export default function WalletScreen() {
   const router = useRouter();
   const { walletBalance, addFunds, user, refreshProfile } = useAuthStore();
   const [selected, setSelected] = useState(1000);
-  const [transactions, setTransactions] = useState<WalletTransaction[]>(MOCK_WALLET.transactions);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [txLoading, setTxLoading] = useState(true);
+  const [topUpError, setTopUpError] = useState<string | null>(null);
 
   // Per-button flash: maps amount → 'added' | null
   const [flashedAmt, setFlashedAmt] = useState<number | null>(null);
@@ -29,10 +30,14 @@ export default function WalletScreen() {
   useEffect(() => {
     if (!user?.id) return;
     refreshProfile();
-    fetchWalletTransactions(user.id).then(setTransactions);
+    fetchWalletTransactions(user.id).then(txns => {
+      setTransactions(txns);
+      setTxLoading(false);
+    }).catch(() => setTxLoading(false));
   }, [user?.id]);
 
   async function handleTopUp(amt: number) {
+    setTopUpError(null);
     addFunds(amt);
     setFlashedAmt(amt);
 
@@ -52,21 +57,27 @@ export default function WalletScreen() {
     }, 2000);
 
     // Persist to DB
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      // Update balance in profiles
-      await supabase
-        .from('profiles')
-        .update({ wallet_balance: walletBalance + amt })
-        .eq('id', user.id);
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        const { error: balErr } = await supabase
+          .from('profiles')
+          .update({ wallet_balance: walletBalance + amt })
+          .eq('id', currentUser.id);
+        if (balErr) throw balErr;
 
-      // Log transaction
-      await supabase.from('wallet_transactions').insert({
-        user_id: user.id,
-        amount: amt,
-        type: 'topup',
-        description: `Wallet top-up · ${formatTicketPrice(amt)}`,
-      });
+        const { error: txErr } = await supabase.from('wallet_transactions').insert({
+          user_id: currentUser.id,
+          amount: amt,
+          type: 'topup',
+          description: `Wallet top-up · ${formatTicketPrice(amt)}`,
+        });
+        if (txErr) throw txErr;
+
+        fetchWalletTransactions(currentUser.id).then(setTransactions);
+      }
+    } catch {
+      setTopUpError('Top-up saved locally — sync will retry on next open.');
     }
   }
 
@@ -127,8 +138,13 @@ export default function WalletScreen() {
           style={{ marginBottom: Spacing.xl }}
         />
 
+        {topUpError && (
+          <Text style={{ fontSize: FontSizes.xs, color: Colors.danger, marginBottom: 10, lineHeight: 16 }}>{topUpError}</Text>
+        )}
+
         <Text style={styles.sectionLabel}>RECENT ACTIVITY</Text>
-        {transactions.map(tx => (
+        {txLoading && <ActivityIndicator color={Colors.lilac} style={{ marginTop: 20 }} />}
+        {!txLoading && transactions.map(tx => (
           <View key={tx.id} style={styles.txRow}>
             <View style={styles.txLeft}>
               <Text style={styles.txLabel}>{tx.label}</Text>

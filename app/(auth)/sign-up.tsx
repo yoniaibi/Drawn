@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Linking } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -11,14 +11,50 @@ export default function SignUpScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [handle, setHandle] = useState('');
+  const [handleStatus, setHandleStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [showPw, setShowPw] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const handleCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function onHandleChange(text: string) {
+    const cleaned = text.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    setHandle(cleaned);
+    setError('');
+    setHandleStatus('idle');
+    if (handleCheckTimer.current) clearTimeout(handleCheckTimer.current);
+    if (cleaned.length >= 3) {
+      setHandleStatus('checking');
+      handleCheckTimer.current = setTimeout(async () => {
+        const full = '@' + cleaned;
+        const { data } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('handle', full)
+          .maybeSingle();
+        setHandleStatus(data ? 'taken' : 'available');
+      }, 500);
+    }
+  }
+
   async function handleCreate() {
     if (!name.trim() || !email.trim() || !password) {
       setError('Please fill in all fields.');
+      return;
+    }
+    if (handle.length < 3) {
+      setError('Handle must be at least 3 characters.');
+      return;
+    }
+    if (handleStatus === 'taken') {
+      setError('That handle is already taken. Please choose another.');
+      return;
+    }
+    if (handleStatus === 'checking') {
+      setError('Please wait while we check handle availability.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -36,13 +72,13 @@ export default function SignUpScreen() {
     setError('');
     setLoading(true);
 
-    const handle = '@' + name.trim().toLowerCase().replace(/\s+/g, '_');
+    const fullHandle = '@' + handle;
 
     const { error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        data: { handle, avatar_letter: name.trim()[0].toUpperCase() },
+        data: { handle: fullHandle, avatar_letter: name.trim()[0].toUpperCase(), full_name: name.trim() },
       },
     });
 
@@ -86,6 +122,27 @@ export default function SignUpScreen() {
           style={styles.input} placeholder="Your name" placeholderTextColor={Colors.textTertiary}
           value={name} onChangeText={t => { setName(t); setError(''); }} autoCapitalize="words"
         />
+
+        <Text style={styles.label}>USERNAME (HANDLE)</Text>
+        <View style={styles.pwWrap}>
+          <Text style={[styles.input, { flex: 0, paddingRight: 0, marginBottom: 0, color: Colors.textSecondary }]}>@</Text>
+          <TextInput
+            style={[styles.input, { flex: 1, marginBottom: 0 }]}
+            placeholder="yourhandle"
+            placeholderTextColor={Colors.textTertiary}
+            value={handle}
+            onChangeText={onHandleChange}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <View style={styles.eye}>
+            {handleStatus === 'checking' && <ActivityIndicator size="small" color={Colors.textTertiary} />}
+            {handleStatus === 'available' && <Ionicons name="checkmark-circle" size={18} color={Colors.success} />}
+            {handleStatus === 'taken' && <Ionicons name="close-circle" size={18} color={Colors.danger} />}
+          </View>
+        </View>
+        {handleStatus === 'taken' && <Text style={styles.handleHint}>Handle taken</Text>}
+        {handleStatus === 'available' && <Text style={[styles.handleHint, { color: Colors.success }]}>Available!</Text>}
 
         <Text style={styles.label}>EMAIL ADDRESS</Text>
         <TextInput
@@ -189,4 +246,5 @@ const styles = StyleSheet.create({
   loginRow: { marginTop: 14, alignItems: 'center' },
   loginText: { fontSize: FontSizes.xs, color: Colors.lilac },
   loginLink: { color: Colors.pink, fontWeight: '600' },
+  handleHint: { fontSize: 9, color: Colors.danger, marginTop: 2, marginBottom: 4 },
 });
