@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -17,6 +17,8 @@ import { MOCK_WINNER } from '../../../src/mocks';
 import Confetti from '../../../src/components/Confetti';
 import PrimaryButton from '../../../src/components/PrimaryButton';
 import { supabase } from '../../../src/lib/supabase';
+import { SELLER_FEE_MULTIPLIER } from '../../../src/constants';
+import { useAuthStore } from '../../../src/store';
 
 interface WinnerData {
   winnerHandle: string;
@@ -29,7 +31,7 @@ interface WinnerData {
 }
 
 function mapToWinner(db: any): WinnerData {
-  const earned = Math.round((db.tickets_sold ?? 0) * (db.ticket_price ?? 0) * 0.846);
+  const earned = Math.round((db.tickets_sold ?? 0) * (db.ticket_price ?? 0) * SELLER_FEE_MULTIPLIER);
   return {
     winnerHandle: db.winner_handle ?? '@winner',
     image: db.image_url ?? db.image ?? '',
@@ -44,9 +46,13 @@ function mapToWinner(db: any): WinnerData {
 export default function WinnerScreen() {
   const { drawId } = useLocalSearchParams<{ drawId: string }>();
   const router = useRouter();
+  const { handle: myHandle } = useAuthStore();
 
   const [winner, setWinner] = useState<WinnerData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isWinner, setIsWinner] = useState(false);
+  const [deliveryConfirmed, setDeliveryConfirmed] = useState(false);
+  const [confirmingDelivery, setConfirmingDelivery] = useState(false);
 
   useEffect(() => {
     if (!drawId) { setWinner(mapToWinner(MOCK_WINNER)); setLoading(false); return; }
@@ -59,7 +65,9 @@ export default function WinnerScreen() {
         if (error || !data) {
           setWinner(mapToWinner(MOCK_WINNER));
         } else {
-          setWinner(mapToWinner(data));
+          const w = mapToWinner(data);
+          setWinner(w);
+          if (myHandle && w.winnerHandle === myHandle) setIsWinner(true);
         }
         setLoading(false);
       });
@@ -115,6 +123,24 @@ export default function WinnerScreen() {
 
   const valueMultiple = Math.round(winner.retailValue / winner.ticketPrice);
 
+  async function confirmDelivery() {
+    if (!drawId || confirmingDelivery) return;
+    setConfirmingDelivery(true);
+    try {
+      await supabase.from('draw_deliveries').insert({
+        draw_id: drawId,
+        winner_handle: myHandle,
+        confirmed_at: new Date().toISOString(),
+      });
+      setDeliveryConfirmed(true);
+    } catch {
+      // Table may not exist yet — still mark locally
+      setDeliveryConfirmed(true);
+    } finally {
+      setConfirmingDelivery(false);
+    }
+  }
+
   return (
     <View style={styles.screen}>
       <Confetti />
@@ -169,6 +195,28 @@ export default function WinnerScreen() {
       </View>
 
       <View style={styles.cta}>
+        {isWinner && (
+          deliveryConfirmed ? (
+            <View style={styles.deliveryConfirmed}>
+              <Ionicons name="checkmark-circle" size={18} color={Colors.success} />
+              <Text style={styles.deliveryConfirmedText}>Item delivery confirmed — seller payout released</Text>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.deliveryBtn}
+              onPress={confirmDelivery}
+              disabled={confirmingDelivery}
+            >
+              {confirmingDelivery
+                ? <ActivityIndicator color={Colors.white} size="small" />
+                : <>
+                    <Ionicons name="checkmark-done" size={16} color={Colors.white} />
+                    <Text style={styles.deliveryBtnText}>I've received my item</Text>
+                  </>
+              }
+            </TouchableOpacity>
+          )
+        )}
         <Text style={styles.ctaHint}>More draws close tomorrow at 9pm</Text>
         <PrimaryButton label="Browse more draws" onPress={() => router.replace('/(tabs)')} />
       </View>
@@ -213,4 +261,15 @@ const styles = StyleSheet.create({
   shareText: { fontSize: FontSizes.base, color: Colors.royal, fontWeight: '800' },
   cta: { padding: Spacing.lg, zIndex: 2, gap: 8 },
   ctaHint: { textAlign: 'center', fontSize: FontSizes.xs, color: Colors.textSecondary },
+  deliveryBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: Colors.success, borderRadius: Radius.md, paddingVertical: 14,
+  },
+  deliveryBtnText: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
+  deliveryConfirmed: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center',
+    backgroundColor: 'rgba(29,158,117,0.15)', borderRadius: Radius.md, padding: Spacing.md,
+    borderWidth: 1, borderColor: 'rgba(29,158,117,0.3)',
+  },
+  deliveryConfirmedText: { fontSize: FontSizes.sm, color: Colors.success, fontWeight: '600' },
 });

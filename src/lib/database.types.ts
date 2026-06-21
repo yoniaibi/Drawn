@@ -1,4 +1,4 @@
-export type DrawStatus = 'open' | 'closing_tonight' | 'live' | 'completed' | 'cancelled';
+export type DrawStatus = 'open' | 'closing_tonight' | 'live' | 'completed' | 'cancelled' | 'pending';
 export type ConditionType = 'new' | 'like_new' | 'good' | 'fair';
 
 export interface Profile {
@@ -30,6 +30,7 @@ export interface Draw {
   description: string;
   condition: ConditionType;
   is_bundle: boolean;
+  category?: string | null;
   draw_date: string;
   created_at: string;
   winner_user_id?: string | null;

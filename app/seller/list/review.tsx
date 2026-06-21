@@ -9,7 +9,8 @@ import { formatTicketPrice } from '../../../src/utils/countdown';
 import { useSellerDraft } from '../../../src/store/sellerDraft';
 import { useAuthStore } from '../../../src/store';
 import { supabase } from '../../../src/lib/supabase';
-import { SELLER_FEE_MULTIPLIER } from '../../../src/constants';
+import { SELLER_FEE_MULTIPLIER, getCategoryMeta } from '../../../src/constants';
+import type { DrawCategory } from '../../../src/constants';
 
 export default function ListReviewScreen() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function ListReviewScreen() {
 
   const totalRaise = draft.ticketPrice * draft.totalTickets;
   const sellerGets = Math.round(totalRaise * SELLER_FEE_MULTIPLIER);
+  const catMeta = getCategoryMeta((draft.category ?? 'fashion') as DrawCategory);
 
   // Map display condition back to DB enum
   const conditionMap: Record<string, string> = {
@@ -62,6 +64,7 @@ export default function ListReviewScreen() {
         description: draft.description,
         condition: conditionMap[draft.condition] ?? 'good',
         is_bundle: draft.type === 'bundle',
+        category: draft.category ?? null,
         draw_date: drawDate.toISOString(),
       }).select().single();
 
@@ -92,7 +95,7 @@ export default function ListReviewScreen() {
         </Text>
         <View style={styles.successSteps}>
           {[
-            { icon: 'cube-outline' as const, label: 'Ship item', sub: 'Prepaid label sent to your email' },
+            { icon: 'cube-outline' as const, label: 'Hand over item', sub: catMeta.handoverNote },
             { icon: 'search-outline' as const, label: 'We verify it', sub: 'Authenticity check within 24h of receipt' },
             { icon: 'rocket-outline' as const, label: 'Goes live', sub: 'Next available 9pm slot' },
             { icon: 'cash-outline' as const, label: 'You get paid', sub: `${formatTicketPrice(sellerGets)} if all tickets sell` },
@@ -160,9 +163,7 @@ export default function ListReviewScreen() {
 
         <View style={styles.shippingNote}>
           <Ionicons name="cube-outline" size={16} color={Colors.lilac} />
-          <Text style={styles.shippingText}>
-            A prepaid shipping label will be emailed to you immediately after submission.
-          </Text>
+          <Text style={styles.shippingText}>{catMeta.handoverNote}</Text>
         </View>
 
         {error && (

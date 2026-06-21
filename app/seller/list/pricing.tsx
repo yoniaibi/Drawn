@@ -7,7 +7,12 @@ import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
 import PrimaryButton from '../../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../../src/utils/countdown';
 import { useSellerDraft } from '../../../src/store/sellerDraft';
-import { SELLER_FEE_MULTIPLIER, TICKET_PRICE_OPTIONS_PENCE as PRICES, TICKET_QUANTITY_OPTIONS as QUANTITIES } from '../../../src/constants';
+import {
+  SELLER_FEE_MULTIPLIER, PLATFORM_FEE_PERCENT, PROCESSING_FEE_PERCENT,
+  TICKET_PRICE_OPTIONS_PENCE, TICKET_QUANTITY_OPTIONS,
+  getCategoryMeta,
+} from '../../../src/constants';
+import type { DrawCategory } from '../../../src/constants';
 
 export default function ListPricingScreen() {
   const router = useRouter();
@@ -16,10 +21,15 @@ export default function ListPricingScreen() {
     ticketPrice: s.ticketPrice,
     totalTickets: s.totalTickets,
     retailValue: s.retailValue,
+    category: s.category,
   }));
 
-  const [price, setPrice] = useState(draft.ticketPrice);
-  const [qty, setQty] = useState(draft.totalTickets);
+  const catMeta = getCategoryMeta((draft.category ?? 'fashion') as DrawCategory);
+  const PRICES = catMeta.ticketPrices;
+  const QUANTITIES = catMeta.ticketQuantities;
+
+  const [price, setPrice] = useState(PRICES.includes(draft.ticketPrice) ? draft.ticketPrice : PRICES[1]);
+  const [qty, setQty] = useState(QUANTITIES.includes(draft.totalTickets) ? draft.totalTickets : QUANTITIES[1]);
   const [retailValueInput, setRetailValueInput] = useState(
     draft.retailValue > 0 ? String(draft.retailValue / 100) : ''
   );
@@ -99,15 +109,15 @@ export default function ListPricingScreen() {
               <Text style={styles.earningsVal}>{formatTicketPrice(totalRaise)}</Text>
             </View>
             <View style={styles.earningsRow}>
-              <Text style={styles.earningsLabel}>DRAWN fee (12%)</Text>
+              <Text style={styles.earningsLabel}>DRAWN fee ({Math.round(PLATFORM_FEE_PERCENT * 100)}%)</Text>
               <Text style={[styles.earningsVal, { color: Colors.pink }]}>
-                -{formatTicketPrice(Math.round(totalRaise * 0.12))}
+                -{formatTicketPrice(Math.round(totalRaise * PLATFORM_FEE_PERCENT))}
               </Text>
             </View>
             <View style={styles.earningsRow}>
-              <Text style={styles.earningsLabel}>Processing</Text>
+              <Text style={styles.earningsLabel}>Processing ({(PROCESSING_FEE_PERCENT * 100).toFixed(1)}%)</Text>
               <Text style={[styles.earningsVal, { color: Colors.lilac }]}>
-                -{formatTicketPrice(Math.round(totalRaise * 0.034))}
+                -{formatTicketPrice(Math.round(totalRaise * PROCESSING_FEE_PERCENT))}
               </Text>
             </View>
             <View style={[styles.earningsRow, styles.totalRow]}>

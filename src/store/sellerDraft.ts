@@ -1,9 +1,11 @@
 import { create } from 'zustand';
+import type { DrawCategory } from '../constants';
 
 interface SellerDraft {
+  category: DrawCategory | null;
   type: 'single' | 'bundle' | null;
   emoji: string;
-  images: string[]; // local URIs or data URIs
+  images: string[];
   title: string;
   description: string;
   condition: string | null;
@@ -12,6 +14,7 @@ interface SellerDraft {
   totalTickets: number;
   // actions
   clearDraft: () => void;
+  setCategory: (c: DrawCategory) => void;
   setType: (t: 'single' | 'bundle') => void;
   setEmoji: (emoji: string) => void;
   setImages: (images: string[]) => void;
@@ -20,6 +23,7 @@ interface SellerDraft {
 }
 
 const DEFAULTS = {
+  category: null as DrawCategory | null,
   type: null as 'single' | 'bundle' | null,
   emoji: '👜',
   images: [] as string[],
@@ -35,6 +39,8 @@ export const useSellerDraft = create<SellerDraft>((set) => ({
   ...DEFAULTS,
 
   clearDraft: () => set({ ...DEFAULTS }),
+
+  setCategory: (c) => set({ category: c }),
 
   setType: (t) => set({ type: t, emoji: t === 'bundle' ? '🛍️' : '👜' }),
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TextInput,
-  TouchableOpacity, ActivityIndicator,
+  TouchableOpacity, ActivityIndicator, Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,9 +17,11 @@ export default function EditListingScreen() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -60,6 +62,42 @@ export default function EditListingScreen() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function cancelDraw() {
+    if (!drawId || !canEdit) return;
+    setError(null);
+    setCancelling(true);
+    try {
+      const { error: err } = await supabase
+        .from('draws')
+        .update({ status: 'cancelled' })
+        .eq('id', drawId)
+        .eq('seller_id', user?.id ?? '');
+      if (err) throw new Error(err.message);
+      setCancelled(true);
+    } catch (e: any) {
+      setError(e.message ?? 'Could not cancel draw.');
+    } finally {
+      setCancelling(false);
+    }
+  }
+
+  if (cancelled) {
+    return (
+      <View style={styles.screen}>
+        <View style={styles.centred}>
+          <View style={styles.cancelledIcon}>
+            <Ionicons name="close-circle" size={48} color={Colors.textSecondary} />
+          </View>
+          <Text style={styles.cancelledTitle}>Draw cancelled</Text>
+          <Text style={styles.cancelledSub}>
+            Your listing has been cancelled. If we already received your item we'll be in touch about returning it.
+          </Text>
+          <PrimaryButton label="Back to dashboard" onPress={() => router.replace('/seller/dashboard')} style={{ marginTop: Spacing.xl }} />
+        </View>
+      </View>
+    );
   }
 
   return (
@@ -115,9 +153,8 @@ export default function EditListingScreen() {
             />
 
             <Text style={styles.lockedNote}>
-              Ticket price and quantity cannot be changed once submitted. Contact us at{' '}
-              <Text style={{ color: Colors.lilac }}>support@drawn.co.uk</Text>
-              {' '}if you need to cancel a listing.
+              Ticket price and quantity cannot be changed once submitted.{' '}
+              Contact us at <Text style={{ color: Colors.lilac }}>support@drawn.co.uk</Text> if you need help.
             </Text>
 
             {saved && (
@@ -142,6 +179,36 @@ export default function EditListingScreen() {
                 />
               )
             )}
+
+            {/* Cancel draw — only for pending draws */}
+            {canEdit && (
+              <View style={styles.dangerZone}>
+                <Text style={styles.dangerTitle}>Danger zone</Text>
+                <Text style={styles.dangerSub}>
+                  Cancelling removes this draw and notifies any ticket holders. This cannot be undone.
+                </Text>
+                {cancelling ? (
+                  <ActivityIndicator color={Colors.danger} style={{ marginTop: Spacing.md }} />
+                ) : (
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() =>
+                      Alert.alert(
+                        'Cancel this draw?',
+                        'This will remove the listing. Ticket holders (if any) will be refunded.',
+                        [
+                          { text: 'Keep listing', style: 'cancel' },
+                          { text: 'Yes, cancel it', style: 'destructive', onPress: cancelDraw },
+                        ],
+                      )
+                    }
+                  >
+                    <Ionicons name="close-circle-outline" size={16} color={Colors.danger} />
+                    <Text style={styles.cancelBtnText}>Cancel this draw</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
           </>
         )}
       </ScrollView>
@@ -153,6 +220,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg, paddingTop: 56 },
   back: { paddingHorizontal: Spacing.lg, marginBottom: 8 },
   content: { padding: Spacing.lg, paddingBottom: 48 },
+  centred: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.xl },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: Spacing.xl },
   label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.8, fontWeight: '700', marginBottom: 6 },
   input: { backgroundColor: Colors.darkCard, borderRadius: Radius.sm, padding: 12, fontSize: FontSizes.sm, color: Colors.white, borderWidth: 1, borderColor: Colors.darkBorder },
@@ -167,4 +235,15 @@ const styles = StyleSheet.create({
   savedText: { fontSize: FontSizes.sm, color: Colors.success, fontWeight: '600' },
   loadingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: Spacing.xl },
   loadingText: { fontSize: FontSizes.base, color: Colors.textSecondary, fontStyle: 'italic' },
+  dangerZone: {
+    marginTop: Spacing.xl * 2, padding: Spacing.md, borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: 'rgba(226,75,74,0.2)', backgroundColor: 'rgba(226,75,74,0.05)',
+  },
+  dangerTitle: { fontSize: FontSizes.sm, color: Colors.danger, fontWeight: '700', marginBottom: 4 },
+  dangerSub: { fontSize: FontSizes.xs, color: Colors.textTertiary, lineHeight: 17, marginBottom: Spacing.md },
+  cancelBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(226,75,74,0.4)', padding: Spacing.md, alignSelf: 'flex-start' },
+  cancelBtnText: { fontSize: FontSizes.sm, color: Colors.danger, fontWeight: '600' },
+  cancelledIcon: { width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  cancelledTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: 8, textAlign: 'center' },
+  cancelledSub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 20 },
 });

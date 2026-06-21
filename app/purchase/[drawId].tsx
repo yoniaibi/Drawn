@@ -13,6 +13,7 @@ import PrimaryButton from '../../src/components/PrimaryButton';
 import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { supabase } from '../../src/lib/supabase';
+import { MAX_TICKETS_PCT } from '../../src/constants';
 import { fetchDrawById } from '../../src/services/draws';
 
 const QUICK_AMOUNTS = [1, 5, 10, 25];
@@ -76,7 +77,7 @@ export default function PurchaseScreen() {
   const d = draw!;
   const total = qty * d.ticketPrice;
   const canAfford = walletBalance >= total;
-  const maxAllowed = Math.floor(d.totalTickets * 0.25);
+  const maxAllowed = Math.floor(d.totalTickets * MAX_TICKETS_PCT);
   const remaining = d.totalTickets - d.ticketsSold;
   const myNewOdds = ((qty / d.totalTickets) * 100).toFixed(2);
   const progress = d.ticketsSold / d.totalTickets;

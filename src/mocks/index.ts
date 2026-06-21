@@ -1,4 +1,4 @@
-export type DrawStatus = 'open' | 'closing_tonight' | 'live' | 'completed' | 'cancelled';
+export type DrawStatus = 'open' | 'closing_tonight' | 'live' | 'completed' | 'cancelled' | 'pending';
 export type ConditionType = 'new' | 'like_new' | 'good' | 'fair';
 
 export interface Draw {
@@ -16,6 +16,7 @@ export interface Draw {
   condition: ConditionType;
   description: string;
   isBundle: boolean;
+  category?: string;
   bundleItems?: BundleItem[];
   closesAt: string;
   myTickets: number;
