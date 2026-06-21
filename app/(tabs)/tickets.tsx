@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   summaryItem: { flex: 1, alignItems: 'center' },
   summaryVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
-  summaryLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2 },
+  summaryLabel: { fontSize: 10, color: Colors.textSecondary, marginTop: 2 },
   summaryDivider: { width: 1, backgroundColor: Colors.darkBorder },
 
   callout: {

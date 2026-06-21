@@ -381,6 +381,9 @@ export default function LiveScreen() {
               <Text style={styles.noDrawsEmoji}>🌙</Text>
               <Text style={styles.noDrawsTitle}>No draws tonight</Text>
               <Text style={styles.noDrawsSub}>New draws go live every evening. Check back soon — something good is always on the way.</Text>
+              <TouchableOpacity style={styles.noDrawsBtn} onPress={() => router.replace('/(tabs)')}>
+                <Text style={styles.noDrawsBtnText}>Browse all draws →</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -560,6 +563,8 @@ const styles = StyleSheet.create({
   noDrawsEmoji: { fontSize: 40, marginBottom: 4 },
   noDrawsTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
   noDrawsSub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+  noDrawsBtn: { marginTop: 8, backgroundColor: Colors.lilac, borderRadius: Radius.pill, paddingHorizontal: 24, paddingVertical: 10 },
+  noDrawsBtnText: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
 
   legalNote: { padding: Spacing.lg, alignItems: 'center' },
   legalText: { fontSize: 9, color: Colors.textTertiary, textAlign: 'center', lineHeight: 14 },

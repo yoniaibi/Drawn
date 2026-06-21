@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   back: { paddingHorizontal: Spacing.lg, marginBottom: 8 },
   content: { padding: Spacing.lg, paddingBottom: 48 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, marginBottom: Spacing.xl },
-  label: { fontSize: 9, color: Colors.textSecondary, letterSpacing: 0.8, fontWeight: '700', marginBottom: 6 },
+  label: { fontSize: 10, color: Colors.textSecondary, letterSpacing: 0.8, fontWeight: '700', marginBottom: 6 },
   inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.darkCard, borderRadius: Radius.sm, borderWidth: 1, borderColor: Colors.darkBorder },
   atSign: { paddingHorizontal: 12, fontSize: FontSizes.sm, color: Colors.textTertiary },
   input: { flex: 1, paddingVertical: 12, paddingRight: 12, fontSize: FontSizes.sm, color: Colors.white },

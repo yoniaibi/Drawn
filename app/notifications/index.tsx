@@ -120,6 +120,9 @@ export default function NotificationsScreen() {
           </View>
           <Text style={styles.emptyTitle}>Nothing here yet</Text>
           <Text style={styles.emptySub}>Draw alerts and win announcements will appear here.</Text>
+          <TouchableOpacity style={styles.emptyBtn} onPress={() => router.replace('/(tabs)' as any)}>
+            <Text style={styles.emptyBtnText}>Browse draws →</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
@@ -186,7 +189,9 @@ const styles = StyleSheet.create({
   time: { fontSize: 9, color: Colors.textTertiary },
   unreadDot: { width: 7, height: 7, borderRadius: 99, backgroundColor: Colors.lilac },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: Spacing.xxl },
-  emptyIconBox: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,255,255,0.04)', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  emptyIconBox: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(139,92,246,0.1)', borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   emptyTitle: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
   emptySub: { fontSize: FontSizes.sm, color: Colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+  emptyBtn: { marginTop: 8, backgroundColor: Colors.lilac, borderRadius: Radius.pill, paddingHorizontal: 28, paddingVertical: 12 },
+  emptyBtnText: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700' },
 });

@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.darkBg },
   content: { padding: Spacing.lg, paddingBottom: 48 },
 
-  dots: { flexDirection: 'row', gap: 6, marginBottom: Spacing.xl, marginTop: 8 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  dots: { flexDirection: 'row', gap: 8, marginBottom: Spacing.xl, marginTop: 8 },
+  dot: { width: 12, height: 12, borderRadius: 6 },
   dotActive: { backgroundColor: Colors.lilac },
   dotInactive: { backgroundColor: Colors.darkBorder },
 
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   sub: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20, marginBottom: Spacing.xl },
 
   sectionLabel: {
-    fontSize: 9,
+    fontSize: 11,
     color: Colors.textTertiary,
     letterSpacing: 1,
     fontWeight: '700',
