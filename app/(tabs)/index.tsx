@@ -214,17 +214,26 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={styles.heroCard}
             onPress={() => router.push(`/draw/${featuredDraw.id}` as any)}
-            activeOpacity={0.92}
+            activeOpacity={0.9}
           >
+            {featuredDraw.image ? (
+              <Image
+                source={{ uri: featuredDraw.image }}
+                style={StyleSheet.absoluteFillObject as any}
+                resizeMode="cover"
+              />
+            ) : null}
+            <View style={styles.heroGradientOverlay} />
+
             <View style={styles.heroTop}>
               <View style={styles.heroLiveBadge}>
                 <View style={styles.heroLiveDot} />
                 <Text style={styles.heroLiveText}>CLOSING TONIGHT · 9PM</Text>
               </View>
               <View style={styles.heroViewers}>
-                <Ionicons name="eye-outline" size={10} color={Colors.textSecondary} />
+                <Ionicons name="eye-outline" size={10} color="rgba(210,195,240,0.8)" />
                 <Text style={styles.heroViewersText}>
-                  {featuredDraw ? (Math.round(featuredDraw.ticketsSold * 0.012 + 4)).toLocaleString() : '—'} watching
+                  {Math.round(featuredDraw.ticketsSold * 0.012 + 4).toLocaleString()} watching
                 </Text>
               </View>
             </View>
@@ -234,9 +243,11 @@ export default function HomeScreen() {
                 <Text style={styles.heroTitle}>{featuredDraw.title}</Text>
                 <Text style={styles.heroSeller}>{featuredDraw.seller}</Text>
                 <View style={styles.heroValueRow}>
-                  <Text style={styles.heroTicketPrice}>from {featuredDraw.ticketPrice}p</Text>
+                  <View style={styles.heroTicketPill}>
+                    <Text style={styles.heroTicketPrice}>from {featuredDraw.ticketPrice}p</Text>
+                  </View>
                   <Text style={styles.heroArrow}>→</Text>
-                  <Text style={styles.heroValue}>£{featuredDraw.retailValue.toLocaleString()} prize</Text>
+                  <Text style={styles.heroValue}>£{featuredDraw.retailValue.toLocaleString()}</Text>
                 </View>
               </View>
             </View>
@@ -253,9 +264,12 @@ export default function HomeScreen() {
               <View style={styles.heroFooterRow}>
                 <Text style={styles.heroSoldText}>
                   {Math.round(featuredDraw.ticketsSold / featuredDraw.totalTickets * 100)}% sold
-                  {' · '}{(featuredDraw.totalTickets - featuredDraw.ticketsSold).toLocaleString()} left
+                  {' · '}{(featuredDraw.totalTickets - featuredDraw.ticketsSold).toLocaleString()} tickets left
                 </Text>
-                <Text style={styles.heroEnterBtn}>Enter draw →</Text>
+                <View style={styles.heroEnterPill}>
+                  <Text style={styles.heroEnterBtn}>Enter draw</Text>
+                  <Ionicons name="arrow-forward" size={10} color={Colors.ink} />
+                </View>
               </View>
             </View>
           </TouchableOpacity>
@@ -406,76 +420,103 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   nav: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
-    backgroundColor: Colors.darkDeep, borderBottomWidth: 1, borderBottomColor: Colors.darkCard,
+    paddingHorizontal: Spacing.lg, paddingVertical: 12,
+    backgroundColor: '#100c20',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(139,92,246,0.15)',
   },
-  navRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  navRight: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   streakBadge: {
-    backgroundColor: 'rgba(249,200,70,0.12)', borderRadius: Radius.pill,
-    paddingHorizontal: 8, paddingVertical: 3,
-    borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)',
+    backgroundColor: 'rgba(249,200,70,0.1)', borderRadius: Radius.pill,
+    paddingHorizontal: 9, paddingVertical: 4,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.3)',
   },
   streakText: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '800' },
 
   ticker: {
-    flexDirection: 'row', alignItems: 'center', gap: 7,
-    backgroundColor: '#120D2A', paddingHorizontal: Spacing.lg, paddingVertical: 7,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(139,92,246,0.15)',
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(16,12,32,0.95)', paddingHorizontal: Spacing.lg, paddingVertical: 8,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(139,92,246,0.12)',
   },
   tickerDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
-  tickerText: { fontSize: FontSizes.xs, color: Colors.textSecondary, flex: 1 },
+  tickerText: { fontSize: FontSizes.xs, color: 'rgba(210,195,240,0.7)', flex: 1, letterSpacing: 0.1 },
 
   // Hero
   heroCard: {
     margin: Spacing.md, marginBottom: Spacing.sm,
-    backgroundColor: '#1A0D42', borderRadius: Radius.lg,
-    borderWidth: 1, borderColor: 'rgba(249,200,70,0.25)',
-    overflow: 'hidden',
+    backgroundColor: '#1A0D42', borderRadius: Radius.xl,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.3)',
+    overflow: 'hidden', minHeight: 160,
+    shadowColor: '#F472B6',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+    elevation: 10,
+  },
+  heroGradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15,10,40,0.72)',
   },
   heroTop: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: Spacing.md, paddingTop: Spacing.md, paddingBottom: 6,
   },
-  heroLiveBadge: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  heroLiveBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: 'rgba(244,114,182,0.18)', borderRadius: Radius.pill,
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderWidth: 1, borderColor: 'rgba(244,114,182,0.35)',
+  },
   heroLiveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.pink },
-  heroLiveText: { fontSize: 9, fontWeight: '800', color: Colors.pink, letterSpacing: 0.8 },
+  heroLiveText: { fontSize: 9, fontWeight: '800', color: Colors.pink, letterSpacing: 1 },
   heroViewers: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  heroViewersText: { fontSize: 9, color: Colors.textSecondary },
+  heroViewersText: { fontSize: 9, color: 'rgba(210,195,240,0.7)' },
   heroBody: {
     flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.md, paddingBottom: Spacing.md, gap: 14,
+    paddingHorizontal: Spacing.md, paddingBottom: Spacing.md, paddingTop: 6, gap: 14,
   },
-  heroInfo: { flex: 1, gap: 3 },
-  heroTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.lg, color: Colors.white, lineHeight: 24 },
-  heroSeller: { fontSize: FontSizes.xs, color: Colors.textSecondary },
-  heroValueRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
-  heroTicketPrice: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '600' },
-  heroArrow: { fontSize: FontSizes.xs, color: Colors.textTertiary },
-  heroValue: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '800' },
+  heroInfo: { flex: 1, gap: 5 },
+  heroTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, lineHeight: 30 },
+  heroSeller: { fontSize: FontSizes.xs, color: 'rgba(210,195,240,0.7)' },
+  heroValueRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
+  heroTicketPill: {
+    backgroundColor: 'rgba(139,92,246,0.3)', borderRadius: Radius.pill,
+    paddingHorizontal: 8, paddingVertical: 3,
+    borderWidth: 1, borderColor: 'rgba(139,92,246,0.4)',
+  },
+  heroTicketPrice: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '700' },
+  heroArrow: { fontSize: FontSizes.xs, color: 'rgba(210,195,240,0.4)' },
+  heroValue: { fontSize: FontSizes.md, color: Colors.gold, fontWeight: '800' },
   heroFooter: {
-    borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, gap: 6,
+    borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, gap: 8,
   },
-  heroProgressWrap: { height: 4, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' },
-  heroProgressBar: { height: 4, backgroundColor: Colors.pink, borderRadius: 2 },
+  heroProgressWrap: { height: 5, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' },
+  heroProgressBar: { height: 5, backgroundColor: Colors.pink, borderRadius: 3 },
   heroFooterRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  heroSoldText: { fontSize: 9, color: Colors.textSecondary },
-  heroEnterBtn: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '700' },
+  heroSoldText: { fontSize: 9.5, color: 'rgba(210,195,240,0.65)' },
+  heroEnterPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: Colors.gold, borderRadius: Radius.pill,
+    paddingHorizontal: 10, paddingVertical: 5,
+  },
+  heroEnterBtn: { fontSize: FontSizes.xs, color: Colors.ink, fontWeight: '800' },
 
   // Winner
   winnerBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: Colors.darkCard, marginHorizontal: Spacing.md, marginBottom: Spacing.sm,
-    borderRadius: Radius.md, padding: Spacing.md,
-    borderWidth: 1, borderColor: 'rgba(249,200,70,0.18)',
+    backgroundColor: 'rgba(249,200,70,0.06)',
+    marginHorizontal: Spacing.md, marginBottom: Spacing.sm,
+    borderRadius: Radius.lg, padding: Spacing.md,
+    borderWidth: 1, borderColor: 'rgba(249,200,70,0.22)',
+    borderLeftWidth: 3, borderLeftColor: Colors.gold,
   },
   winnerLeft: { flex: 1 },
-  winnerKicker: { fontSize: 9, fontWeight: '700', color: Colors.gold, letterSpacing: 0.5, marginBottom: 3 },
-  winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.md, color: Colors.white, lineHeight: 18 },
-  winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
-  winnerRight: { alignItems: 'flex-end', paddingLeft: 10, gap: 2 },
-  winnerImg: { width: 44, height: 44, borderRadius: 8 },
-  winnerPrice: { fontSize: 9, color: Colors.textSecondary },
+  winnerKicker: { fontSize: 8.5, fontWeight: '800', color: Colors.gold, letterSpacing: 1.2, marginBottom: 4 },
+  winnerHandle: { fontFamily: Fonts.serif, fontSize: FontSizes.md, color: Colors.white, lineHeight: 20 },
+  winnerItem: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 3 },
+  winnerRight: { alignItems: 'flex-end', paddingLeft: 12, gap: 3 },
+  winnerImg: { width: 50, height: 50, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(249,200,70,0.3)' },
+  winnerPrice: { fontSize: 9, color: Colors.textTertiary },
   winnerValue: { fontSize: FontSizes.sm, color: Colors.gold, fontWeight: '800' },
 
   // Tonight strip
@@ -508,18 +549,21 @@ const styles = StyleSheet.create({
   // Filters
   liveRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   liveText: { fontSize: 9, fontWeight: '700', color: Colors.white, letterSpacing: 0.6 },
-  filterRow: { paddingHorizontal: Spacing.md, gap: 8, paddingBottom: 4, paddingTop: 4 },
+  filterRow: { paddingHorizontal: Spacing.md, gap: 7, paddingBottom: 6, paddingTop: 6 },
   chip: {
-    borderRadius: Radius.pill, paddingHorizontal: 14, paddingVertical: 6,
-    backgroundColor: Colors.darkCard, borderWidth: 1, borderColor: Colors.darkBorder,
+    borderRadius: Radius.pill, paddingHorizontal: 15, paddingVertical: 7,
+    backgroundColor: 'rgba(30,21,53,0.9)', borderWidth: 1, borderColor: Colors.darkBorder,
   },
-  chipOn: { backgroundColor: Colors.lilac, borderColor: Colors.lilac },
+  chipOn: {
+    backgroundColor: 'rgba(139,92,246,0.22)', borderColor: Colors.lilac,
+  },
   chipText: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '600' },
-  chipTextOn: { color: Colors.white },
+  chipTextOn: { color: Colors.lilac, fontWeight: '700' },
 
   sectionTitle: {
-    fontSize: FontSizes.xs, color: Colors.white, fontWeight: '600',
-    paddingHorizontal: Spacing.md, paddingTop: Spacing.sm, paddingBottom: 6,
+    fontFamily: Fonts.serif,
+    fontSize: FontSizes.base, color: Colors.white,
+    paddingHorizontal: Spacing.md, paddingTop: Spacing.sm, paddingBottom: 8,
   },
 
   // Grid
