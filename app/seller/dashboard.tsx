@@ -8,6 +8,7 @@ import ProgressBar from '../../src/components/ProgressBar';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { useAuthStore } from '../../src/store';
 import { fetchSellerDraws, fetchSellerStats, SellerStats } from '../../src/services/draws';
+import { SELLER_FEE_MULTIPLIER } from '../../src/constants';
 import type { Draw } from '../../src/mocks';
 
 const STATUS_COLOR: Record<string, string> = {
@@ -111,11 +112,11 @@ export default function SellerDashboardScreen() {
         ) : (
           draws.map(draw => {
             const progress = draw.ticketsSold / draw.totalTickets;
-            const earned = Math.round(draw.ticketsSold * draw.ticketPrice * 0.846);
+            const earned = Math.round(draw.ticketsSold * draw.ticketPrice * SELLER_FEE_MULTIPLIER);
             const statusColor = STATUS_COLOR[draw.status] ?? Colors.textSecondary;
             return (
               <View key={draw.id} style={styles.drawCard}>
-                <TouchableOpacity onPress={() => router.push(`/draw/${draw.id}` as any)}>
+                <TouchableOpacity onPress={() => router.push((draw.status === 'completed' ? `/seller/draw-complete/${draw.id}` : `/draw/${draw.id}`) as any)}>
                   <View style={styles.drawTop}>
                     <View style={styles.drawIconBox}>
                       <Ionicons name="ticket-outline" size={18} color={Colors.lilac} />

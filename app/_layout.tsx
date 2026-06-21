@@ -93,6 +93,7 @@ export default function RootLayout() {
         <Stack.Screen name="seller/kyc-approved" options={{ headerShown: false }} />
         <Stack.Screen name="seller/dashboard" options={{ headerShown: false }} />
         <Stack.Screen name="seller/payout" options={{ headerShown: false }} />
+        <Stack.Screen name="seller/draw-complete/[drawId]" options={{ headerShown: false }} />
         <Stack.Screen name="seller/item/[drawId]" options={{ headerShown: false }} />
         <Stack.Screen name="account/settings" options={{ headerShown: false }} />
         <Stack.Screen name="account/orders" options={{ headerShown: false }} />
