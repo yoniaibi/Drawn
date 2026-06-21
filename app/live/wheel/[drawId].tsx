@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -162,14 +162,18 @@ export default function LiveWheelScreen() {
 
       {/* Prize row */}
       <View style={styles.prizeRow}>
-        <View style={styles.prizeIcon}><Text style={styles.prizeEmoji}>{draw.emoji}</Text></View>
+        <View style={styles.prizeIcon}>
+          {draw.image
+            ? <Image source={{ uri: draw.image }} style={styles.prizeImg} />
+            : <Ionicons name="gift-outline" size={28} color={Colors.lilac} />}
+        </View>
         <View style={styles.prizeInfo}>
           <Text style={styles.prizeTitle}>{draw.title}</Text>
           <Text style={styles.prizeSub}>£{draw.retailValue.toLocaleString()} prize · {draw.ticketPrice}p per ticket</Text>
         </View>
         {draw.myTickets > 0 && (
           <View style={styles.youBadge}>
-            <Text style={styles.youText}>🤞 You: {draw.myTickets}</Text>
+            <Text style={styles.youText}>You: {draw.myTickets}</Text>
           </View>
         )}
       </View>
@@ -251,7 +255,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.royal, borderRadius: Radius.md, padding: Spacing.md, marginBottom: 10,
   },
   prizeIcon: { width: 44, height: 44, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  prizeEmoji: { fontSize: 22 },
+  prizeImg: { width: 44, height: 44, borderRadius: 10 },
   prizeInfo: { flex: 1 },
   prizeTitle: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700' },
   prizeSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },

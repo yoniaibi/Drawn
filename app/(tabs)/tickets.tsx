@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
@@ -132,7 +132,9 @@ export default function TicketsScreen() {
               {/* Top */}
               <View style={styles.cardTop}>
                 <View style={styles.emojiBox}>
-                  <Text style={styles.emoji}>{item.emoji}</Text>
+                  {item.image
+                    ? <Image source={{ uri: item.image }} style={styles.thumbImg} />
+                    : <View style={styles.thumbPlaceholder}><Ionicons name="ticket-outline" size={22} color={Colors.lilac} /></View>}
                   {isTonight && <View style={styles.tonightDot} />}
                 </View>
                 <View style={styles.info}>
@@ -153,7 +155,7 @@ export default function TicketsScreen() {
                     <Text style={styles.progressLabel}>{Math.round(progress * 100)}%</Text>
                   </View>
                   {remaining < 500 && (
-                    <Text style={styles.scarcity}>⚠️ Only {remaining} tickets left!</Text>
+                    <Text style={styles.scarcity}>Only {remaining} tickets left</Text>
                   )}
                 </View>
               </View>
@@ -162,7 +164,7 @@ export default function TicketsScreen() {
               <View style={[styles.statusTag, { backgroundColor: isTonight ? 'rgba(244,114,182,0.12)' : 'rgba(139,92,246,0.12)' }]}>
                 <View style={[styles.statusDot, { backgroundColor: isTonight ? Colors.pink : Colors.lilac }]} />
                 <Text style={[styles.statusText, { color: isTonight ? Colors.pink : Colors.lilac }]}>
-                  {isTonight ? '🔴 Draws tonight at 9pm' : 'Draws tomorrow at 9pm'}
+                  {isTonight ? 'Draws tonight at 9pm' : 'Draws tomorrow at 9pm'}
                 </Text>
               </View>
 
@@ -242,7 +244,8 @@ const styles = StyleSheet.create({
   card: { backgroundColor: Colors.darkCard, borderRadius: Radius.lg, padding: Spacing.md, overflow: 'hidden' },
   cardTop: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: Spacing.sm },
   emojiBox: { position: 'relative' },
-  emoji: { fontSize: 36, marginTop: 4 },
+  thumbImg: { width: 52, height: 52, borderRadius: 10 },
+  thumbPlaceholder: { width: 52, height: 52, borderRadius: 10, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center' },
   tonightDot: { position: 'absolute', top: 0, right: -2, width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.pink, borderWidth: 1.5, borderColor: Colors.darkCard },
   info: { flex: 1, gap: 3 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Animated as RNAnimated, TextInput, KeyboardAvoidingView,
-  Platform, Keyboard,
+  Platform, Keyboard, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -223,9 +223,9 @@ export default function LiveScreen() {
   // Hype ticker
   useEffect(() => {
     const id = setInterval(() => {
-      RNAnimated.timing(hypeOpacity, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => {
+      RNAnimated.timing(hypeOpacity, { toValue: 0, duration: 250, useNativeDriver: false }).start(() => {
         setHypeIdx(i => (i + 1) % HYPE_MESSAGES.length);
-        RNAnimated.timing(hypeOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+        RNAnimated.timing(hypeOpacity, { toValue: 1, duration: 250, useNativeDriver: false }).start();
       });
     }, 3200);
     return () => clearInterval(id);
@@ -402,7 +402,13 @@ export default function LiveScreen() {
                 <View style={styles.drawNumBox}>
                   <Text style={styles.drawNum}>{i + 1}</Text>
                 </View>
-                <Text style={styles.drawEmoji}>{draw.emoji}</Text>
+                {draw.image ? (
+                  <Image source={{ uri: draw.image }} style={styles.drawThumb} />
+                ) : (
+                  <View style={styles.drawThumbPlaceholder}>
+                    <Ionicons name="gift-outline" size={16} color={Colors.lilac} />
+                  </View>
+                )}
                 <View style={styles.drawInfo}>
                   <Text style={styles.drawTitle}>{draw.title}</Text>
                   <Text style={styles.drawSub}>{draw.seller} · {draw.ticketsSold.toLocaleString()} tickets</Text>
@@ -545,7 +551,8 @@ const styles = StyleSheet.create({
   },
   drawNumBox: { width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.darkCard, alignItems: 'center', justifyContent: 'center' },
   drawNum: { fontSize: FontSizes.xs, color: Colors.textTertiary, fontWeight: '700' },
-  drawEmoji: { fontSize: 26 },
+  drawThumb: { width: 40, height: 40, borderRadius: 8 },
+  drawThumbPlaceholder: { width: 40, height: 40, borderRadius: 8, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center' },
   drawInfo: { flex: 1 },
   drawTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '600' },
   drawSub: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 1 },

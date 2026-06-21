@@ -19,17 +19,17 @@ function ConfettiPiece({ delay }: { delay: number }) {
       Animated.parallel([
         Animated.sequence([
           Animated.delay(delay),
-          Animated.timing(y, { toValue: height, duration, useNativeDriver: true }),
-          Animated.timing(y, { toValue: -20, duration: 0, useNativeDriver: true }),
+          Animated.timing(y, { toValue: height, duration, useNativeDriver: false }),
+          Animated.timing(y, { toValue: -20, duration: 0, useNativeDriver: false }),
         ]),
         Animated.sequence([
           Animated.delay(delay),
-          Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
-          Animated.timing(opacity, { toValue: 0, duration: 400, delay: duration - 600, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: false }),
+          Animated.timing(opacity, { toValue: 0, duration: 400, delay: duration - 600, useNativeDriver: false }),
         ]),
         Animated.sequence([
           Animated.delay(delay),
-          Animated.timing(rotate, { toValue: 1, duration, useNativeDriver: true }),
+          Animated.timing(rotate, { toValue: 1, duration, useNativeDriver: false }),
         ]),
       ])
     );

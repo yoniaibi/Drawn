@@ -39,14 +39,14 @@ export default function WalletScreen() {
     // Show confirmation chip
     if (chipTimer.current) clearTimeout(chipTimer.current);
     setLastAdded(amt);
-    RNAnimated.timing(chipOpacity, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+    RNAnimated.timing(chipOpacity, { toValue: 1, duration: 200, useNativeDriver: false }).start();
 
     // Reset button flash after 1s
     setTimeout(() => setFlashedAmt(null), 1000);
 
     // Fade out chip after 2s
     chipTimer.current = setTimeout(() => {
-      RNAnimated.timing(chipOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
+      RNAnimated.timing(chipOpacity, { toValue: 0, duration: 400, useNativeDriver: false }).start(() => {
         setLastAdded(null);
       });
     }, 2000);

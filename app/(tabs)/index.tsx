@@ -124,9 +124,9 @@ export default function HomeScreen() {
   // Rotate live ticker
   useEffect(() => {
     const interval = setInterval(() => {
-      RNAnimated.timing(tickerOpacity, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => {
+      RNAnimated.timing(tickerOpacity, { toValue: 0, duration: 400, useNativeDriver: false }).start(() => {
         setTickerIdx(i => (i + 1) % LIVE_TICKERS.length);
-        RNAnimated.timing(tickerOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+        RNAnimated.timing(tickerOpacity, { toValue: 1, duration: 400, useNativeDriver: false }).start();
       });
     }, 8000);
     return () => clearInterval(interval);
@@ -137,8 +137,8 @@ export default function HomeScreen() {
     const pool = recentWinners.length > 0 ? recentWinners : [{}];
     const interval = setInterval(() => {
       RNAnimated.sequence([
-        RNAnimated.timing(winnerSlide, { toValue: -20, duration: 300, useNativeDriver: true }),
-        RNAnimated.timing(winnerSlide, { toValue: 0, duration: 0, useNativeDriver: true }),
+        RNAnimated.timing(winnerSlide, { toValue: -20, duration: 300, useNativeDriver: false }),
+        RNAnimated.timing(winnerSlide, { toValue: 0, duration: 0, useNativeDriver: false }),
       ]).start(() => setWinnerIdx(i => (i + 1) % pool.length));
     }, 9000);
     return () => clearInterval(interval);

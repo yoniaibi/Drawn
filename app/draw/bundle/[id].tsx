@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, ActivityIndicator, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/theme';
@@ -64,9 +64,9 @@ export default function BundleDrawScreen() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      RNAnimated.timing(buyerOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+      RNAnimated.timing(buyerOpacity, { toValue: 0, duration: 300, useNativeDriver: false }).start(() => {
         setBuyerIdx(i => (i + 1) % BUYER_TICKERS.length);
-        RNAnimated.timing(buyerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+        RNAnimated.timing(buyerOpacity, { toValue: 1, duration: 300, useNativeDriver: false }).start();
       });
     }, 3000);
     return () => clearInterval(timer);
@@ -89,7 +89,9 @@ export default function BundleDrawScreen() {
           <Text style={styles.bundleBadgeText}>BUNDLE</Text>
         </View>
 
-        <Text style={styles.heroEmoji}>{draw.emoji}</Text>
+        {draw.image
+          ? <Image source={{ uri: draw.image }} style={styles.heroImage} resizeMode="cover" />
+          : <View style={styles.heroIconBox}><Ionicons name="bag-outline" size={72} color="rgba(255,255,255,0.6)" /></View>}
 
         <View style={styles.heroValueBox}>
           <Text style={styles.heroValueLabel}>{formatTicketPrice(draw.ticketPrice)}</Text>
@@ -140,7 +142,9 @@ export default function BundleDrawScreen() {
 
           {draw.bundleItems.map((item, i) => (
             <View key={i} style={[styles.bundleRow, i === draw.bundleItems!.length - 1 && { borderBottomWidth: 0 }]}>
-              <Text style={styles.bundleEmoji}>{item.emoji}</Text>
+              {item.image
+                ? <Image source={{ uri: item.image }} style={styles.bundleItemImg} />
+                : <View style={styles.bundleItemIcon}><Ionicons name="gift-outline" size={16} color={Colors.lilac} /></View>}
               <Text style={styles.bundleName}>{item.name}</Text>
               <View style={styles.bundleValBadge}>
                 <Text style={styles.bundleVal}>£{item.retailValue.toLocaleString()}</Text>
@@ -256,7 +260,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 5,
   },
   bundleBadgeText: { fontSize: 8, fontWeight: '700', color: Colors.white },
-  heroEmoji: { fontSize: 90 },
+  heroImage: { width: '100%', height: 200, marginBottom: 12 },
+  heroIconBox: { width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   heroValueBox: {
     position: 'absolute', bottom: 12, left: 12,
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -309,7 +314,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.darkBorder,
   },
-  bundleEmoji: { fontSize: 22 },
+  bundleItemImg: { width: 30, height: 30, borderRadius: 6 },
+  bundleItemIcon: { width: 30, height: 30, borderRadius: 6, backgroundColor: 'rgba(139,92,246,0.12)', alignItems: 'center', justifyContent: 'center' },
   bundleName: { flex: 1, fontSize: FontSizes.sm, color: Colors.textSecondary },
   bundleValBadge: { backgroundColor: 'rgba(249,200,70,0.1)', borderRadius: Radius.sm, paddingHorizontal: 8, paddingVertical: 3 },
   bundleVal: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '700' },

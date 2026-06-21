@@ -8,9 +8,9 @@ export function useRotatingAnimation<T>(items: T[], intervalMs = 3000) {
   useEffect(() => {
     if (items.length <= 1) return;
     const id = setInterval(() => {
-      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: false }).start(() => {
         setIndex(i => (i + 1) % items.length);
-        Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+        Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: false }).start();
       });
     }, intervalMs);
     return () => clearInterval(id);

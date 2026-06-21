@@ -34,7 +34,7 @@ export default function SearchScreen() {
   useEffect(() => {
     setLoading(true);
     fetchDraws().then(d => { setAllDraws(d); setLoading(false); });
-    Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+    Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: false }).start();
   }, []);
 
   function handleSearch(term: string) {

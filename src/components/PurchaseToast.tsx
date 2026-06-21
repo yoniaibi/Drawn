@@ -3,16 +3,16 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Colors, FontSizes, Radius, Spacing } from '../theme';
 
 const ACTIVITIES = [
-  { handle: '@chloe_j', action: 'bought 10 tickets', item: 'Chanel Flap 👜' },
-  { handle: '@dan.west', action: 'grabbed 5 tickets', item: 'Rolex Submariner ⌚' },
-  { handle: '@priya__', action: 'added 15 tickets', item: 'Designer Closet 👗' },
-  { handle: '@marcus_t', action: 'just joined', item: 'Rolex Submariner ⌚' },
-  { handle: '@sophie_r', action: 'bought 8 tickets', item: 'MacBook Pro 💻' },
-  { handle: '@ryan.k', action: 'grabbed 20 tickets', item: 'Chanel Flap 👜' },
-  { handle: '@jade_m', action: 'added 3 tickets', item: 'Jordan 1 OG 👟' },
-  { handle: '@tom_w', action: 'bought 12 tickets', item: 'Designer Closet 👗' },
-  { handle: '@ellie.b', action: 'just entered', item: 'MacBook Pro 💻' },
-  { handle: '@kian_j', action: 'grabbed 6 tickets', item: 'Rolex Submariner ⌚' },
+  { handle: '@chloe_j', action: 'bought 10 tickets', item: 'Chanel Classic Flap' },
+  { handle: '@dan.west', action: 'grabbed 5 tickets', item: 'Rolex Submariner' },
+  { handle: '@priya__', action: 'added 15 tickets', item: 'Designer Closet Bundle' },
+  { handle: '@marcus_t', action: 'just joined', item: 'Rolex Submariner' },
+  { handle: '@sophie_r', action: 'bought 8 tickets', item: 'MacBook Pro' },
+  { handle: '@ryan.k', action: 'grabbed 20 tickets', item: 'Chanel Classic Flap' },
+  { handle: '@jade_m', action: 'added 3 tickets', item: 'Jordan 1 OG' },
+  { handle: '@tom_w', action: 'bought 12 tickets', item: 'Designer Closet Bundle' },
+  { handle: '@ellie.b', action: 'just entered', item: 'MacBook Pro' },
+  { handle: '@kian_j', action: 'grabbed 6 tickets', item: 'Rolex Submariner' },
 ];
 
 export default function PurchaseToast() {
@@ -28,14 +28,14 @@ export default function PurchaseToast() {
     setVisible(true);
 
     Animated.parallel([
-      Animated.spring(slideY, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+      Animated.spring(slideY, { toValue: 0, tension: 80, friction: 10, useNativeDriver: false }),
+      Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: false }),
     ]).start();
 
     setTimeout(() => {
       Animated.parallel([
-        Animated.timing(slideY, { toValue: -70, duration: 300, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(slideY, { toValue: -70, duration: 300, useNativeDriver: false }),
+        Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: false }),
       ]).start(() => setVisible(false));
     }, 3800);
   }, []);

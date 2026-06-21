@@ -32,7 +32,7 @@ function mapToWinner(db: any): WinnerData {
   const earned = Math.round((db.tickets_sold ?? 0) * (db.ticket_price ?? 0) * 0.846);
   return {
     winnerHandle: db.winner_handle ?? '@winner',
-    image: db.image ?? '',
+    image: db.image_url ?? db.image ?? '',
     item: db.title ?? 'Prize',
     retailValue: Math.round((db.retail_value ?? 0) / 100), // pence → display-pounds
     ticketPrice: db.ticket_price ?? 10,
