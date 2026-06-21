@@ -5,12 +5,19 @@
 
 -- PROFILES (extends auth.users)
 create table public.profiles (
-  id              uuid references auth.users on delete cascade primary key,
-  handle          text not null,
-  avatar_letter   text not null default 'D',
-  is_seller       boolean not null default false,
-  wallet_balance  integer not null default 0, -- pence
-  created_at      timestamptz not null default now()
+  id                   uuid references auth.users on delete cascade primary key,
+  handle               text not null unique,
+  avatar_letter        text not null default 'D',
+  full_name            text check (char_length(full_name) <= 100),
+  is_seller            boolean not null default false,
+  seller_verified      boolean not null default false,
+  kyc_submitted        boolean not null default false,
+  wallet_balance       integer not null default 0, -- pence
+  interests            text[] default '{}',
+  preferred_sizes      text[] default '{}',
+  price_range          text default 'any',
+  notify_before_close  boolean not null default true,
+  created_at           timestamptz not null default now()
 );
 alter table public.profiles enable row level security;
 create policy "Users can read own profile"  on public.profiles for select using (auth.uid() = id);
@@ -20,11 +27,12 @@ create policy "Users can update own profile" on public.profiles for update using
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, handle, avatar_letter)
+  insert into public.profiles (id, handle, avatar_letter, full_name)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'handle', '@user'),
-    coalesce(new.raw_user_meta_data->>'avatar_letter', 'U')
+    coalesce(new.raw_user_meta_data->>'avatar_letter', 'U'),
+    new.raw_user_meta_data->>'full_name'
   );
   return new;
 end;
@@ -38,6 +46,8 @@ create table public.draws (
   id               uuid primary key default gen_random_uuid(),
   title            text not null,
   emoji            text not null default '🎁',
+  image_url        text,
+  category         text,
   seller_id        uuid references public.profiles on delete cascade not null,
   seller_handle    text not null,
   seller_avatar    text not null default 'S',
@@ -46,7 +56,7 @@ create table public.draws (
   total_tickets    integer not null,
   tickets_sold     integer not null default 0,
   status           text not null default 'open'
-                   check (status in ('open','closing_tonight','live','completed','cancelled')),
+                   check (status in ('open','pending','closing_tonight','live','completed','cancelled')),
   retail_value     integer not null, -- pence
   min_threshold    numeric not null default 0.5,
   description      text not null default '',
@@ -54,6 +64,9 @@ create table public.draws (
                    check (condition in ('new','like_new','good','fair')),
   is_bundle        boolean not null default false,
   draw_date        timestamptz,
+  winner_user_id   uuid references public.profiles on delete set null,
+  winner_handle    text,
+  completed_at     timestamptz,
   created_at       timestamptz not null default now()
 );
 alter table public.draws enable row level security;
@@ -69,7 +82,8 @@ create table public.bundle_items (
   draw_id      uuid references public.draws on delete cascade not null,
   emoji        text not null,
   name         text not null,
-  retail_value integer not null
+  retail_value integer not null,
+  image_url    text
 );
 alter table public.bundle_items enable row level security;
 create policy "Anyone can read bundle items" on public.bundle_items for select using (true);
@@ -91,7 +105,7 @@ create table public.wallet_transactions (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid references public.profiles on delete cascade not null,
   amount      integer not null, -- pence; positive = credit, negative = debit
-  type        text not null check (type in ('topup','purchase','refund','win')),
+  type        text not null check (type in ('topup','purchase','refund','win','payout')),
   description text not null,
   created_at  timestamptz not null default now()
 );

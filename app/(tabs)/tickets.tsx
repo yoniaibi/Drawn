@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { Draw, MOCK_MY_TICKETS } from '../../src/mocks';
+import { Draw } from '../../src/mocks';
 import { fetchMyTickets } from '../../src/services/draws';
 import { useAuthStore } from '../../src/store';
 import { supabase } from '../../src/lib/supabase';
@@ -21,12 +21,12 @@ function getOddsColor(pct: number) {
 export default function TicketsScreen() {
   const router = useRouter();
   const { user, notifyBeforeClose } = useAuthStore();
-  const [myTickets, setMyTickets] = useState<Draw[]>(MOCK_MY_TICKETS);
+  const [myTickets, setMyTickets] = useState<Draw[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.id) {
-      setMyTickets(MOCK_MY_TICKETS);
+      setMyTickets([]);
       setLoading(false);
       return;
     }

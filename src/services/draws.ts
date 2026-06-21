@@ -8,9 +8,6 @@ import {
 import {
   Draw,
   BundleItem,
-  MOCK_DRAWS,
-  MOCK_MY_TICKETS,
-  MOCK_WALLET,
 } from '../mocks';
 import { SELLER_FEE_MULTIPLIER } from '../constants';
 
@@ -86,12 +83,13 @@ export async function fetchDraws(): Promise<Draw[]> {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !draws || draws.length === 0) return MOCK_DRAWS;
+    if (error) return [];
+    if (!draws || draws.length === 0) return [];
 
     const bundleMap = await fetchBundleMap(draws.filter(d => d.is_bundle).map(d => d.id));
     return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
   } catch {
-    return MOCK_DRAWS;
+    return [];
   }
 }
 
