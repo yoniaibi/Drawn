@@ -16,11 +16,21 @@ import TicketLogo from '../../src/components/TicketLogo';
 import DrawCard from '../../src/components/DrawCard';
 import WalletBadge from '../../src/components/WalletBadge';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
+import CategoryRow from '../../src/components/CategoryRow';
 import { useStreak } from '../../src/hooks/useStreak';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { useAuthStore } from '../../src/store';
 
 const FILTERS = ['Tonight', 'Filling fast', 'High value', 'Bundles', 'Just listed', 'Saved'];
+
+const SECTION_LABEL: Record<string, string> = {
+  Tonight: 'Closing tonight',
+  'Filling fast': 'Filling fast',
+  Bundles: 'Bundle draws',
+  'High value': 'High value draws',
+  'Just listed': 'Just listed',
+  Saved: 'Saved draws',
+};
 
 const LIVE_TICKERS = [
   '@jade_m just bought 3 tickets · Chanel Flap',
@@ -304,6 +314,17 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Categories */}
+        <View style={styles.categorySection}>
+          <View style={styles.categorySectionHeader}>
+            <Text style={styles.categorySectionTitle}>Browse by category</Text>
+            <TouchableOpacity onPress={() => router.push('/categories' as any)}>
+              <Text style={styles.categorySeeAll}>See all →</Text>
+            </TouchableOpacity>
+          </View>
+          <CategoryRow />
+        </View>
+
         {/* Filter chips */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
           {FILTERS.map(f => (
@@ -337,14 +358,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         )}
 
-        <Text style={styles.sectionTitle}>
-          {filter === 'Tonight' ? 'Closing tonight' :
-           filter === 'Filling fast' ? 'Filling fast' :
-           filter === 'Bundles' ? 'Bundle draws' :
-           filter === 'High value' ? 'High value draws' :
-           filter === 'Just listed' ? 'Just listed' :
-           filter === 'Saved' ? 'Saved draws' : 'All draws'}
-        </Text>
+        <Text style={styles.sectionTitle}>{SECTION_LABEL[filter] ?? 'All draws'}</Text>
 
         {/* 2-col grid */}
         <View style={styles.grid}>
@@ -545,6 +559,15 @@ const styles = StyleSheet.create({
   forYouKicker: { fontSize: 8, color: Colors.lilac, fontWeight: '800', letterSpacing: 1, marginBottom: 4 },
   forYouTitle: { fontSize: FontSizes.base, color: Colors.white, fontWeight: '700', marginBottom: 2 },
   forYouSub: { fontSize: FontSizes.xs, color: Colors.textSecondary },
+
+  // Categories
+  categorySection: { marginBottom: 4 },
+  categorySectionHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: Spacing.md, paddingTop: Spacing.sm, paddingBottom: 2,
+  },
+  categorySectionTitle: { fontFamily: Fonts.serif, fontSize: FontSizes.base, color: Colors.white },
+  categorySeeAll: { fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '600' },
 
   // Filters
   liveRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },

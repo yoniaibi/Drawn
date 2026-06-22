@@ -4,16 +4,9 @@ import { useRouter } from 'expo-router';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { supabase } from '../../src/lib/supabase';
+import { CATEGORIES as ALL_CATEGORIES } from '../../src/constants/categories';
 
-const CATEGORIES: { label: string; emoji: string }[] = [
-  { label: 'Fashion', emoji: '👗' },
-  { label: 'Sneakers', emoji: '👟' },
-  { label: 'Watches', emoji: '⌚' },
-  { label: 'Bags', emoji: '👜' },
-  { label: 'Jewellery', emoji: '💎' },
-  { label: 'Tech', emoji: '📱' },
-  { label: 'Art', emoji: '🎨' },
-];
+const INTEREST_CATEGORIES = ALL_CATEGORIES.map(c => ({ label: c.label, emoji: c.emoji, slug: c.slug }));
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 
@@ -80,6 +73,8 @@ export default function InterestsScreen() {
     ['Fashion', 'Sneakers', 'Bags', 'Jewellery'].includes(c)
   );
 
+  const FASHION_SIZE_CATS = ['Fashion', 'Sneakers', 'Bags', 'Jewellery'];
+
   const toggleMulti = (arr: string[], set: (v: string[]) => void, val: string) =>
     set(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
 
@@ -94,7 +89,7 @@ export default function InterestsScreen() {
 
       <Text style={styles.sectionLabel}>CATEGORIES</Text>
       <View style={styles.chips}>
-        {CATEGORIES.map((c) => (
+        {INTEREST_CATEGORIES.map((c) => (
           <Chip
             key={c.label}
             label={c.label}

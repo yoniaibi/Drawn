@@ -42,6 +42,7 @@ export function mapDraw(db: DBDraw, myTickets = 0, bundleItems?: DBBundleItem[])
     condition: db.condition,
     description: db.description,
     isBundle: db.is_bundle,
+    category: (db as any).category ?? undefined,
     bundleItems: bundleItems?.map(
       (b): BundleItem => ({ image: b.image_url ?? undefined, name: b.name, retailValue: b.retail_value })
     ),
@@ -49,6 +50,23 @@ export function mapDraw(db: DBDraw, myTickets = 0, bundleItems?: DBBundleItem[])
     myTickets,
     verified: db.seller_verified,
   };
+}
+
+export async function fetchDrawsByCategory(slug: string): Promise<Draw[]> {
+  try {
+    const { data: draws, error } = await supabase
+      .from('draws')
+      .select('*')
+      .eq('category', slug)
+      .order('created_at', { ascending: false });
+
+    if (error || !draws || draws.length === 0) return [];
+
+    const bundleMap = await fetchBundleMap(draws.filter(d => d.is_bundle).map(d => d.id));
+    return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
+  } catch {
+    return [];
+  }
 }
 
 export interface WalletTransaction {
