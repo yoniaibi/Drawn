@@ -1,20 +1,18 @@
 const { test, expect } = require('/opt/node22/lib/node_modules/playwright/test');
 const { waitForApp } = require('./helpers.cjs');
+const { gotoAuthenticated } = require('./auth-mock.cjs');
 
 const BASE = 'http://localhost:8100';
 
 test.describe('Navigation Flows', () => {
-  // Tab bar navigation requires auth
-  test.skip('tab bar visible on home (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)');
-    await waitForApp(page);
+  test('tab bar visible on home', async ({ page }) => {
+    await gotoAuthenticated(page, '/', waitForApp);
     const body = await page.textContent('body');
     expect(body).toMatch(/browse|live|tickets|account/i);
   });
 
-  test.skip('tab bar navigates to Live tab (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)');
-    await waitForApp(page);
+  test('tab bar navigates to Live tab', async ({ page }) => {
+    await gotoAuthenticated(page, '/', waitForApp);
     const liveTab = page.getByText('Live').first();
     if (await liveTab.isVisible()) {
       await liveTab.click();
@@ -24,9 +22,8 @@ test.describe('Navigation Flows', () => {
     }
   });
 
-  test.skip('tab bar navigates to Grand Draw tab (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)');
-    await waitForApp(page);
+  test('tab bar navigates to Grand Draw tab', async ({ page }) => {
+    await gotoAuthenticated(page, '/', waitForApp);
     const grandTab = page.getByText('Grand Draw').first();
     if (await grandTab.isVisible()) {
       await grandTab.click();
@@ -36,9 +33,8 @@ test.describe('Navigation Flows', () => {
     }
   });
 
-  test.skip('tab bar navigates to My Tickets tab (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)');
-    await waitForApp(page);
+  test('tab bar navigates to My Tickets tab', async ({ page }) => {
+    await gotoAuthenticated(page, '/', waitForApp);
     const ticketTab = page.getByText('My Tickets').first();
     if (await ticketTab.isVisible()) {
       await ticketTab.click();
@@ -48,9 +44,8 @@ test.describe('Navigation Flows', () => {
     }
   });
 
-  test.skip('tab bar navigates to Account tab (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)');
-    await waitForApp(page);
+  test('tab bar navigates to Account tab', async ({ page }) => {
+    await gotoAuthenticated(page, '/', waitForApp);
     const accTab = page.getByText('Account').first();
     if (await accTab.isVisible()) {
       await accTab.click();
@@ -60,9 +55,8 @@ test.describe('Navigation Flows', () => {
     }
   });
 
-  test.skip('grand draw simulate dev button navigates to live (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)/grand-draw');
-    await waitForApp(page);
+  test('grand draw simulate dev button navigates to live', async ({ page }) => {
+    await gotoAuthenticated(page, '/(tabs)/grand-draw', waitForApp);
     const devBtn = page.getByText(/simulate draw/i).first();
     if (await devBtn.isVisible()) {
       await devBtn.click();
@@ -91,9 +85,8 @@ test.describe('Navigation Flows', () => {
     }
   });
 
-  test.skip('category row tile navigates to category detail (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)');
-    await waitForApp(page);
+  test('category row tile navigates to category detail', async ({ page }) => {
+    await gotoAuthenticated(page, '/', waitForApp);
     const fashionTile = page.getByText('Fashion').first();
     if (await fashionTile.isVisible()) {
       await fashionTile.click();
@@ -103,9 +96,8 @@ test.describe('Navigation Flows', () => {
     }
   });
 
-  test.skip('categories explore "All" tile navigates to categories index (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)');
-    await waitForApp(page);
+  test('categories explore "All" tile navigates to categories index', async ({ page }) => {
+    await gotoAuthenticated(page, '/', waitForApp);
     const allTile = page.getByText('All').first();
     if (await allTile.isVisible()) {
       await allTile.click();
@@ -115,7 +107,6 @@ test.describe('Navigation Flows', () => {
     }
   });
 
-  // Public navigation tests
   test('get started navigates to sign-up', async ({ page }) => {
     await page.goto(BASE);
     await waitForApp(page);

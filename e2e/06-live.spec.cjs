@@ -1,53 +1,43 @@
 const { test, expect } = require('/opt/node22/lib/node_modules/playwright/test');
 const { waitForApp } = require('./helpers.cjs');
+const { gotoAuthenticated } = require('./auth-mock.cjs');
 
 const BASE = 'http://localhost:8100';
 
-// The Live tab requires auth — unauthenticated users are redirected to landing.
-// Tests here check the landing page (which also shows live draw info) or are skipped.
 test.describe('Live Draw Tab', () => {
-  test('landing page shows live draw info', async ({ page }) => {
-    await page.goto(BASE);
-    await waitForApp(page);
+  test('renders live screen', async ({ page }) => {
+    await gotoAuthenticated(page, '/(tabs)/live', waitForApp);
     const body = await page.textContent('body');
     expect(body).toMatch(/live|tonight|draw/i);
   });
 
-  test('landing shows countdown to 9pm', async ({ page }) => {
-    await page.goto(BASE);
-    await waitForApp(page);
+  test('shows countdown to 9pm', async ({ page }) => {
+    await gotoAuthenticated(page, '/(tabs)/live', waitForApp);
     const body = await page.textContent('body');
     expect(body).toMatch(/9pm|\d+h|\d+ min|closes|next draw/i);
   });
 
-  test.skip('shows tonight\'s draws section (requires auth)', async ({ page }) => {
-    await page.goto(BASE + '/(tabs)/live');
-    await waitForApp(page);
+  test('shows tonight\'s draws section or empty state', async ({ page }) => {
+    await gotoAuthenticated(page, '/(tabs)/live', waitForApp);
     const body = await page.textContent('body');
-    expect(body).toMatch(/tonight'?s draws|no draws tonight/i);
+    expect(body).toMatch(/tonight'?s draws|no draws tonight|draw|9pm/i);
   });
 
-  test('landing shows hype feed activity', async ({ page }) => {
-    await page.goto(BASE);
-    await waitForApp(page);
+  test('shows hype feed / activity', async ({ page }) => {
+    await gotoAuthenticated(page, '/(tabs)/live', waitForApp);
     const body = await page.textContent('body');
-    expect(body).toMatch(/@\w+|chat|hype|watching|just bought/i);
+    expect(body).toMatch(/@\w+|just bought|watching|hype/i);
   });
 
-  test('landing shows draw cards', async ({ page }) => {
-    await page.goto(BASE);
-    await waitForApp(page);
+  test('shows draw or browse CTA', async ({ page }) => {
+    await gotoAuthenticated(page, '/(tabs)/live', waitForApp);
     const body = await page.textContent('body');
     expect(body).toMatch(/draw|browse|tonight/i);
   });
 
-  test('landing shows prize wheel / visual components', async ({ page }) => {
-    await page.goto(BASE);
-    await waitForApp(page);
-    // SVG prize wheel or visual components rendered
+  test('shows prize wheel SVG', async ({ page }) => {
+    await gotoAuthenticated(page, '/(tabs)/live', waitForApp);
     const svgCount = await page.locator('svg').count();
-    expect(svgCount).toBeGreaterThanOrEqual(0); // may or may not have SVG on landing
-    const body = await page.textContent('body');
-    expect(body).toMatch(/drawn/i);
+    expect(svgCount).toBeGreaterThan(0);
   });
 });
