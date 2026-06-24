@@ -42,17 +42,26 @@ export default function RootLayout() {
 
   // Listen for Supabase auth changes
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) refreshProfile();
-    });
+    // Safety timeout — if Supabase doesn't respond in 5s, clear loading anyway
+    const timeout = setTimeout(() => setSession(null), 5000);
+
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        clearTimeout(timeout);
+        setSession(session);
+        if (session) refreshProfile();
+      })
+      .catch(() => {
+        clearTimeout(timeout);
+        setSession(null);
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) refreshProfile();
     });
 
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 
   // Handle deep links for email confirmation and password reset
