@@ -127,12 +127,47 @@ async function setupAuthMock(page) {
   }, { key: STORAGE_KEY, session: MOCK_SESSION });
 }
 
+// Map tab paths to their tab bar label text
+const TAB_LABELS = {
+  '/(tabs)/live': 'Live',
+  '/(tabs)/grand-draw': 'Grand Draw',
+  '/(tabs)/tickets': 'My Tickets',
+  '/(tabs)/account': 'Account',
+};
+
 /**
  * Navigate to a page with auth mocking active and wait for the app to render.
+ *
+ * Strategy:
+ *  1. Boot the app at root — lets the auth guard resolve from localStorage
+ *  2. For tab paths, click the tab bar button (avoids auth-guard redirect loop)
+ *  3. For non-tab paths, do a second page.goto() now that auth is set
  */
 async function gotoAuthenticated(page, path, waitForApp) {
   await setupAuthMock(page);
-  await page.goto(`http://localhost:8100${path}`);
+
+  const BASE_URL = 'http://localhost:8100/Drawn/webapp';
+
+  // Boot app at root so auth state loads from localStorage
+  await page.goto(`${BASE_URL}/`);
+  await waitForApp(page);
+
+  if (path === '/') return;
+
+  const tabLabel = TAB_LABELS[path];
+  if (tabLabel) {
+    // Click the tab bar button — more reliable than URL navigation because
+    // it avoids the auth-guard redirect-to-root on direct deep-link boot.
+    const tab = page.getByText(tabLabel).last();
+    await tab.waitFor({ state: 'visible', timeout: 10000 });
+    await tab.click();
+    await waitForApp(page);
+    return;
+  }
+
+  // Non-tab path: use the in-app router (avoids auth-guard redirect on full reload)
+  await page.waitForFunction(() => typeof window.__drawnNavigate === 'function', { timeout: 10000 });
+  await page.evaluate((p) => window.__drawnNavigate(p), path);
   await waitForApp(page);
 }
 

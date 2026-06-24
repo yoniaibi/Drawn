@@ -40,6 +40,13 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
 
+  // Expose router to window for E2E test navigation (web/dev only)
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      (window as any).__drawnNavigate = (path: string) => router.push(path as any);
+    }
+  }, [router]);
+
   // Listen for Supabase auth changes
   useEffect(() => {
     supabase.auth.getSession()
