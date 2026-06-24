@@ -50,7 +50,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   profile: null,
-  loading: hasStoredSession(), // only wait if there's actually a session to restore
+  loading: false,
   isLoggedIn: false,
   isSeller: false,
   handle: '@you',

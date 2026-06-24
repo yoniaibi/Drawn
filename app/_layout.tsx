@@ -36,32 +36,25 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold_Italic });
-  const { setSession, refreshProfile, session, loading } = useAuthStore();
+  const { setSession, refreshProfile, session } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
 
   // Listen for Supabase auth changes
   useEffect(() => {
-    // Safety timeout — if Supabase doesn't respond in 5s, clear loading anyway
-    const timeout = setTimeout(() => setSession(null), 2000);
-
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
-        clearTimeout(timeout);
         setSession(session);
         if (session) refreshProfile();
       })
-      .catch(() => {
-        clearTimeout(timeout);
-        setSession(null);
-      });
+      .catch(() => setSession(null));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) refreshProfile();
     });
 
-    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
+    return () => subscription.unsubscribe();
   }, []);
 
   // Handle deep links for email confirmation and password reset
@@ -112,26 +105,17 @@ export default function RootLayout() {
     return () => sub.remove();
   }, []);
 
-  // Redirect based on auth state — don't wait for fonts, they load in background
+  // Redirect based on auth state
   useEffect(() => {
-    if (loading) return;
     const inAuth = segments[0] === '(auth)';
     if (!session && !inAuth) {
       router.replace('/(auth)');
     } else if (session && inAuth) {
       router.replace('/(tabs)');
     }
-  }, [session, loading]);
+  }, [session]);
 
-  useEffect(() => {
-    if (!loading) SplashScreen.hideAsync();
-  }, [loading]);
-
-  if (loading) return (
-    <View style={{ flex: 1, backgroundColor: '#0F0A1E', alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ color: '#F472B6', fontFamily: 'sans-serif', fontSize: 18, letterSpacing: 2 }}>DRAWN</Text>
-    </View>
-  );
+  useEffect(() => { SplashScreen.hideAsync(); }, []);
 
   return (
     <ErrorBoundary>
