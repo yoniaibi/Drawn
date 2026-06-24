@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Profile } from '../lib/database.types';
+import { LoginStreak, GrandDraw, MOCK_LOGIN_STREAK, MOCK_GRAND_DRAW } from '../mocks';
 
 interface AuthState {
   session: Session | null;
@@ -92,4 +93,58 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         : null;
       return { profile, walletBalance: (s.profile?.wallet_balance ?? 0) - pence };
     }),
+}));
+
+// ── Grand Draw Store ──────────────────────────────────────────────────────
+
+interface GrandDrawState {
+  streak: LoginStreak;
+  grandDraw: GrandDraw;
+  todayTicketClaimed: boolean;
+  claimTodayTicket: () => void;
+  useShield: () => void;
+  setStatus: (status: GrandDraw['status']) => void;
+}
+
+export const useGrandDrawStore = create<GrandDrawState>((set, get) => ({
+  streak: MOCK_LOGIN_STREAK,
+  grandDraw: MOCK_GRAND_DRAW,
+  todayTicketClaimed: true,
+
+  claimTodayTicket: () => {
+    const { todayTicketClaimed, streak, grandDraw } = get();
+    if (todayTicketClaimed) return;
+    set({
+      todayTicketClaimed: true,
+      streak: {
+        ...streak,
+        current: streak.current + 1,
+        longest: Math.max(streak.longest, streak.current + 1),
+        monthTickets: streak.monthTickets + 1,
+        totalEarned: streak.totalEarned + 1,
+        lastLoginDate: new Date().toISOString().split('T')[0],
+      },
+      grandDraw: {
+        ...grandDraw,
+        myTickets: grandDraw.myTickets + 1,
+        totalTickets: grandDraw.totalTickets + 1,
+        myOdds: Math.round((grandDraw.totalTickets + 1) / (grandDraw.myTickets + 1)),
+      },
+    });
+  },
+
+  useShield: () => {
+    const { streak } = get();
+    if (!streak.shieldAvailable) return;
+    set({
+      streak: {
+        ...streak,
+        shieldAvailable: false,
+        shieldUsedAt: new Date().toISOString().split('T')[0],
+      },
+    });
+  },
+
+  setStatus: (status) =>
+    set((s) => ({ grandDraw: { ...s.grandDraw, status } })),
 }));

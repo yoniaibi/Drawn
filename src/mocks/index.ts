@@ -242,3 +242,110 @@ export const MOCK_SELLER = {
   pendingPayout: 1008,
   status: 'approved' as const,
 };
+
+// ── Grand Draw types ───────────────────────────────────────────────────────
+
+export type GrandDrawStatus = 'active' | 'drawing' | 'complete';
+
+export interface GrandDrawPrize {
+  title: string;
+  emoji: string;
+  retailValue: number;
+  description: string;
+}
+
+export interface GrandDrawWinner {
+  handle: string;
+  tickets: number;
+  ticketPct: number;
+}
+
+export interface GrandDraw {
+  id: string;
+  month: string;
+  status: GrandDrawStatus;
+  prize: GrandDrawPrize;
+  fundTotal: number;
+  drawDate: string;
+  totalTickets: number;
+  myTickets: number;
+  myOdds: number;
+  winner?: GrandDrawWinner;
+}
+
+export interface LoginStreak {
+  current: number;
+  longest: number;
+  shieldAvailable: boolean;
+  shieldUsedAt: string | null;
+  lastLoginDate: string;
+  monthTickets: number;
+  totalEarned: number;
+}
+
+export interface LoginDay {
+  date: string;
+  loggedIn: boolean;
+  shieldUsed: boolean;
+}
+
+// ── Grand Draw mock data ──────────────────────────────────────────────────
+
+export const MOCK_GRAND_DRAW: GrandDraw = {
+  id: 'grand-2026-06',
+  month: 'June 2026',
+  status: 'active',
+  prize: {
+    title: 'Bottega Veneta Jodie Bag',
+    emoji: '👜',
+    retailValue: 1650,
+    description: 'Sage green intrecciato leather. Brand new, unworn. Full box and dustbag.',
+  },
+  fundTotal: 1650,
+  drawDate: '2026-06-30T21:00:00Z',
+  totalTickets: 8420,
+  myTickets: 18,
+  myOdds: 468,
+};
+
+export const MOCK_LOGIN_STREAK: LoginStreak = {
+  current: 18,
+  longest: 31,
+  shieldAvailable: true,
+  shieldUsedAt: null,
+  lastLoginDate: new Date().toISOString().split('T')[0],
+  monthTickets: 18,
+  totalEarned: 94,
+};
+
+export const MOCK_LOGIN_HISTORY: LoginDay[] = Array.from({ length: 30 }, (_, i) => {
+  const d = new Date();
+  d.setDate(d.getDate() - (29 - i));
+  return {
+    date: d.toISOString().split('T')[0],
+    loggedIn: i !== 12,
+    shieldUsed: i === 12,
+  };
+});
+
+export const MOCK_GRAND_DRAW_COMPLETE: GrandDraw = {
+  id: 'grand-2026-05',
+  month: 'May 2026',
+  status: 'complete',
+  prize: {
+    title: 'AirPods Max — Midnight',
+    emoji: '🎧',
+    retailValue: 449,
+    description: 'Brand new sealed box.',
+  },
+  fundTotal: 449,
+  drawDate: '2026-05-31T21:00:00Z',
+  totalTickets: 5240,
+  myTickets: 24,
+  myOdds: 218,
+  winner: {
+    handle: '@m***s',
+    tickets: 24,
+    ticketPct: 0.46,
+  },
+};
