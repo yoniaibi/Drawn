@@ -55,9 +55,11 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS kyc_submitted       boolean  DEFAULT false,
   ADD COLUMN IF NOT EXISTS seller_verified     boolean  NOT NULL DEFAULT false;
 
--- Length constraints
+-- Length constraints (drop first so this is safe to re-run)
 ALTER TABLE public.profiles
-  ADD CONSTRAINT IF NOT EXISTS profiles_fullname_length
+  DROP CONSTRAINT IF EXISTS profiles_fullname_length;
+ALTER TABLE public.profiles
+  ADD CONSTRAINT profiles_fullname_length
     CHECK (full_name IS NULL OR char_length(full_name) <= 100);
 
 -- ── handle_new_user: also persist full_name from sign-up metadata ────────────

@@ -45,13 +45,19 @@ create policy "Users can update own profile" on public.profiles
 -- ── 3. profiles: enforce unique handle + length constraints ─────────────────
 
 alter table public.profiles
-  add constraint if not exists profiles_handle_unique unique (handle);
+  drop constraint if exists profiles_handle_unique;
+alter table public.profiles
+  add constraint profiles_handle_unique unique (handle);
 
 alter table public.profiles
-  add constraint if not exists profiles_handle_length check (char_length(handle) between 2 and 32);
+  drop constraint if exists profiles_handle_length;
+alter table public.profiles
+  add constraint profiles_handle_length check (char_length(handle) between 2 and 32);
 
 alter table public.profiles
-  add constraint if not exists profiles_fullname_length
+  drop constraint if exists profiles_fullname_length;
+alter table public.profiles
+  add constraint profiles_fullname_length
     check (full_name is null or char_length(full_name) <= 100);
 
 
@@ -60,7 +66,9 @@ alter table public.profiles
 -- Only service role / edge function should insert non-topup transactions.
 -- For topups submitted by the client, enforce allowed amounts.
 alter table public.wallet_transactions
-  add constraint if not exists wallet_topup_amounts
+  drop constraint if exists wallet_topup_amounts;
+alter table public.wallet_transactions
+  add constraint wallet_topup_amounts
     check (
       type != 'topup'
       or amount in (500, 1000, 2000, 5000)
