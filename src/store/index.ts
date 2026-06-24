@@ -25,6 +25,16 @@ interface AuthState {
   deductFunds: (pence: number) => void;
 }
 
+// Check localStorage synchronously — if nothing stored, we know immediately user isn't logged in
+function hasStoredSession(): boolean {
+  try {
+    const key = 'sb-eqaltlwngsmomlwbkqzu-auth-token';
+    return typeof window !== 'undefined' && !!localStorage.getItem(key);
+  } catch {
+    return false;
+  }
+}
+
 function derived(profile: Profile | null, session: Session | null) {
   return {
     isLoggedIn: !!session,
@@ -40,7 +50,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   profile: null,
-  loading: true,
+  loading: hasStoredSession(), // only wait if there's actually a session to restore
   isLoggedIn: false,
   isSeller: false,
   handle: '@you',

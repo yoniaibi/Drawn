@@ -43,7 +43,7 @@ export default function RootLayout() {
   // Listen for Supabase auth changes
   useEffect(() => {
     // Safety timeout — if Supabase doesn't respond in 5s, clear loading anyway
-    const timeout = setTimeout(() => setSession(null), 5000);
+    const timeout = setTimeout(() => setSession(null), 2000);
 
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
