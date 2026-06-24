@@ -5,11 +5,12 @@
 <title>DRAWN</title>
 <script>
   var seg = window.location.pathname;
-  // If it looks like an app route, restore and redirect to app
+  // Store the intended path so the app can restore it after load
   if (seg !== '/Drawn/' && seg !== '/Drawn/index.html') {
     sessionStorage.setItem('__spa_path', seg + window.location.search);
-    window.location.replace('/Drawn/app-preview.html');
   }
+  // Always redirect to the webapp
+  window.location.replace('/Drawn/webapp/');
 </script>
 </head>
 <body></body>
