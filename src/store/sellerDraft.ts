@@ -12,6 +12,7 @@ interface SellerDraft {
   retailValue: number; // pence
   ticketPrice: number; // pence
   totalTickets: number;
+  closeDays: number; // days from listing until draw closes (7–60)
   // actions
   clearDraft: () => void;
   setCategory: (c: DrawCategory) => void;
@@ -20,6 +21,7 @@ interface SellerDraft {
   setImages: (images: string[]) => void;
   setDetails: (title: string, description: string, condition: string) => void;
   setPricing: (price: number, qty: number, retailValue: number) => void;
+  setCloseDays: (days: number) => void;
 }
 
 const DEFAULTS = {
@@ -33,6 +35,7 @@ const DEFAULTS = {
   retailValue: 0,
   ticketPrice: 25,
   totalTickets: 2000,
+  closeDays: 14,
 };
 
 export const useSellerDraft = create<SellerDraft>((set) => ({
@@ -51,4 +54,6 @@ export const useSellerDraft = create<SellerDraft>((set) => ({
   setDetails: (title, description, condition) => set({ title, description, condition }),
 
   setPricing: (price, qty, retailValue) => set({ ticketPrice: price, totalTickets: qty, retailValue }),
+
+  setCloseDays: (days) => set({ closeDays: days }),
 }));

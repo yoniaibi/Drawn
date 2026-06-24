@@ -13,7 +13,19 @@ import { fetchDrawById, fetchDraws } from '../../src/services/draws';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/store';
 
+function formatTimeRemaining(closesAt: string): { main: string; sub: string } {
+  const diff = new Date(closesAt).getTime() - Date.now();
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const main = days >= 1 ? `${days} day${days > 1 ? 's' : ''}` : `${hours}h ${mins}m`;
+  const sub = 'closes ' + new Date(closesAt).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  return { main, sub };
+}
 
+function formatCloseDateFull(closesAt: string): string {
+  return new Date(closesAt).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at 9pm';
+}
 
 export default function DrawDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -30,7 +42,6 @@ export default function DrawDetailScreen() {
       setSimilarDraws(others);
     });
 
-    // Real-time ticket count via Supabase Realtime postgres changes
     const channel = supabase
       .channel(`draw-detail-${id}`)
       .on(
@@ -58,30 +69,32 @@ export default function DrawDetailScreen() {
       </View>
     );
   }
+
   const progress = draw.ticketsSold / draw.totalTickets;
   const remaining = draw.totalTickets - draw.ticketsSold;
   const isVeryLow = remaining < 200;
   const isLow = remaining < 500;
+  const isSoldOut = draw.ticketsSold >= draw.totalTickets;
+  const isWaitingForMinDate = isSoldOut && draw.minCloseDate && new Date() < new Date(draw.minCloseDate);
+  const timeLeft = formatTimeRemaining(draw.closesAt);
 
   const heroBg = draw.isBundle ? '#2D1B00' : '#1A0D42';
 
   const [trustVisible, setTrustVisible] = useState(false);
-  const [postalVisible, setPostalVisible] = useState(false);
+  const [postalExpanded, setPostalExpanded] = useState(false);
   const [watching, setWatching] = useState(false);
   const { user, handle } = useAuthStore();
 
-  // Pulse for scarcity
   const pulseOpacity = useSharedValue(1);
   useEffect(() => {
-    if (isLow) {
+    if (isLow && !isSoldOut) {
       pulseOpacity.value = withRepeat(
         withSequence(withTiming(0.4, { duration: 600 }), withTiming(1, { duration: 600 })),
         -1,
       );
     }
-  }, [isLow]);
+  }, [isLow, isSoldOut]);
   const pulseStyle = useAnimatedStyle(() => ({ opacity: pulseOpacity.value }));
-
 
   const viewers = Math.round(draw.ticketsSold * 0.012 + 4);
 
@@ -108,7 +121,6 @@ export default function DrawDetailScreen() {
           <Ionicons name="chevron-back" size={22} color={Colors.white} />
         </TouchableOpacity>
 
-        {/* Viewer count badge */}
         <View style={styles.viewersBadge}>
           <View style={styles.viewersDot} />
           <Text style={styles.viewersText}>{viewers} viewing</Text>
@@ -120,7 +132,6 @@ export default function DrawDetailScreen() {
           <View style={styles.heroImagePlaceholder} />
         )}
 
-        {/* Value ratio overlay */}
         <View style={styles.heroValueBox}>
           <Text style={styles.heroValueLabel}>{formatTicketPrice(draw.ticketPrice)}</Text>
           <Text style={styles.heroValueArrow}>→</Text>
@@ -165,13 +176,13 @@ export default function DrawDetailScreen() {
           <Ionicons name="chevron-forward" size={13} color={Colors.textTertiary} style={{ marginLeft: 'auto' }} />
         </TouchableOpacity>
 
-        {/* Scarcity warning */}
-        {isLow && (
+        {/* Scarcity warning (only when not sold out) */}
+        {isLow && !isSoldOut && (
           <Animated.View style={[styles.scarcityCard, pulseStyle, { borderColor: isVeryLow ? Colors.danger : Colors.warning }]}>
             <Ionicons name="warning" size={14} color={isVeryLow ? Colors.danger : Colors.warning} />
             <Text style={[styles.scarcityText, { color: isVeryLow ? Colors.danger : Colors.warning }]}>
               {isVeryLow
-                ? `Only ${remaining} tickets left — drawing soon`
+                ? `Only ${remaining} tickets left — draw closes ${timeLeft.sub.replace('closes ', '')}`
                 : `${remaining} tickets remaining · filling fast`}
             </Text>
           </Animated.View>
@@ -185,15 +196,27 @@ export default function DrawDetailScreen() {
               {draw.ticketsSold.toLocaleString()} / {draw.totalTickets.toLocaleString()}
             </Text>
           </View>
-          <ProgressBar
-            progress={progress}
-            height={6}
-            color={progress > 0.9 ? Colors.danger : progress > 0.7 ? Colors.warning : Colors.lilac}
-          />
+          {isWaitingForMinDate ? (
+            <View style={styles.soldOutBar} />
+          ) : (
+            <ProgressBar
+              progress={progress}
+              height={6}
+              color={progress > 0.9 ? Colors.danger : progress > 0.7 ? Colors.warning : Colors.lilac}
+            />
+          )}
           <View style={styles.thresholdBottom}>
-            <Text style={[styles.thresholdMet, { color: progress >= draw.minThreshold ? Colors.gold : Colors.textSecondary }]}>
-              {progress >= draw.minThreshold ? 'Threshold met · draws tonight' : `${Math.round(draw.minThreshold * 100)}% needed to draw`}
-            </Text>
+            {isWaitingForMinDate ? (
+              <Text style={[styles.thresholdMet, { color: Colors.gold }]}>
+                {`All tickets sold · draw resolves ${formatCloseDateFull(draw.closesAt)}`}
+              </Text>
+            ) : (
+              <Text style={[styles.thresholdMet, { color: progress >= draw.minThreshold ? Colors.gold : Colors.textSecondary }]}>
+                {progress >= draw.minThreshold
+                  ? `Threshold met · resolves ${formatCloseDateFull(draw.closesAt)}`
+                  : `${Math.round(draw.minThreshold * 100)}% needed to draw`}
+              </Text>
+            )}
             <Text style={styles.pctSold}>{Math.round(progress * 100)}% sold</Text>
           </View>
         </View>
@@ -211,6 +234,10 @@ export default function DrawDetailScreen() {
           <View style={styles.stat}>
             <Text style={styles.statVal}>{draw.condition.replace('_', ' ')}</Text>
             <Text style={styles.statLabel}>condition</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={[styles.statVal, { fontSize: FontSizes.sm }]}>{timeLeft.main}</Text>
+            <Text style={styles.statLabel}>{timeLeft.sub}</Text>
           </View>
         </View>
 
@@ -261,6 +288,52 @@ export default function DrawDetailScreen() {
             ))}
           </View>
         )}
+
+        {/* Free postal entry — always visible, collapsible */}
+        <View style={styles.postalSection}>
+          <TouchableOpacity
+            style={styles.postalHeader}
+            onPress={() => setPostalExpanded(e => !e)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="mail-outline" size={16} color={Colors.lilac} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.postalHeaderTitle}>Free postal entry</Text>
+              {!postalExpanded && (
+                <Text style={styles.postalHeaderSub}>No purchase necessary</Text>
+              )}
+            </View>
+            <Ionicons name={postalExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.textTertiary} />
+          </TouchableOpacity>
+
+          {postalExpanded && (
+            <View style={styles.postalBody}>
+              <Text style={styles.postalBodyHeading}>No purchase necessary</Text>
+              <Text style={styles.postalBodyText}>
+                You can enter this draw for free by post. Free entries have identical odds to paid entries — one free entry counts the same as one paid ticket.
+              </Text>
+
+              <Text style={styles.postalBodyHeading}>How to enter by post</Text>
+              <Text style={styles.postalBodyText}>
+                Write your name, email address, and draw ID on a piece of paper and post it to:
+              </Text>
+
+              <View style={styles.postalAddress}>
+                <Text style={styles.postalAddressText}>
+                  {'DRAWN Free Entry\n[DRAWN postal address — to be confirmed before launch]\nDraw ID: '}{draw.id}
+                </Text>
+              </View>
+
+              <Text style={styles.postalBodyText}>
+                One postal entry per person per draw. Entries must arrive before the draw closes on {formatCloseDateFull(draw.closesAt)}. Allow at least 3 days for delivery.
+              </Text>
+
+              <Text style={styles.postalLegalFooter}>
+                DRAWN is a prize draw, not a lottery. No purchase is ever necessary to enter or win.
+              </Text>
+            </View>
+          )}
+        </View>
 
         {/* Similar draws */}
         {similarDraws.length > 0 && (
@@ -316,84 +389,41 @@ export default function DrawDetailScreen() {
 
       {/* CTA */}
       <View style={styles.cta}>
-        {isLow && (
-          <Text style={styles.ctaScarcity}>
-            {isVeryLow ? `Only ${remaining} tickets left` : `${remaining} remaining`}
-          </Text>
-        )}
-        <PrimaryButton
-          label={`Enter from ${formatTicketPrice(draw.ticketPrice)}`}
-          onPress={() => router.push(`/purchase/${draw.id}`)}
-        />
-        <TouchableOpacity
-          style={styles.shareBtn}
-          onPress={() => Share.share({
-            message: `I'm entering to win ${draw.title} on DRAWN for just ${draw.ticketPrice}p a ticket. Use my link to get a free entry: https://drawn.app/draw/${draw.id}?ref=${handle}`,
-          })}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.shareBtnText}>Share & get a free ticket</Text>
-        </TouchableOpacity>
-        <View style={styles.shareCallout}>
-          <Text style={styles.shareCalloutText}>Share this draw with a friend — when they sign up, you both get 1 free ticket</Text>
-        </View>
-        <TouchableOpacity onPress={() => setPostalVisible(true)} activeOpacity={0.7}>
-          <Text style={styles.ctaSub}>Enter for free by post — tap for instructions</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Postal entry modal */}
-      <Modal visible={postalVisible} transparent animationType="slide" onRequestClose={() => setPostalVisible(false)}>
-        <Pressable style={styles.trustOverlay} onPress={() => setPostalVisible(false)}>
-          <Pressable style={styles.trustSheet} onPress={() => {}}>
-            <View style={styles.trustHandle} />
-            <Text style={styles.trustTitle}>Free Postal Entry</Text>
-            <Text style={styles.postalIntro}>
-              No purchase needed. Every draw has a free entry route — here's how to use it.
-            </Text>
-
-            {[
-              {
-                num: '1',
-                title: 'Write a postcard',
-                desc: `Include your full name, email address, the draw name ("${draw.title}"), and the draw date.`,
-              },
-              {
-                num: '2',
-                title: 'Post it to us',
-                desc: 'DRAWN, PO Box 1000, London, EC1A 1BB\n\nA standard UK stamp is all you need.',
-              },
-              {
-                num: '3',
-                title: 'Must arrive by 5pm on draw day',
-                desc: "We register your entry manually before the draw closes. Late arrivals can't be included.",
-              },
-              {
-                num: '4',
-                title: 'Same odds as paid entries',
-                desc: 'One postcard = one entry. Your name goes into the same draw pool as ticket buyers.',
-              },
-            ].map(s => (
-              <View key={s.num} style={styles.postalStep}>
-                <View style={styles.postalNum}>
-                  <Text style={styles.postalNumText}>{s.num}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.trustStepTitle}>{s.title}</Text>
-                  <Text style={styles.trustStepDesc}>{s.desc}</Text>
-                </View>
-              </View>
-            ))}
-
-            <View style={styles.postalLegal}>
-              <Ionicons name="information-circle-outline" size={14} color={Colors.textTertiary} />
-              <Text style={styles.postalLegalText}>
-                Free entry is available on every DRAWN draw. This is what makes DRAWN a legal prize promotion under UK law, not a lottery.
-              </Text>
+        {isWaitingForMinDate ? (
+          <>
+            <View style={[styles.soldOutBtn]}>
+              <Text style={styles.soldOutBtnText}>Sold out · free entry still open</Text>
             </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+            <Text style={styles.postalNoteText}>
+              Postal entries accepted until {formatCloseDateFull(draw.closesAt)}. See below for details.
+            </Text>
+          </>
+        ) : (
+          <>
+            {isLow && (
+              <Text style={styles.ctaScarcity}>
+                {isVeryLow ? `Only ${remaining} tickets left` : `${remaining} remaining`}
+              </Text>
+            )}
+            <PrimaryButton
+              label={`Enter from ${formatTicketPrice(draw.ticketPrice)}`}
+              onPress={() => router.push(`/purchase/${draw.id}`)}
+            />
+            <TouchableOpacity
+              style={styles.shareBtn}
+              onPress={() => Share.share({
+                message: `I'm entering to win ${draw.title} on DRAWN for just ${draw.ticketPrice}p a ticket. Use my link to get a free entry: https://drawn.app/draw/${draw.id}?ref=${handle}`,
+              })}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.shareBtnText}>Share & get a free ticket</Text>
+            </TouchableOpacity>
+            <View style={styles.shareCallout}>
+              <Text style={styles.shareCalloutText}>Share this draw with a friend — when they sign up, you both get 1 free ticket</Text>
+            </View>
+          </>
+        )}
+      </View>
     </View>
   );
 }
@@ -436,14 +466,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: Colors.darkCard, borderRadius: Radius.md,
     borderWidth: 1, borderColor: Colors.darkBorder,
-    padding: Spacing.md, marginBottom: Spacing.sm,
+    padding: Spacing.md,
   },
   qaBtnText: { flex: 1, fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '600' },
   trustRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: 'rgba(139,92,246,0.08)', borderRadius: Radius.md,
     borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)',
-    padding: Spacing.sm, marginBottom: Spacing.sm,
+    padding: Spacing.sm,
   },
   trustText: { flex: 1, fontSize: FontSizes.xs, color: Colors.lilac, fontWeight: '600' },
   trustOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
@@ -464,8 +494,7 @@ const styles = StyleSheet.create({
   trustFooterText: { fontSize: FontSizes.xs, color: Colors.textTertiary, flex: 1 },
 
   body: { flex: 1 },
-  bodyContent: { padding: Spacing.lg, paddingBottom: 120, gap: 14 },
-
+  bodyContent: { padding: Spacing.lg, paddingBottom: 160, gap: 14 },
 
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   title: { fontFamily: Fonts.serif, fontSize: FontSizes.xl, color: Colors.white, flex: 1, lineHeight: 30 },
@@ -494,14 +523,15 @@ const styles = StyleSheet.create({
   thresholdTop: { flexDirection: 'row', justifyContent: 'space-between' },
   thresholdLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary },
   thresholdCount: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
+  soldOutBar: { height: 6, borderRadius: 3, backgroundColor: Colors.gold },
   thresholdBottom: { flexDirection: 'row', justifyContent: 'space-between' },
-  thresholdMet: { fontSize: FontSizes.xs, fontWeight: '600' },
+  thresholdMet: { fontSize: FontSizes.xs, fontWeight: '600', flex: 1 },
   pctSold: { fontSize: FontSizes.xs, color: Colors.pink, fontWeight: '600' },
 
   statsRow: { flexDirection: 'row', gap: 8 },
   stat: { flex: 1, backgroundColor: Colors.darkCard, borderRadius: Radius.sm, padding: Spacing.sm, alignItems: 'center' },
-  statVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
-  statLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+  statVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700', textAlign: 'center' },
+  statLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2, textAlign: 'center' },
 
   myTicketsCard: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
@@ -519,6 +549,32 @@ const styles = StyleSheet.create({
   bundleItemImage: { width: 32, height: 32, borderRadius: 6 },
   bundleName: { flex: 1, fontSize: FontSizes.xs, color: Colors.textSecondary },
   bundleVal: { fontSize: FontSizes.xs, color: Colors.gold, fontWeight: '700' },
+
+  // Postal entry section
+  postalSection: {
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    borderWidth: 1, borderColor: Colors.darkBorder, overflow: 'hidden',
+  },
+  postalHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    padding: Spacing.md,
+  },
+  postalHeaderTitle: { fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '700' },
+  postalHeaderSub: { fontSize: FontSizes.xs, color: Colors.textTertiary, marginTop: 1 },
+  postalBody: {
+    paddingHorizontal: Spacing.md, paddingBottom: Spacing.md,
+    borderTopWidth: 1, borderTopColor: Colors.darkBorder, gap: 8,
+    paddingTop: Spacing.sm,
+  },
+  postalBodyHeading: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700', marginTop: 4 },
+  postalBodyText: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20 },
+  postalAddress: {
+    backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: Radius.sm,
+    borderWidth: 1, borderColor: Colors.darkBorder,
+    padding: Spacing.sm,
+  },
+  postalAddressText: { fontFamily: 'monospace', fontSize: FontSizes.sm, color: Colors.white, lineHeight: 20 },
+  postalLegalFooter: { fontSize: FontSizes.xs, color: Colors.textTertiary, fontStyle: 'italic', lineHeight: 17, marginTop: 4 },
 
   similarSection: { marginTop: 4 },
   similarTitle: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 10 },
@@ -540,7 +596,13 @@ const styles = StyleSheet.create({
     ...Shadows.card,
   },
   ctaScarcity: { textAlign: 'center', fontSize: FontSizes.xs, color: Colors.danger, fontWeight: '700' },
-  ctaSub: { textAlign: 'center', fontSize: 9, color: Colors.textTertiary },
+  soldOutBtn: {
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    padding: Spacing.md, alignItems: 'center',
+    borderWidth: 1, borderColor: Colors.darkBorder,
+  },
+  soldOutBtnText: { fontSize: FontSizes.base, color: Colors.textSecondary, fontWeight: '600' },
+  postalNoteText: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'center' },
   shareBtn: {
     backgroundColor: 'rgba(139,92,246,0.15)', borderRadius: Radius.md,
     borderWidth: 1, borderColor: 'rgba(139,92,246,0.35)',
@@ -553,17 +615,4 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
   },
   shareCalloutText: { fontSize: FontSizes.xs, color: Colors.lilac, textAlign: 'center', lineHeight: 17 },
-
-  postalIntro: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20, marginBottom: Spacing.lg, textAlign: 'center' },
-  postalStep: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: Spacing.md },
-  postalNum: {
-    width: 26, height: 26, borderRadius: 13,
-    backgroundColor: Colors.royal, alignItems: 'center', justifyContent: 'center', marginTop: 1,
-  },
-  postalNumText: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '800' },
-  postalLegal: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: Spacing.md,
-    paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.darkBorder,
-  },
-  postalLegalText: { fontSize: 10, color: Colors.textTertiary, flex: 1, lineHeight: 15 },
 });

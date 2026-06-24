@@ -20,6 +20,9 @@ export interface Draw {
   category?: string;
   bundleItems?: BundleItem[];
   closesAt: string;
+  listedAt: string;
+  minCloseDate: string;
+  postalEntryCount: number;
   myTickets: number;
   verified: boolean;
 }
@@ -53,6 +56,20 @@ function getTomorrowAt9pm(): string {
   return d.toISOString();
 }
 
+function getCloseDate(daysFromNow: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  d.setHours(21, 0, 0, 0);
+  return d.toISOString();
+}
+
+function getListedDate(daysAgo: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  d.setHours(10, 0, 0, 0);
+  return d.toISOString();
+}
+
 export const MOCK_DRAWS: Draw[] = [
   {
     id: 'draw-001',
@@ -70,7 +87,10 @@ export const MOCK_DRAWS: Draw[] = [
     description: 'Midnight black quilted lambskin, gold hardware. Purchased 2022, worn fewer than 5 times. Full authenticity card, dust bag, and original box included.',
     isBundle: false,
     category: 'bags',
-    closesAt: getTonightAt9pm(),
+    closesAt: getCloseDate(9),
+    listedAt: getListedDate(5),
+    minCloseDate: getCloseDate(2),
+    postalEntryCount: 3,
     myTickets: 10,
     verified: true,
   },
@@ -90,7 +110,10 @@ export const MOCK_DRAWS: Draw[] = [
     description: '41mm, black dial, ceramic bezel. Reference 126610LN. Full set — box, papers, 2019 service record. Minor brushing on bracelet only.',
     isBundle: false,
     category: 'watches',
-    closesAt: getTonightAt9pm(),
+    closesAt: getCloseDate(13),
+    listedAt: getListedDate(1),
+    minCloseDate: getCloseDate(6),
+    postalEntryCount: 0,
     myTickets: 5,
     verified: true,
   },
@@ -110,6 +133,9 @@ export const MOCK_DRAWS: Draw[] = [
     description: '28 pieces, all authenticated. Clearing before a move abroad — everything barely worn. Includes bags, shoes, jewellery, and one watch.',
     isBundle: true,
     category: 'fashion',
+    listedAt: getListedDate(3),
+    minCloseDate: getCloseDate(4),
+    postalEntryCount: 1,
     bundleItems: [
       { image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80', name: 'Chanel Classic Flap', retailValue: 2400 },
       { image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=400&q=80', name: 'Bottega Veneta Heels', retailValue: 1800 },
@@ -118,7 +144,7 @@ export const MOCK_DRAWS: Draw[] = [
       { image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=400&q=80', name: 'Tiffany & Co Bracelet', retailValue: 620 },
       { image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=400&q=80', name: 'Hermès Beauty Set', retailValue: 340 },
     ],
-    closesAt: getTonightAt9pm(),
+    closesAt: getCloseDate(11),
     myTickets: 8,
     verified: true,
   },
@@ -138,7 +164,10 @@ export const MOCK_DRAWS: Draw[] = [
     description: 'M3 Pro chip, 18GB RAM, 512GB SSD. Space Black. Bought March 2024, barely used — upgraded company kit. Original receipt included.',
     isBundle: false,
     category: 'tech',
-    closesAt: getTonightAt9pm(),
+    closesAt: getCloseDate(0),
+    listedAt: getListedDate(14),
+    minCloseDate: getListedDate(7),
+    postalEntryCount: 2,
     myTickets: 0,
     verified: true,
   },
@@ -158,7 +187,10 @@ export const MOCK_DRAWS: Draw[] = [
     description: 'Chicago colourway. UK9. Worn twice. Minor creasing on toe box. Original box and tissue included.',
     isBundle: false,
     category: 'sneakers',
-    closesAt: getTomorrowAt9pm(),
+    closesAt: getCloseDate(9),
+    listedAt: getListedDate(5),
+    minCloseDate: getCloseDate(2),
+    postalEntryCount: 0,
     myTickets: 5,
     verified: true,
   },
@@ -178,7 +210,10 @@ export const MOCK_DRAWS: Draw[] = [
     description: 'DS. Never worn. UK10. Original box, zip ties, extra laces and accessories. Purchased from Dover Street Market on drop day.',
     isBundle: false,
     category: 'sneakers',
-    closesAt: getTomorrowAt9pm(),
+    closesAt: getCloseDate(21),
+    listedAt: getListedDate(2),
+    minCloseDate: getCloseDate(5),
+    postalEntryCount: 0,
     myTickets: 0,
     verified: false,
   },
@@ -198,7 +233,10 @@ export const MOCK_DRAWS: Draw[] = [
     description: 'FW23 Black. Size L. Never worn — still in original Supreme bag with receipt.',
     isBundle: false,
     category: 'fashion',
-    closesAt: getTomorrowAt9pm(),
+    closesAt: getCloseDate(30),
+    listedAt: getListedDate(1),
+    minCloseDate: getCloseDate(6),
+    postalEntryCount: 0,
     myTickets: 0,
     verified: false,
   },
@@ -217,10 +255,46 @@ export const MOCK_WINNER = {
 };
 
 export const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: 'n1', type: 'reminder', title: "Tonight's draw is at 9pm", body: "You're entered in 4 draws closing tonight. Don't miss the reveal.", time: '8:50pm', read: false },
-  { id: 'n2', type: 'threshold', title: 'Threshold hit on Chanel Flap!', body: 'That draw is definitely running tonight. You hold 10 tickets.', time: '6:12pm', read: false },
-  { id: 'n3', type: 'win', title: '🏆 You won!', body: 'You won the Jordan 1 Chicago draw last night. Delivery in 2–3 days.', time: 'Yesterday', read: true },
-  { id: 'n4', type: 'payout', title: 'Payout sent to @sophiestyle', body: '£1,008 sent to her bank within 24h of the draw closing.', time: 'Yesterday', read: true },
+  {
+    id: 'n1',
+    type: 'win',
+    title: 'You won! Chanel Flap',
+    body: 'You won the draw for 30p. Your item will arrive in 2–3 days.',
+    time: 'Just now',
+    read: false,
+  },
+  {
+    id: 'n2',
+    type: 'reminder',
+    title: 'Chanel Flap draw closes tomorrow',
+    body: 'Your draw closes tomorrow at 9pm. 1,558 tickets sold so far.',
+    time: '9:00am today',
+    read: false,
+  },
+  {
+    id: 'n3',
+    type: 'threshold',
+    title: 'Wardrobe bundle hits 72%',
+    body: 'Threshold met. Draw resolves Mon 15 Jul at 9pm if it stays above 60%.',
+    time: '2 hours ago',
+    read: true,
+  },
+  {
+    id: 'n4',
+    type: 'approved',
+    title: 'Listing approved',
+    body: 'Your Chanel Flap listing is live. It closes Mon 15 Jul at 9pm.',
+    time: 'Yesterday',
+    read: true,
+  },
+  {
+    id: 'n5',
+    type: 'payout',
+    title: 'Payout sent — £212',
+    body: 'Your payout for the Tag Heuer draw has been sent. Allow 1–2 business days.',
+    time: '3 days ago',
+    read: true,
+  },
 ];
 
 export const MOCK_WALLET = {

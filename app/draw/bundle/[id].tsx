@@ -9,6 +9,20 @@ import PrimaryButton from '../../../src/components/PrimaryButton';
 import { formatTicketPrice } from '../../../src/utils/countdown';
 import { fetchDrawById } from '../../../src/services/draws';
 
+function formatTimeRemaining(closesAt: string): { main: string; sub: string } {
+  const diff = new Date(closesAt).getTime() - Date.now();
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const main = days >= 1 ? `${days} day${days > 1 ? 's' : ''}` : `${hours}h ${mins}m`;
+  const sub = 'closes ' + new Date(closesAt).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  return { main, sub };
+}
+
+function formatCloseDateFull(closesAt: string): string {
+  return new Date(closesAt).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at 9pm';
+}
+
 const BUYER_TICKERS = [
   '@sophie_k just bought 5 tickets',
   '@dan.w grabbed 3 tickets',
@@ -57,7 +71,11 @@ export default function BundleDrawScreen() {
   const remaining = draw.totalTickets - draw.ticketsSold;
   const isLow = remaining < 500;
   const isVeryLow = remaining < 200;
+  const isSoldOut = draw.ticketsSold >= draw.totalTickets;
+  const isWaitingForMinDate = isSoldOut && draw.minCloseDate && new Date() < new Date(draw.minCloseDate);
   const totalBundleValue = draw.bundleItems.reduce((s, i) => s + i.retailValue, 0);
+  const timeLeft = formatTimeRemaining(draw.closesAt);
+  const [postalExpanded, setPostalExpanded] = useState(false);
 
   const [buyerIdx, setBuyerIdx] = useState(0);
   const buyerOpacity = useRef(new RNAnimated.Value(1)).current;
@@ -179,15 +197,27 @@ export default function BundleDrawScreen() {
               {draw.ticketsSold.toLocaleString()} / {draw.totalTickets.toLocaleString()}
             </Text>
           </View>
-          <ProgressBar
-            progress={progress}
-            height={6}
-            color={progress > 0.9 ? Colors.danger : progress > 0.7 ? Colors.warning : Colors.lilac}
-          />
+          {isWaitingForMinDate ? (
+            <View style={styles.soldOutBar} />
+          ) : (
+            <ProgressBar
+              progress={progress}
+              height={6}
+              color={progress > 0.9 ? Colors.danger : progress > 0.7 ? Colors.warning : Colors.lilac}
+            />
+          )}
           <View style={styles.thresholdBottom}>
-            <Text style={[styles.thresholdMet, { color: progress >= draw.minThreshold ? Colors.gold : Colors.textSecondary }]}>
-              {progress >= draw.minThreshold ? '✅ Threshold met · draws tonight' : `${Math.round(draw.minThreshold * 100)}% needed to draw`}
-            </Text>
+            {isWaitingForMinDate ? (
+              <Text style={[styles.thresholdMet, { color: Colors.gold }]}>
+                {`All tickets sold · draw resolves ${formatCloseDateFull(draw.closesAt)}`}
+              </Text>
+            ) : (
+              <Text style={[styles.thresholdMet, { color: progress >= draw.minThreshold ? Colors.gold : Colors.textSecondary }]}>
+                {progress >= draw.minThreshold
+                  ? `Threshold met · resolves ${formatCloseDateFull(draw.closesAt)}`
+                  : `${Math.round(draw.minThreshold * 100)}% needed to draw`}
+              </Text>
+            )}
             <Text style={styles.pctSold}>{Math.round(progress * 100)}% sold</Text>
           </View>
         </View>
@@ -205,6 +235,10 @@ export default function BundleDrawScreen() {
           <View style={styles.stat}>
             <Text style={styles.statVal}>{draw.condition.replace('_', ' ')}</Text>
             <Text style={styles.statLabel}>condition</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={[styles.statVal, { fontSize: FontSizes.sm }]}>{timeLeft.main}</Text>
+            <Text style={styles.statLabel}>{timeLeft.sub}</Text>
           </View>
         </View>
 
@@ -224,20 +258,74 @@ export default function BundleDrawScreen() {
         )}
 
         <Text style={styles.desc}>{draw.description}</Text>
+
+        {/* Free postal entry — always visible, collapsible */}
+        <View style={styles.postalSection}>
+          <TouchableOpacity
+            style={styles.postalHeader}
+            onPress={() => setPostalExpanded(e => !e)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="mail-outline" size={16} color={Colors.lilac} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.postalHeaderTitle}>Free postal entry</Text>
+              {!postalExpanded && (
+                <Text style={styles.postalHeaderSub}>No purchase necessary</Text>
+              )}
+            </View>
+            <Ionicons name={postalExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={Colors.textTertiary} />
+          </TouchableOpacity>
+
+          {postalExpanded && (
+            <View style={styles.postalBody}>
+              <Text style={styles.postalBodyHeading}>No purchase necessary</Text>
+              <Text style={styles.postalBodyText}>
+                You can enter this draw for free by post. Free entries have identical odds to paid entries — one free entry counts the same as one paid ticket.
+              </Text>
+              <Text style={styles.postalBodyHeading}>How to enter by post</Text>
+              <Text style={styles.postalBodyText}>
+                Write your name, email address, and draw ID on a piece of paper and post it to:
+              </Text>
+              <View style={styles.postalAddress}>
+                <Text style={styles.postalAddressText}>
+                  {'DRAWN Free Entry\n[DRAWN postal address — to be confirmed before launch]\nDraw ID: '}{draw.id}
+                </Text>
+              </View>
+              <Text style={styles.postalBodyText}>
+                One postal entry per person per draw. Entries must arrive before the draw closes on {formatCloseDateFull(draw.closesAt)}. Allow at least 3 days for delivery.
+              </Text>
+              <Text style={styles.postalLegalFooter}>
+                DRAWN is a prize draw, not a lottery. No purchase is ever necessary to enter or win.
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
 
       {/* Sticky CTA */}
       <View style={styles.cta}>
-        {isLow && (
-          <Text style={styles.ctaScarcity}>
-            {isVeryLow ? `🚨 Only ${remaining} tickets left!` : `⚡ ${remaining} remaining`}
-          </Text>
+        {isWaitingForMinDate ? (
+          <>
+            <View style={styles.soldOutBtn}>
+              <Text style={styles.soldOutBtnText}>Sold out · free entry still open</Text>
+            </View>
+            <Text style={styles.postalNoteText}>
+              Postal entries accepted until {formatCloseDateFull(draw.closesAt)}. See below for details.
+            </Text>
+          </>
+        ) : (
+          <>
+            {isLow && (
+              <Text style={styles.ctaScarcity}>
+                {isVeryLow ? `Only ${remaining} tickets left` : `${remaining} remaining`}
+              </Text>
+            )}
+            <PrimaryButton
+              label={`Enter from ${formatTicketPrice(draw.ticketPrice)}`}
+              onPress={() => router.push(`/purchase/${draw.id}`)}
+            />
+          </>
         )}
-        <PrimaryButton
-          label={`Enter from ${formatTicketPrice(draw.ticketPrice)}`}
-          onPress={() => router.push(`/purchase/${draw.id}`)}
-        />
-        <Text style={styles.ctaSub}>Free postal entry also available</Text>
       </View>
     </View>
   );
@@ -338,14 +426,15 @@ const styles = StyleSheet.create({
   thresholdTop: { flexDirection: 'row', justifyContent: 'space-between' },
   thresholdLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary },
   thresholdCount: { fontSize: FontSizes.xs, color: Colors.white, fontWeight: '700' },
+  soldOutBar: { height: 6, borderRadius: 3, backgroundColor: Colors.gold },
   thresholdBottom: { flexDirection: 'row', justifyContent: 'space-between' },
-  thresholdMet: { fontSize: FontSizes.xs, fontWeight: '600' },
+  thresholdMet: { fontSize: FontSizes.xs, fontWeight: '600', flex: 1 },
   pctSold: { fontSize: FontSizes.xs, color: Colors.pink, fontWeight: '600' },
 
   statsRow: { flexDirection: 'row', gap: 8 },
   stat: { flex: 1, backgroundColor: Colors.darkCard, borderRadius: Radius.sm, padding: Spacing.sm, alignItems: 'center' },
-  statVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700' },
-  statLabel: { fontSize: FontSizes.xs, color: Colors.textSecondary, marginTop: 2 },
+  statVal: { fontSize: FontSizes.md, color: Colors.white, fontWeight: '700', textAlign: 'center' },
+  statLabel: { fontSize: 9, color: Colors.textSecondary, marginTop: 2, textAlign: 'center' },
 
   myTicketsCard: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
@@ -357,6 +446,27 @@ const styles = StyleSheet.create({
 
   desc: { fontSize: FontSizes.base, color: Colors.textSecondary, lineHeight: 22 },
 
+  // Postal entry section
+  postalSection: {
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    borderWidth: 1, borderColor: Colors.darkBorder, overflow: 'hidden',
+  },
+  postalHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: Spacing.md },
+  postalHeaderTitle: { fontSize: FontSizes.sm, color: Colors.lilac, fontWeight: '700' },
+  postalHeaderSub: { fontSize: FontSizes.xs, color: Colors.textTertiary, marginTop: 1 },
+  postalBody: {
+    paddingHorizontal: Spacing.md, paddingBottom: Spacing.md,
+    borderTopWidth: 1, borderTopColor: Colors.darkBorder, gap: 8, paddingTop: Spacing.sm,
+  },
+  postalBodyHeading: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '700', marginTop: 4 },
+  postalBodyText: { fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20 },
+  postalAddress: {
+    backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: Radius.sm,
+    borderWidth: 1, borderColor: Colors.darkBorder, padding: Spacing.sm,
+  },
+  postalAddressText: { fontFamily: 'monospace', fontSize: FontSizes.sm, color: Colors.white, lineHeight: 20 },
+  postalLegalFooter: { fontSize: FontSizes.xs, color: Colors.textTertiary, fontStyle: 'italic', lineHeight: 17, marginTop: 4 },
+
   cta: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     padding: Spacing.lg, backgroundColor: Colors.darkBg,
@@ -365,5 +475,11 @@ const styles = StyleSheet.create({
     ...Shadows.card,
   },
   ctaScarcity: { textAlign: 'center', fontSize: FontSizes.xs, color: Colors.danger, fontWeight: '700' },
-  ctaSub: { textAlign: 'center', fontSize: 9, color: Colors.textTertiary },
+  soldOutBtn: {
+    backgroundColor: Colors.darkCard, borderRadius: Radius.md,
+    padding: Spacing.md, alignItems: 'center',
+    borderWidth: 1, borderColor: Colors.darkBorder,
+  },
+  soldOutBtnText: { fontSize: FontSizes.base, color: Colors.textSecondary, fontWeight: '600' },
+  postalNoteText: { fontSize: FontSizes.xs, color: Colors.textSecondary, textAlign: 'center' },
 });

@@ -12,6 +12,28 @@ import { supabase } from '../../../src/lib/supabase';
 import { SELLER_FEE_MULTIPLIER, getCategoryMeta } from '../../../src/constants';
 import type { DrawCategory } from '../../../src/constants';
 
+function validateDrawDuration(listedAt: Date, closesAt: Date): string | null {
+  const MIN_DAYS = 7;
+  const MAX_DAYS = 60;
+  const diffDays = (closesAt.getTime() - listedAt.getTime()) / 86400000;
+  if (diffDays < MIN_DAYS) {
+    return `Draw must be open for at least ${MIN_DAYS} days to allow free postal entries.`;
+  }
+  if (diffDays > MAX_DAYS) {
+    return `Draw cannot be open for more than ${MAX_DAYS} days.`;
+  }
+  if (closesAt.getHours() !== 21 || closesAt.getMinutes() !== 0) {
+    return 'Draw must close at 9pm on the selected date.';
+  }
+  return null;
+}
+
+function formatCloseDate(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + ' at 9pm';
+}
+
 export default function ListReviewScreen() {
   const router = useRouter();
   const { user, handle, avatar } = useAuthStore();
@@ -35,6 +57,14 @@ export default function ListReviewScreen() {
     if (!draft.title || !draft.condition) { setError('Missing item details — go back and fill in all fields.'); return; }
     if (draft.retailValue <= 0) { setError('Missing retail value — go back and set it.'); return; }
 
+    // Validate close date duration
+    const listedAt = new Date();
+    const closesAt = new Date();
+    closesAt.setDate(closesAt.getDate() + (draft.closeDays ?? 14));
+    closesAt.setHours(21, 0, 0, 0);
+    const durationError = validateDrawDuration(listedAt, closesAt);
+    if (durationError) { setError(durationError); return; }
+
     setError(null);
     setSubmitting(true);
 
@@ -42,9 +72,9 @@ export default function ListReviewScreen() {
       // 1. Mark seller as is_seller in profiles
       await supabase.from('profiles').update({ is_seller: true }).eq('id', user.id);
 
-      // Schedule draw for next available 9pm slot (at least 3 days out for shipping)
+      // Schedule draw close date at 9pm on the seller-chosen day
       const drawDate = new Date();
-      drawDate.setDate(drawDate.getDate() + 3);
+      drawDate.setDate(drawDate.getDate() + (draft.closeDays ?? 14));
       drawDate.setHours(21, 0, 0, 0);
 
       // 2. Insert draw
@@ -153,12 +183,18 @@ export default function ListReviewScreen() {
             ['Total tickets', draft.totalTickets.toLocaleString()],
             ['Value ratio', draft.retailValue > 0 ? `${Math.round((draft.retailValue / 100) / draft.ticketPrice)}× return for buyers` : '—'],
             ['You receive', `${formatTicketPrice(sellerGets)} (if all sell)`],
+            ['Draw close date', formatCloseDate(draft.closeDays ?? 14)],
+            ['Postal entries accepted until', formatCloseDate(draft.closeDays ?? 14)],
           ] as [string, string][]).map(([label, val]) => (
             <View key={label} style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>{label}</Text>
               <Text style={[styles.summaryVal, label === 'You receive' && { color: Colors.gold }]}>{val}</Text>
             </View>
           ))}
+          <View style={styles.postalDeliveryNote}>
+            <Ionicons name="mail-outline" size={12} color={Colors.textTertiary} />
+            <Text style={styles.postalDeliveryText}>Allow at least 3 days for delivery</Text>
+          </View>
         </View>
 
         <View style={styles.shippingNote}>
@@ -212,7 +248,9 @@ const styles = StyleSheet.create({
   summaryCard: { backgroundColor: Colors.darkCard, borderRadius: Radius.lg, padding: Spacing.md, gap: 10, marginBottom: Spacing.md, borderWidth: 1, borderColor: Colors.darkBorder },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   summaryLabel: { fontSize: FontSizes.sm, color: Colors.textSecondary },
-  summaryVal: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '600', flex: 1, textAlign: 'right' },
+  summaryVal: { fontSize: FontSizes.sm, color: Colors.white, fontWeight: '600', flex: 1, textAlign: 'right', flexShrink: 1 },
+  postalDeliveryNote: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 8, borderTopWidth: 1, borderTopColor: Colors.darkBorder, marginTop: 4 },
+  postalDeliveryText: { fontSize: FontSizes.xs, color: Colors.textTertiary },
   shippingNote: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: 'rgba(139,92,246,0.1)', borderRadius: Radius.md, padding: Spacing.md },
   shippingText: { flex: 1, fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20 },
   errorCard: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(226,75,74,0.1)', borderRadius: Radius.md, borderWidth: 1, borderColor: 'rgba(226,75,74,0.3)', padding: Spacing.md, marginTop: Spacing.md },

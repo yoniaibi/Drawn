@@ -47,6 +47,13 @@ export function mapDraw(db: DBDraw, myTickets = 0, bundleItems?: DBBundleItem[])
       (b): BundleItem => ({ image: b.image_url ?? undefined, name: b.name, retailValue: b.retail_value })
     ),
     closesAt: db.draw_date,
+    listedAt: (db as any).listed_at ?? db.draw_date,
+    minCloseDate: (() => {
+      const d = new Date((db as any).listed_at ?? db.draw_date);
+      d.setDate(d.getDate() + 7);
+      return d.toISOString();
+    })(),
+    postalEntryCount: (db as any).postal_entry_count ?? 0,
     myTickets,
     verified: db.seller_verified,
   };
