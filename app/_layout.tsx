@@ -112,22 +112,22 @@ export default function RootLayout() {
     return () => sub.remove();
   }, []);
 
-  // Redirect based on auth state once fonts + session are resolved
+  // Redirect based on auth state — don't wait for fonts, they load in background
   useEffect(() => {
-    if (!fontsLoaded || loading) return;
+    if (loading) return;
     const inAuth = segments[0] === '(auth)';
     if (!session && !inAuth) {
       router.replace('/(auth)');
     } else if (session && inAuth) {
       router.replace('/(tabs)');
     }
-  }, [session, fontsLoaded, loading]);
+  }, [session, loading]);
 
   useEffect(() => {
-    if (fontsLoaded && !loading) SplashScreen.hideAsync();
-  }, [fontsLoaded, loading]);
+    if (!loading) SplashScreen.hideAsync();
+  }, [loading]);
 
-  if (!fontsLoaded || loading) return (
+  if (loading) return (
     <View style={{ flex: 1, backgroundColor: '#0F0A1E', alignItems: 'center', justifyContent: 'center' }}>
       <Text style={{ color: '#F472B6', fontFamily: 'sans-serif', fontSize: 18, letterSpacing: 2 }}>DRAWN</Text>
     </View>
