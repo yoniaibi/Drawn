@@ -7,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/theme';
 import PrimaryButton from '../../../src/components/PrimaryButton';
 import { useSellerDraft } from '../../../src/store/sellerDraft';
+import type { DrawStyle, ItemCategory } from '../../../src/mocks';
 
 const CONDITIONS = [
   { label: 'New', value: 'new' },
@@ -15,25 +16,55 @@ const CONDITIONS = [
   { label: 'Fair', value: 'fair' },
 ];
 
+const STYLE_OPTIONS: { label: string; value: DrawStyle }[] = [
+  { label: 'Womenswear & accessories', value: 'womenswear' },
+  { label: 'Menswear & streetwear', value: 'menswear' },
+  { label: 'Unisex / not sure', value: 'unisex' },
+];
+
+const CATEGORY_ROW1: { label: string; value: ItemCategory }[] = [
+  { label: 'Bags', value: 'bags' },
+  { label: 'Trainers', value: 'trainers' },
+  { label: 'Watches', value: 'watches' },
+  { label: 'Streetwear', value: 'streetwear' },
+];
+
+const CATEGORY_ROW2: { label: string; value: ItemCategory }[] = [
+  { label: 'Clothing', value: 'clothing' },
+  { label: 'Jewellery', value: 'jewellery' },
+  { label: 'Accessories', value: 'accessories' },
+  { label: 'Vintage', value: 'vintage' },
+];
+
 const MAX_PHOTOS = 4;
 
 export default function ListPhotosScreen() {
   const router = useRouter();
-  const { setDetails, setImages } = useSellerDraft((s) => ({
+  const { setDetails, setImages, setStyle, setItemCategory } = useSellerDraft((s) => ({
     setDetails: s.setDetails,
     setImages: s.setImages,
+    setStyle: s.setStyle,
+    setItemCategory: s.setItemCategory,
   }));
   const draft = useSellerDraft((s) => ({
     title: s.title,
     description: s.description,
     condition: s.condition,
     images: s.images,
+    type: s.type,
+    style: s.style,
+    itemCategory: s.itemCategory,
   }));
 
   const [title, setTitle] = useState(draft.title);
   const [description, setDescription] = useState(draft.description);
   const [condition, setCondition] = useState<string | null>(draft.condition);
   const [photos, setPhotos] = useState<string[]>(draft.images);
+  const [styleVal, setStyleVal] = useState<DrawStyle | null>(draft.style);
+  const [categoryVal, setCategoryVal] = useState<ItemCategory | null>(
+    draft.type === 'bundle' ? 'bundles' : draft.itemCategory
+  );
+  const [styleError, setStyleError] = useState<string | null>(null);
 
   async function pickPhoto(index: number) {
     if (Platform.OS !== 'web') {
@@ -68,8 +99,15 @@ export default function ListPhotosScreen() {
   }
 
   const handleNext = () => {
+    if (!styleVal) {
+      setStyleError('Please choose a style for your item.');
+      return;
+    }
+    setStyleError(null);
     setDetails(title, description, condition ?? '');
     setImages(photos);
+    setStyle(styleVal);
+    if (categoryVal) setItemCategory(categoryVal);
     router.push('/seller/list/pricing');
   };
 
@@ -145,6 +183,38 @@ export default function ListPhotosScreen() {
           ))}
         </View>
 
+        <Text style={styles.label}>WHO IS THIS FOR?</Text>
+        <View style={styles.condRow}>
+          {STYLE_OPTIONS.map((s) => (
+            <TouchableOpacity
+              key={s.value}
+              style={[styles.condChip, styleVal === s.value && styles.condChipOn, { flex: undefined, paddingHorizontal: 10 }]}
+              onPress={() => { setStyleVal(s.value); setStyleError(null); }}
+            >
+              <Text style={[styles.condText, styleVal === s.value && styles.condTextOn]}>{s.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text style={styles.helperText}>Choose the style that best fits your item. This helps buyers find it.</Text>
+        {styleError && <Text style={styles.errorText}>{styleError}</Text>}
+
+        {draft.type !== 'bundle' && (
+          <>
+            <Text style={styles.label}>ITEM TYPE</Text>
+            <View style={[styles.condRow, { flexWrap: 'wrap' }]}>
+              {[...CATEGORY_ROW1, ...CATEGORY_ROW2].map((c) => (
+                <TouchableOpacity
+                  key={c.value}
+                  style={[styles.condChip, categoryVal === c.value && styles.condChipOn, { flex: undefined, marginBottom: 6 }]}
+                  onPress={() => setCategoryVal(c.value)}
+                >
+                  <Text style={[styles.condText, categoryVal === c.value && styles.condTextOn]}>{c.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
         <PrimaryButton
           label="Next: Set price →"
           onPress={handleNext}
@@ -183,4 +253,6 @@ const styles = StyleSheet.create({
   condChipOn: { backgroundColor: Colors.lilac, borderColor: Colors.lilac },
   condText: { fontSize: FontSizes.xs, color: Colors.textSecondary, fontWeight: '600' },
   condTextOn: { color: Colors.white },
+  helperText: { fontSize: FontSizes.xs, color: Colors.textTertiary, marginTop: 6, marginBottom: 4, lineHeight: 17 },
+  errorText: { fontSize: FontSizes.xs, color: Colors.danger, marginTop: 4 },
 });

@@ -11,6 +11,8 @@ import { useAuthStore } from '../../../src/store';
 import { supabase } from '../../../src/lib/supabase';
 import { SELLER_FEE_MULTIPLIER, getCategoryMeta } from '../../../src/constants';
 import type { DrawCategory } from '../../../src/constants';
+import { STYLE_LABELS, CATEGORY_LABELS } from '../../../src/mocks';
+import type { DrawStyle, ItemCategory } from '../../../src/mocks';
 
 function validateDrawDuration(listedAt: Date, closesAt: Date): string | null {
   const MIN_DAYS = 7;
@@ -185,6 +187,8 @@ export default function ListReviewScreen() {
             ['Total tickets', draft.totalTickets.toLocaleString()],
             ['Value ratio', draft.retailValue > 0 ? `${Math.round((draft.retailValue / 100) / draft.ticketPrice)}× return for buyers` : '—'],
             ['You receive', `${formatTicketPrice(sellerGets)} (if all sell)`],
+            ['Style', draft.style ? STYLE_LABELS[draft.style as DrawStyle] : '—'],
+            ['Item type', draft.itemCategory ? CATEGORY_LABELS[draft.itemCategory as ItemCategory] : '—'],
             ['Draw close date', formatCloseDate(draft.closeDays ?? 14)],
             ['Postal entries accepted until', formatCloseDate(draft.closeDays ?? 14)],
           ] as [string, string][]).map(([label, val]) => (

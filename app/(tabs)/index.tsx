@@ -9,7 +9,7 @@ import Animated2, {
   useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming,
 } from 'react-native-reanimated';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
-import { Draw, MOCK_DRAWS } from '../../src/mocks';
+import { Draw, MOCK_DRAWS, STYLE_LABELS } from '../../src/mocks';
 import { fetchDraws, checkForWins, fetchRecentWinners, WinResult, RecentWinner } from '../../src/services/draws';
 import { supabase } from '../../src/lib/supabase';
 import TicketLogo from '../../src/components/TicketLogo';
@@ -17,19 +17,24 @@ import DrawCard from '../../src/components/DrawCard';
 import WalletBadge from '../../src/components/WalletBadge';
 import ScreenWrapper from '../../src/components/ScreenWrapper';
 import CategoryRow from '../../src/components/CategoryRow';
+import StyleRow from '../../src/components/StyleRow';
 import { useStreak } from '../../src/hooks/useStreak';
 import { formatTicketPrice } from '../../src/utils/countdown';
 import { useAuthStore } from '../../src/store';
+import { useLocalSearchParams } from 'expo-router';
 
-const FILTERS = ['Tonight', 'Filling fast', 'High value', 'Bundles', 'Just listed', 'Saved'];
+const FILTERS = ['Tonight', 'Womenswear', 'Menswear', 'High value', 'Bundles', 'Just listed', 'Watches', 'Bags', 'Trainers'];
 
 const SECTION_LABEL: Record<string, string> = {
   Tonight: 'Closing tonight',
-  'Filling fast': 'Filling fast',
-  Bundles: 'Bundle draws',
+  Womenswear: 'Womenswear & accessories',
+  Menswear: 'Menswear & streetwear',
+  Bundles: 'Wardrobe bundles',
   'High value': 'High value draws',
   'Just listed': 'Just listed',
-  Saved: 'Saved draws',
+  Watches: 'Watches',
+  Bags: 'Bags',
+  Trainers: 'Trainers',
 };
 
 const LIVE_TICKERS = [
@@ -49,7 +54,12 @@ const LIVE_TICKERS = [
 export default function HomeScreen() {
   const router = useRouter();
   const { streak } = useStreak();
-  const [filter, setFilter] = useState('Tonight');
+  const params = useLocalSearchParams<{ styleFilter?: string }>();
+  const [filter, setFilter] = useState(
+    params.styleFilter === 'womenswear' ? 'Womenswear'
+    : params.styleFilter === 'menswear' ? 'Menswear'
+    : 'Tonight'
+  );
   const [tickerIdx, setTickerIdx] = useState(0);
   const [winnerIdx, setWinnerIdx] = useState(0);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
@@ -158,13 +168,22 @@ export default function HomeScreen() {
 
   const filtered = draws.filter(d => {
     if (filter === 'Tonight') return d.status === 'closing_tonight';
-    if (filter === 'Filling fast') return (d.ticketsSold / d.totalTickets) >= 0.75;
+    if (filter === 'Womenswear') return (d as any).style === 'womenswear';
+    if (filter === 'Menswear') return (d as any).style === 'menswear';
     if (filter === 'Bundles') return d.isBundle;
-    if (filter === 'High value') return d.retailValue >= 1000;
-    if (filter === 'Saved') return savedIds.has(d.id);
+    if (filter === 'High value') return d.retailValue >= 100000;
     if (filter === 'Just listed') return d.status === 'open' && (d.ticketsSold / d.totalTickets) < 0.15;
+    if (filter === 'Watches') return (d as any).category === 'watches';
+    if (filter === 'Bags') return (d as any).category === 'bags';
+    if (filter === 'Trainers') return (d as any).category === 'trainers';
     return true;
   });
+
+  // Curated style rows — sort by retailValue desc, show if 2+ draws
+  const allDraws = draws.length > 0 ? draws : MOCK_DRAWS;
+  const womenswearDraws = allDraws.filter((d: any) => d.style === 'womenswear').sort((a, b) => b.retailValue - a.retailValue).slice(0, 8);
+  const menswearDraws = allDraws.filter((d: any) => d.style === 'menswear').sort((a, b) => b.retailValue - a.retailValue).slice(0, 8);
+  const unisexDraws = allDraws.filter((d: any) => d.style === 'unisex').sort((a, b) => b.retailValue - a.retailValue).slice(0, 8);
 
   const winnersPool = recentWinners.length > 0 ? recentWinners : [
     { handle: '@chloe_j', item: 'Chanel Classic Flap', image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=100&q=80', ticketPrice: 25, retailValue: 2400 },
@@ -337,6 +356,11 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        {/* Curated style rows */}
+        <StyleRow style="womenswear" label={STYLE_LABELS.womenswear} draws={womenswearDraws} />
+        <StyleRow style="menswear" label={STYLE_LABELS.menswear} draws={menswearDraws} />
+        <StyleRow style="unisex" label={STYLE_LABELS.unisex} draws={unisexDraws} />
 
         {/* For You section */}
         {forYouDraw && myCount > 0 && (

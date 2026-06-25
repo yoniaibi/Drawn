@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
-import { Draw } from '../mocks';
+import { Draw, STYLE_SHORT } from '../mocks';
 import { Colors, Fonts, Radius, FontSizes, Spacing } from '../theme';
 import { formatTicketPrice, getCountdownTo9pm } from '../utils/countdown';
 import ProgressBar from './ProgressBar';
@@ -14,6 +14,7 @@ interface Props {
   wide?: boolean;
   saved?: boolean;
   onSave?: (id: string) => void;
+  variant?: 'grid' | 'mini';
 }
 
 const URGENCY_COLORS = {
@@ -44,7 +45,8 @@ function avatarColor(letter: string) {
   return AVATAR_COLORS[letter?.toUpperCase()] ?? Colors.royal;
 }
 
-export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {
+export default function DrawCard({ draw, wide, saved = false, onSave, variant = 'grid' }: Props) {
+  const isMini = variant === 'mini';
   const router = useRouter();
   const [countdown, setCountdown] = useState(getCountdownTo9pm());
   const [isSaved, setIsSaved] = useState(saved);
@@ -119,12 +121,12 @@ export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {
           </View>
         </View>
       ) : (
-        <View style={styles.imageBox}>
+        <View style={[styles.imageBox, isMini && styles.imageBoxMini]}>
           {draw.image ? (
             <Image source={{ uri: draw.image }} style={styles.itemImage} resizeMode="cover" />
           ) : (
             <View style={styles.imagePlaceholder}>
-              <Text style={styles.placeholderEmoji}>{(draw as any).emoji ?? '🎁'}</Text>
+              <Text style={[styles.placeholderEmoji, isMini && { fontSize: 32 }]}>{(draw as any).emoji ?? '🎁'}</Text>
             </View>
           )}
 
@@ -151,34 +153,47 @@ export default function DrawCard({ draw, wide, saved = false, onSave }: Props) {
           </View>
 
           {/* Live viewer count */}
-          <View style={styles.viewerBadge}>
-            <View style={[styles.viewerDot, { backgroundColor: urgentColor }]} />
-            <Text style={styles.viewerText}>{viewers}</Text>
-          </View>
+          {!isMini && (
+            <View style={styles.viewerBadge}>
+              <View style={[styles.viewerDot, { backgroundColor: urgentColor }]} />
+              <Text style={styles.viewerText}>{viewers}</Text>
+            </View>
+          )}
+
+          {/* Style badge (mini variant only) */}
+          {isMini && draw.style && (
+            <View style={styles.styleBadgeMini}>
+              <Text style={styles.styleBadgeMiniText}>{STYLE_SHORT[draw.style]}</Text>
+            </View>
+          )}
         </View>
       )}
 
       <View style={styles.meta}>
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={1}>{draw.title}</Text>
-          <Animated.View style={heartStyle}>
-            <TouchableOpacity onPress={handleSave} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons
-                name={isSaved ? 'heart' : 'heart-outline'}
-                size={15}
-                color={isSaved ? Colors.pink : Colors.textTertiary}
-              />
-            </TouchableOpacity>
-          </Animated.View>
+          <Text style={[styles.title, isMini && { fontSize: FontSizes.xs }]} numberOfLines={1}>{draw.title}</Text>
+          {!isMini && (
+            <Animated.View style={heartStyle}>
+              <TouchableOpacity onPress={handleSave} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Ionicons
+                  name={isSaved ? 'heart' : 'heart-outline'}
+                  size={15}
+                  color={isSaved ? Colors.pink : Colors.textTertiary}
+                />
+              </TouchableOpacity>
+            </Animated.View>
+          )}
         </View>
 
-        <View style={styles.sellerRow}>
-          <View style={[styles.sellerDot, { backgroundColor: accentColor + '28', borderColor: accentColor + '60', borderWidth: 1 }]}>
-            <Text style={[styles.sellerDotText, { color: accentColor }]}>{draw.sellerAvatar?.[0] ?? '?'}</Text>
+        {!isMini && (
+          <View style={styles.sellerRow}>
+            <View style={[styles.sellerDot, { backgroundColor: accentColor + '28', borderColor: accentColor + '60', borderWidth: 1 }]}>
+              <Text style={[styles.sellerDotText, { color: accentColor }]}>{draw.sellerAvatar?.[0] ?? '?'}</Text>
+            </View>
+            <Text style={styles.seller} numberOfLines={1}>{draw.seller}</Text>
+            {draw.verified && <Ionicons name="shield-checkmark" size={9} color={Colors.lilac} style={{ marginLeft: 1 }} />}
           </View>
-          <Text style={styles.seller} numberOfLines={1}>{draw.seller}</Text>
-          {draw.verified && <Ionicons name="shield-checkmark" size={9} color={Colors.lilac} style={{ marginLeft: 1 }} />}
-        </View>
+        )}
 
         <View style={styles.progressRow}>
           <ProgressBar
@@ -251,6 +266,13 @@ const styles = StyleSheet.create({
   },
 
   imageBox: { height: 128, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  imageBoxMini: { height: 90 },
+  styleBadgeMini: {
+    position: 'absolute', bottom: 4, left: 4,
+    backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 4,
+    paddingHorizontal: 5, paddingVertical: 2,
+  },
+  styleBadgeMiniText: { fontSize: 7, color: Colors.white, fontWeight: '700' },
   bundleStrip: { flexDirection: 'row', height: 104, position: 'relative', overflow: 'hidden' },
   bundleCell: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
   bundleImage: { width: 52, height: 52, borderRadius: 10 },

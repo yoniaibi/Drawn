@@ -1,6 +1,43 @@
 export type DrawStatus = 'open' | 'closing_tonight' | 'live' | 'completed' | 'cancelled' | 'pending';
 export type ConditionType = 'new' | 'like_new' | 'good' | 'fair';
 
+export type DrawStyle = 'womenswear' | 'menswear' | 'unisex';
+
+export type ItemCategory =
+  | 'bags'
+  | 'trainers'
+  | 'watches'
+  | 'streetwear'
+  | 'clothing'
+  | 'jewellery'
+  | 'accessories'
+  | 'bundles'
+  | 'vintage';
+
+export const STYLE_LABELS: Record<DrawStyle, string> = {
+  womenswear: 'Womenswear & accessories',
+  menswear: 'Menswear & streetwear',
+  unisex: 'Unisex & everything else',
+};
+
+export const STYLE_SHORT: Record<DrawStyle, string> = {
+  womenswear: 'Womenswear',
+  menswear: 'Menswear',
+  unisex: 'Unisex',
+};
+
+export const CATEGORY_LABELS: Record<ItemCategory, string> = {
+  bags: 'Bags',
+  trainers: 'Trainers',
+  watches: 'Watches',
+  streetwear: 'Streetwear',
+  clothing: 'Clothing',
+  jewellery: 'Jewellery',
+  accessories: 'Accessories',
+  bundles: 'Wardrobe bundles',
+  vintage: 'Vintage',
+};
+
 export interface Draw {
   id: string;
   title: string;
@@ -17,7 +54,8 @@ export interface Draw {
   description: string;
   isBundle: boolean;
   emoji?: string;
-  category?: string;
+  style: DrawStyle;
+  category: ItemCategory;
   bundleItems?: BundleItem[];
   closesAt: string;
   listedAt: string;
@@ -86,6 +124,7 @@ export const MOCK_DRAWS: Draw[] = [
     condition: 'like_new',
     description: 'Midnight black quilted lambskin, gold hardware. Purchased 2022, worn fewer than 5 times. Full authenticity card, dust bag, and original box included.',
     isBundle: false,
+    style: 'womenswear',
     category: 'bags',
     closesAt: getCloseDate(9),
     listedAt: getListedDate(5),
@@ -109,6 +148,7 @@ export const MOCK_DRAWS: Draw[] = [
     condition: 'good',
     description: '41mm, black dial, ceramic bezel. Reference 126610LN. Full set — box, papers, 2019 service record. Minor brushing on bracelet only.',
     isBundle: false,
+    style: 'unisex',
     category: 'watches',
     closesAt: getCloseDate(13),
     listedAt: getListedDate(1),
@@ -132,7 +172,8 @@ export const MOCK_DRAWS: Draw[] = [
     condition: 'like_new',
     description: '28 pieces, all authenticated. Clearing before a move abroad — everything barely worn. Includes bags, shoes, jewellery, and one watch.',
     isBundle: true,
-    category: 'fashion',
+    style: 'womenswear',
+    category: 'bundles',
     listedAt: getListedDate(3),
     minCloseDate: getCloseDate(4),
     postalEntryCount: 1,
@@ -163,7 +204,8 @@ export const MOCK_DRAWS: Draw[] = [
     condition: 'like_new',
     description: 'M3 Pro chip, 18GB RAM, 512GB SSD. Space Black. Bought March 2024, barely used — upgraded company kit. Original receipt included.',
     isBundle: false,
-    category: 'tech',
+    style: 'unisex',
+    category: 'accessories',
     closesAt: getCloseDate(0),
     listedAt: getListedDate(14),
     minCloseDate: getListedDate(7),
@@ -186,7 +228,8 @@ export const MOCK_DRAWS: Draw[] = [
     condition: 'good',
     description: 'Chicago colourway. UK9. Worn twice. Minor creasing on toe box. Original box and tissue included.',
     isBundle: false,
-    category: 'sneakers',
+    style: 'menswear',
+    category: 'trainers',
     closesAt: getCloseDate(9),
     listedAt: getListedDate(5),
     minCloseDate: getCloseDate(2),
@@ -209,7 +252,8 @@ export const MOCK_DRAWS: Draw[] = [
     condition: 'new',
     description: 'DS. Never worn. UK10. Original box, zip ties, extra laces and accessories. Purchased from Dover Street Market on drop day.',
     isBundle: false,
-    category: 'sneakers',
+    style: 'menswear',
+    category: 'trainers',
     closesAt: getCloseDate(21),
     listedAt: getListedDate(2),
     minCloseDate: getCloseDate(5),
@@ -232,13 +276,64 @@ export const MOCK_DRAWS: Draw[] = [
     condition: 'new',
     description: 'FW23 Black. Size L. Never worn — still in original Supreme bag with receipt.',
     isBundle: false,
-    category: 'fashion',
+    style: 'menswear',
+    category: 'streetwear',
     closesAt: getCloseDate(30),
     listedAt: getListedDate(1),
     minCloseDate: getCloseDate(6),
     postalEntryCount: 0,
     myTickets: 0,
     verified: false,
+  },
+  {
+    id: 'draw-008',
+    title: 'Tag Heuer Aquaracer',
+    seller: '@marcus_t',
+    sellerAvatar: 'M',
+    emoji: '⏱',
+    image: 'https://images.unsplash.com/photo-1548171915-e79a6a8bfee5?auto=format&fit=crop&w=400&q=80',
+    retailValue: 32000,
+    ticketPrice: 50,
+    totalTickets: 800,
+    ticketsSold: 420,
+    minThreshold: 0.6,
+    status: 'open',
+    condition: 'good',
+    description: 'Stainless steel, date window, original box included. Serviced 2024.',
+    isBundle: false,
+    style: 'unisex',
+    category: 'watches',
+    closesAt: getCloseDate(11),
+    listedAt: getListedDate(3),
+    minCloseDate: getCloseDate(4),
+    postalEntryCount: 0,
+    myTickets: 0,
+    verified: true,
+  },
+  {
+    id: 'draw-009',
+    title: 'Supreme Box Logo Hoodie — Black L',
+    seller: '@jay_99',
+    sellerAvatar: 'J',
+    emoji: '👕',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?auto=format&fit=crop&w=400&q=80',
+    retailValue: 45000,
+    ticketPrice: 20,
+    totalTickets: 2500,
+    ticketsSold: 1800,
+    minThreshold: 0.6,
+    status: 'closing_tonight',
+    condition: 'like_new',
+    description: 'Size L. Worn once. Washed cold, no shrinkage. No signs of fading.',
+    isBundle: false,
+    style: 'menswear',
+    category: 'streetwear',
+    closesAt: getCloseDate(0),
+    listedAt: getListedDate(7),
+    minCloseDate: getCloseDate(0),
+    postalEntryCount: 2,
+    myTickets: 0,
+    verified: true,
   },
 ];
 

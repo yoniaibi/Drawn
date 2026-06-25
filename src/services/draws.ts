@@ -42,7 +42,8 @@ export function mapDraw(db: DBDraw, myTickets = 0, bundleItems?: DBBundleItem[])
     condition: db.condition,
     description: db.description,
     isBundle: db.is_bundle,
-    category: (db as any).category ?? undefined,
+    style: (db as any).style ?? 'unisex',
+    category: (db as any).category ?? 'accessories',
     bundleItems: bundleItems?.map(
       (b): BundleItem => ({ image: b.image_url ?? undefined, name: b.name, retailValue: b.retail_value })
     ),
