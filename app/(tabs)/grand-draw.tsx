@@ -206,16 +206,17 @@ export default function GrandDrawScreen() {
           </View>
         </View>
 
-        {/* Dev simulate button */}
-        <TouchableOpacity
-          style={styles.devBtn}
-          onPress={() => {
-            useGrandDrawStore.getState().setStatus('drawing');
-            router.push('/grand-draw/live' as any);
-          }}
-        >
-          <Text style={styles.devBtnText}>⚙ Simulate draw (dev)</Text>
-        </TouchableOpacity>
+        {__DEV__ && (
+          <TouchableOpacity
+            style={styles.devBtn}
+            onPress={() => {
+              useGrandDrawStore.getState().setStatus('drawing');
+              router.push('/grand-draw/live' as any);
+            }}
+          >
+            <Text style={styles.devBtnText}>⚙ Simulate draw (dev)</Text>
+          </TouchableOpacity>
+        )}
 
       </ScrollView>
     </ScreenWrapper>
