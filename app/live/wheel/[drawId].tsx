@@ -111,7 +111,7 @@ export default function LiveWheelScreen() {
     });
 
     channel
-      .on('broadcast', { event: 'reaction' }, ({ payload }) => {
+      .on('broadcast', { event: 'reaction' }, ({ payload }: { payload: any }) => {
         const emoji = payload.emoji ?? '🔥';
         const x = 30 + Math.random() * 220;
         setFloatingReactions(prev => [...prev, { id: floatIdRef.current++, emoji, x }]);

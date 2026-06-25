@@ -1,12 +1,23 @@
 import { create } from 'zustand';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
-import { Profile } from '../lib/database.types';
+import { supabase, AuthUser, AuthSession } from '../lib/supabase';
+import { apiGet, apiPut } from '../lib/api';
 import { LoginStreak, GrandDraw, MOCK_LOGIN_STREAK, MOCK_GRAND_DRAW } from '../mocks';
 
+// Local profile type (formerly from database.types)
+interface Profile {
+  id: string;
+  handle: string | null;
+  avatar_letter: string | null;
+  wallet_balance: number;
+  is_seller: boolean;
+  seller_verified?: boolean;
+  notify_before_close: boolean;
+  created_at?: string;
+}
+
 interface AuthState {
-  session: Session | null;
-  user: User | null;
+  session: AuthSession | null;
+  user: AuthUser | null;
   profile: Profile | null;
   loading: boolean;
   // derived — kept as plain values, updated in setters
@@ -17,7 +28,7 @@ interface AuthState {
   walletBalance: number;
   notifyBeforeClose: boolean;
   // actions
-  setSession: (session: Session | null) => void;
+  setSession: (session: AuthSession | null) => void;
   setProfile: (profile: Profile | null) => void;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -25,17 +36,7 @@ interface AuthState {
   deductFunds: (pence: number) => void;
 }
 
-// Check localStorage synchronously — if nothing stored, we know immediately user isn't logged in
-function hasStoredSession(): boolean {
-  try {
-    const key = 'sb-eqaltlwngsmomlwbkqzu-auth-token';
-    return typeof window !== 'undefined' && !!localStorage.getItem(key);
-  } catch {
-    return false;
-  }
-}
-
-function derived(profile: Profile | null, session: Session | null) {
+function derived(profile: Profile | null, session: AuthSession | null) {
   return {
     isLoggedIn: !!session,
     isSeller: profile?.is_seller ?? false,
@@ -61,7 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setSession: (session) =>
     set((s) => ({
       session,
-      user: session?.user ?? null,
+      user: (session?.user as AuthUser) ?? null,
       loading: false,
       ...derived(s.profile, session),
     })),
@@ -80,11 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshProfile: async () => {
     const { user, session } = get();
     if (!user) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    const data = await apiGet<Profile>(`/profiles/${user.id}`);
     if (data) set({ profile: data, ...derived(data, session) });
   },
 

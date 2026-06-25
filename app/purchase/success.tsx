@@ -48,7 +48,7 @@ export default function PurchaseSuccessScreen() {
       .select('id, title, image_url, retail_value, total_tickets, ticket_price, seller_handle, condition')
       .eq('id', drawId)
       .single()
-      .then(({ data }) => {
+      .then(({ data }: { data: any }) => {
         if (data) {
           setDraw({
             id: data.id,

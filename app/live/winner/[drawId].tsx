@@ -61,7 +61,7 @@ export default function WinnerScreen() {
       .select('title, image, retail_value, ticket_price, tickets_sold, winner_handle, seller_handle')
       .eq('id', drawId)
       .single()
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: any; error: any }) => {
         if (error || !data) {
           setWinner(mapToWinner(MOCK_WINNER));
         } else {

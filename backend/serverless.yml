@@ -1,0 +1,294 @@
+service: drawn-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-2         # London — change if preferred
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 10
+  environment:
+    STAGE: ${self:provider.stage}
+    DRAWS_TABLE: ${self:service}-${self:provider.stage}-draws
+    PROFILES_TABLE: ${self:service}-${self:provider.stage}-profiles
+    TICKETS_TABLE: ${self:service}-${self:provider.stage}-tickets
+    WALLET_TABLE: ${self:service}-${self:provider.stage}-wallet
+    USER_POOL_ID: ${env:USER_POOL_ID}
+    USER_POOL_CLIENT_ID: ${env:USER_POOL_CLIENT_ID}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - !GetAtt DrawsTable.Arn
+            - !GetAtt ProfilesTable.Arn
+            - !GetAtt TicketsTable.Arn
+            - !GetAtt WalletTable.Arn
+            - !Sub '${DrawsTable.Arn}/index/*'
+            - !Sub '${TicketsTable.Arn}/index/*'
+            - !Sub '${WalletTable.Arn}/index/*'
+
+functions:
+
+  # ── Draws ──────────────────────────────────────────────────────────────────
+  listDraws:
+    handler: src/handlers/draws.list
+    events:
+      - httpApi:
+          path: /draws
+          method: GET
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  getDrawById:
+    handler: src/handlers/draws.getById
+    events:
+      - httpApi:
+          path: /draws/{id}
+          method: GET
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  listDrawsByCategory:
+    handler: src/handlers/draws.listByCategory
+    events:
+      - httpApi:
+          path: /draws/category/{category}
+          method: GET
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  createDraw:
+    handler: src/handlers/draws.create
+    events:
+      - httpApi:
+          path: /draws
+          method: POST
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  recentWinners:
+    handler: src/handlers/draws.recentWinners
+    events:
+      - httpApi:
+          path: /draws/winners/recent
+          method: GET
+
+  # ── Profiles ───────────────────────────────────────────────────────────────
+  getProfile:
+    handler: src/handlers/profiles.get
+    events:
+      - httpApi:
+          path: /profiles/{userId}
+          method: GET
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  updateProfile:
+    handler: src/handlers/profiles.update
+    events:
+      - httpApi:
+          path: /profiles/{userId}
+          method: PUT
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  # ── Tickets ────────────────────────────────────────────────────────────────
+  myTickets:
+    handler: src/handlers/tickets.list
+    events:
+      - httpApi:
+          path: /tickets
+          method: GET
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  purchaseTickets:
+    handler: src/handlers/tickets.purchase
+    events:
+      - httpApi:
+          path: /tickets/purchase
+          method: POST
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  # ── Wallet ─────────────────────────────────────────────────────────────────
+  walletTransactions:
+    handler: src/handlers/wallet.transactions
+    events:
+      - httpApi:
+          path: /wallet/transactions
+          method: GET
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+  addFunds:
+    handler: src/handlers/wallet.addFunds
+    events:
+      - httpApi:
+          path: /wallet/add
+          method: POST
+          authorizer:
+            type: jwt
+            id: !Ref CognitoAuthorizer
+
+resources:
+  Resources:
+
+    # ── Cognito JWT Authorizer ────────────────────────────────────────────────
+    CognitoAuthorizer:
+      Type: AWS::ApiGatewayV2::Authorizer
+      Properties:
+        ApiId: !Ref HttpApi
+        AuthorizerType: JWT
+        Name: CognitoJWT
+        IdentitySource:
+          - '$request.header.Authorization'
+        JwtConfiguration:
+          Audience:
+            - ${env:USER_POOL_CLIENT_ID}
+          Issuer: !Sub 'https://cognito-idp.${self:provider.region}.amazonaws.com/${env:USER_POOL_ID}'
+
+    # ── DynamoDB Tables ────────────────────────────────────────────────────────
+    DrawsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DRAWS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: category
+            AttributeType: S
+          - AttributeName: sellerId
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: createdAt
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: category-index
+            KeySchema:
+              - AttributeName: category
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: seller-index
+            KeySchema:
+              - AttributeName: sellerId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: status-index
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    ProfilesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.PROFILES_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+    TicketsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TICKETS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: drawId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: drawId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: drawId-index
+            KeySchema:
+              - AttributeName: drawId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    WalletTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.WALLET_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+    target: node20
+    platform: node

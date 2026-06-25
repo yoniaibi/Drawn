@@ -66,7 +66,7 @@ export default function SellerProfileScreen() {
       .limit(10);
 
     if (drawsData) {
-      const mapped = drawsData.map((d: any) => mapDraw(d));
+      const mapped: Draw[] = (drawsData as any[]).map((d: any) => mapDraw(d));
       const active = mapped.filter(
         (d) => d.status === 'open' || d.status === 'closing_tonight',
       );

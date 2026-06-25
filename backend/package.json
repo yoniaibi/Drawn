@@ -1,0 +1,24 @@
+{
+  "name": "drawn-api",
+  "version": "1.0.0",
+  "description": "Drawn serverless backend — API Gateway + Lambda + DynamoDB",
+  "scripts": {
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "logs": "serverless logs -f listDraws --tail",
+    "remove": "serverless remove"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.140",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "serverless": "^3.0.0",
+    "serverless-esbuild": "^1.50.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -54,7 +54,7 @@ export default function TicketsScreen() {
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'draws' },
-        (payload) => {
+        (payload: any) => {
           if (payload.new && typeof payload.new.tickets_sold === 'number') {
             setMyTickets(prev =>
               prev.map(d =>

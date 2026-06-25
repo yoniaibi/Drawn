@@ -47,7 +47,7 @@ export default function DrawDetailScreen() {
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'draws', filter: `id=eq.${id}` },
-        (payload) => {
+        (payload: any) => {
           if (payload.new && typeof payload.new.tickets_sold === 'number') {
             setDraw(prev => prev ? { ...prev, ticketsSold: payload.new.tickets_sold } : prev);
           }

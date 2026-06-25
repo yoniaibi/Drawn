@@ -34,7 +34,7 @@ export default function EditListingScreen() {
       .select('title, description, status, seller_id')
       .eq('id', drawId)
       .single()
-      .then(({ data, error: err }) => {
+      .then(({ data, error: err }: { data: any; error: any }) => {
         if (err || !data) { setError('Draw not found.'); setLoading(false); return; }
         if (data.seller_id !== user?.id) { setError('You do not own this draw.'); setLoading(false); return; }
         setTitle(data.title ?? '');

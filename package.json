@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@aws-amplify/react-native": "^1.3.3",
     "@expo-google-fonts/playfair-display": "^0.2.3",
     "@expo/metro-runtime": "^56.0.15",
     "@expo/vector-icons": "^14.0.0",
@@ -16,6 +17,7 @@
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/datetimepicker": "^9.1.0",
     "@supabase/supabase-js": "^2.43.4",
+    "aws-amplify": "^6.18.0",
     "expo": "~51.0.0",
     "expo-constants": "^56.0.18",
     "expo-font": "~12.0.9",

@@ -8,6 +8,7 @@ import { View, Text, ScrollView, Platform } from 'react-native';
 import { Colors } from '../src/theme';
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/store';
+import '../src/lib/amplify';
 
 try { SplashScreen.preventAutoHideAsync(); } catch {}
 
@@ -47,67 +48,36 @@ export default function RootLayout() {
     }
   }, [router]);
 
-  // Listen for Supabase auth changes
+  // Listen for auth state changes (Amplify-backed shim)
   useEffect(() => {
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
-        setSession(session);
+        setSession(session as any);
         if (session) refreshProfile();
       })
       .catch(() => setSession(null));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+      setSession(session as any);
       if (session) refreshProfile();
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Handle deep links for email confirmation and password reset
+  // Handle deep links (Cognito sends ?code= for email confirmation)
   useEffect(() => {
     async function handleUrl(url: string) {
-      // Parse fragment (#access_token=...) or query (?token=...)
       const parsed = Linking.parse(url);
       const params = parsed.queryParams ?? {};
-
-      // Supabase sends tokens in the URL fragment on web, or as query params via custom scheme
-      // expo-linking merges fragment params into queryParams for us
-      const accessToken = params['access_token'] as string | undefined;
-      const refreshToken = params['refresh_token'] as string | undefined;
       const type = params['type'] as string | undefined;
-      const token = params['token'] as string | undefined;
-      const tokenHash = params['token_hash'] as string | undefined;
-
-      if (accessToken && refreshToken) {
-        // Email confirmed or password reset — set the session directly
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        if (!error && type === 'recovery') {
-          // Navigate to reset-password screen so user can set a new password
-          router.replace('/(auth)/reset-password');
-        }
-        return;
-      }
-
-      if ((token || tokenHash) && type) {
-        // OTP-style verification link
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: (tokenHash ?? token) as string,
-          type: type as any,
-        });
-        if (!error && type === 'recovery') {
-          router.replace('/(auth)/reset-password');
-        }
+      // Cognito password reset deep link
+      if (type === 'recovery') {
+        router.replace('/(auth)/reset-password');
       }
     }
 
-    // Handle link that launched the app
     Linking.getInitialURL().then(url => { if (url) handleUrl(url); });
-
-    // Handle link while app is open
     const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url));
     return () => sub.remove();
   }, []);

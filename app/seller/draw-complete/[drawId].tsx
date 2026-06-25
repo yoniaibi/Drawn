@@ -45,7 +45,7 @@ export default function DrawCompleteScreen() {
       .select('id, title, ticket_price, tickets_sold, total_tickets, winner_handle, winner_user_id, retail_value, completed_at, status, seller_id')
       .eq('id', drawId)
       .single()
-      .then(({ data, error: err }) => {
+      .then(({ data, error: err }: { data: any; error: any }) => {
         if (err || !data) { setError('Draw not found.'); setLoading(false); return; }
         if (data.seller_id !== user?.id) { setError('This draw does not belong to you.'); setLoading(false); return; }
         setDraw(data as DrawSummary);
@@ -58,7 +58,7 @@ export default function DrawCompleteScreen() {
       .select('id')
       .eq('draw_id', drawId)
       .maybeSingle()
-      .then(({ data }) => { if (data) setAlreadyShipped(true); });
+      .then(({ data }: { data: any }) => { if (data) setAlreadyShipped(true); });
   }, [drawId, user?.id]);
 
   async function markShipped() {

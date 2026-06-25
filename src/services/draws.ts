@@ -17,7 +17,7 @@ async function fetchBundleMap(drawIds: string[]): Promise<Record<string, DBBundl
   if (drawIds.length === 0) return {};
   const { data: items } = await supabase.from('bundle_items').select('*').in('draw_id', drawIds);
   const map: Record<string, DBBundleItem[]> = {};
-  for (const item of items ?? []) {
+  for (const item of (items as DBBundleItem[] | null) ?? []) {
     if (!map[item.draw_id]) map[item.draw_id] = [];
     map[item.draw_id].push(item);
   }
@@ -68,10 +68,10 @@ export async function fetchDrawsByCategory(slug: string): Promise<Draw[]> {
       .eq('category', slug)
       .order('created_at', { ascending: false });
 
-    if (error || !draws || draws.length === 0) return [];
-
-    const bundleMap = await fetchBundleMap(draws.filter(d => d.is_bundle).map(d => d.id));
-    return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
+    if (error || !draws || (draws as DBDraw[]).length === 0) return [];
+    const typedDraws = draws as DBDraw[];
+    const bundleMap = await fetchBundleMap(typedDraws.filter((d: DBDraw) => d.is_bundle).map((d: DBDraw) => d.id));
+    return typedDraws.map((d: DBDraw) => mapDraw(d, 0, bundleMap[d.id]));
   } catch {
     return [];
   }
@@ -110,10 +110,10 @@ export async function fetchDraws(): Promise<Draw[]> {
       .order('created_at', { ascending: false });
 
     if (error) return [];
-    if (!draws || draws.length === 0) return [];
-
-    const bundleMap = await fetchBundleMap(draws.filter(d => d.is_bundle).map(d => d.id));
-    return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
+    if (!draws || (draws as DBDraw[]).length === 0) return [];
+    const typedDraws = draws as DBDraw[];
+    const bundleMap = await fetchBundleMap(typedDraws.filter((d: DBDraw) => d.is_bundle).map((d: DBDraw) => d.id));
+    return typedDraws.map((d: DBDraw) => mapDraw(d, 0, bundleMap[d.id]));
   } catch {
     return [];
   }
@@ -128,17 +128,18 @@ export async function fetchDrawById(id: string): Promise<Draw | null> {
       .single();
 
     if (error || !draw) return null;
+    const typedDraw = draw as DBDraw;
 
     let bundleItems: DBBundleItem[] | undefined;
-    if (draw.is_bundle) {
+    if (typedDraw.is_bundle) {
       const { data: items } = await supabase
         .from('bundle_items')
         .select('*')
         .eq('draw_id', id);
-      bundleItems = items ?? undefined;
+      bundleItems = (items as DBBundleItem[]) ?? undefined;
     }
 
-    return mapDraw(draw, 0, bundleItems);
+    return mapDraw(typedDraw, 0, bundleItems);
   } catch {
     return null;
   }
@@ -152,17 +153,18 @@ export async function fetchMyTickets(userId: string): Promise<Draw[]> {
       .eq('user_id', userId);
 
     if (error || !tickets) return [];
-    if (tickets.length === 0) return [];
+    const typedTickets = tickets as (DBTicket & { draws: DBDraw | null })[];
+    if (typedTickets.length === 0) return [];
 
     const bundleMap = await fetchBundleMap(
-      tickets.filter(t => t.draws && (t.draws as DBDraw).is_bundle).map(t => (t.draws as DBDraw).id)
+      typedTickets.filter((t) => t.draws && t.draws.is_bundle).map((t) => t.draws!.id)
     );
 
-    return tickets
-      .filter(t => t.draws != null)
-      .map(t => {
+    return typedTickets
+      .filter((t) => t.draws != null)
+      .map((t) => {
         const db = t.draws as DBDraw;
-        return mapDraw(db, (t as DBTicket).quantity, bundleMap[db.id]);
+        return mapDraw(db, t.quantity, bundleMap[db.id]);
       });
   } catch {
     return [];
@@ -189,10 +191,10 @@ export async function checkForWins(userId: string): Promise<WinResult[]> {
 
     if (error || !data) return [];
 
-    return data.map(d => ({
+    return (data as DBDraw[]).map((d: DBDraw) => ({
       drawId: d.id,
       drawTitle: d.title,
-      drawImage: d.image_url,
+      drawImage: d.image_url ?? undefined,
       retailValue: d.retail_value,
       completedAt: d.completed_at ?? '',
     }));
@@ -226,9 +228,9 @@ export async function fetchRecentWinners(): Promise<RecentWinner[]> {
       .order('completed_at', { ascending: false })
       .limit(6);
 
-    if (error || !data || data.length === 0) return FALLBACK_WINNERS;
+    if (error || !data || (data as any[]).length === 0) return FALLBACK_WINNERS;
 
-    return data.map(d => ({
+    return (data as any[]).map((d: any) => ({
       handle: d.winner_handle ?? '@winner',
       item: d.title,
       emoji: d.emoji ?? '🎁',
@@ -251,7 +253,7 @@ export async function fetchWalletTransactions(userId: string): Promise<WalletTra
 
     if (error || !data) return [];
 
-    return data.map(mapTransaction);
+    return (data as DBWalletTransaction[]).map(mapTransaction);
   } catch {
     return [];
   }
@@ -272,10 +274,10 @@ export async function fetchSellerDraws(sellerId: string): Promise<Draw[]> {
       .eq('seller_id', sellerId)
       .order('created_at', { ascending: false });
 
-    if (error || !draws || draws.length === 0) return [];
-
-    const bundleMap = await fetchBundleMap(draws.filter(d => d.is_bundle).map(d => d.id));
-    return draws.map(d => mapDraw(d, 0, bundleMap[d.id]));
+    if (error || !draws || (draws as DBDraw[]).length === 0) return [];
+    const sellerDraws = draws as DBDraw[];
+    const bundleMap = await fetchBundleMap(sellerDraws.filter((d: DBDraw) => d.is_bundle).map((d: DBDraw) => d.id));
+    return sellerDraws.map((d: DBDraw) => mapDraw(d, 0, bundleMap[d.id]));
   } catch {
     return [];
   }
@@ -289,7 +291,7 @@ export async function fetchSellerStats(sellerId: string): Promise<SellerStats> {
       .eq('user_id', sellerId)
       .eq('type', 'payout');
 
-    const totalEarned = txns?.reduce((sum, t) => sum + t.amount, 0) ?? 0;
+    const totalEarned = (txns as DBWalletTransaction[] | null)?.reduce((sum: number, t: DBWalletTransaction) => sum + t.amount, 0) ?? 0;
 
     const { data: pendingDraws } = await supabase
       .from('draws')
@@ -298,7 +300,7 @@ export async function fetchSellerStats(sellerId: string): Promise<SellerStats> {
       .eq('status', 'completed');
 
     const pendingPayout = pendingDraws
-      ? pendingDraws.reduce((sum, d) => sum + Math.round(d.tickets_sold * d.ticket_price * SELLER_FEE_MULTIPLIER), 0) - totalEarned
+      ? (pendingDraws as DBDraw[]).reduce((sum: number, d: DBDraw) => sum + Math.round(d.tickets_sold * d.ticket_price * SELLER_FEE_MULTIPLIER), 0) - totalEarned
       : 0;
 
     return { totalEarned, pendingPayout: Math.max(0, pendingPayout) };
@@ -327,14 +329,14 @@ export async function fetchUserStats(userId: string): Promise<UserStats> {
         .eq('status', 'completed'),
     ]);
 
-    const tickets = ticketsRes.data ?? [];
-    const wins = winsRes.data ?? [];
+    const tickets = (ticketsRes.data ?? []) as DBTicket[];
+    const wins = (winsRes.data ?? []) as DBDraw[];
 
     return {
-      activeDraws: new Set(tickets.map(t => t.draw_id)).size,
-      totalTickets: tickets.reduce((s, t) => s + t.quantity, 0),
+      activeDraws: new Set(tickets.map((t: DBTicket) => t.draw_id)).size,
+      totalTickets: tickets.reduce((s: number, t: DBTicket) => s + t.quantity, 0),
       wins: wins.length,
-      totalWon: wins.reduce((s, w) => s + w.retail_value, 0),
+      totalWon: wins.reduce((s: number, w: DBDraw) => s + w.retail_value, 0),
     };
   } catch {
     return { activeDraws: 0, totalTickets: 0, wins: 0, totalWon: 0 };

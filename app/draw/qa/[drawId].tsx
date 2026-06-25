@@ -66,7 +66,7 @@ export default function DrawQAScreen() {
           table: 'draw_qa',
           filter: `draw_id=eq.${drawId}`,
         },
-        (payload) => {
+        (payload: any) => {
           setItems((prev) => [...prev, payload.new as QAItem]);
         },
       )

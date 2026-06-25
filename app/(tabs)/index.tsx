@@ -125,7 +125,7 @@ export default function HomeScreen() {
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'draws' },
-        (payload) => {
+        (payload: any) => {
           if (payload.new && typeof payload.new.tickets_sold === 'number') {
             setDraws(prev =>
               prev.map(d =>

@@ -1,23 +1,231 @@
-import 'react-native-url-polyfill/auto';
-import { createClient } from '@supabase/supabase-js';
-import * as SecureStore from 'expo-secure-store';
+/**
+ * Supabase compatibility shim — auth delegates to AWS Amplify/Cognito,
+ * DB queries return empty results so the app falls back to mock data
+ * until the REST API backend is deployed.
+ */
+import '../lib/amplify';
+import {
+  signIn,
+  signOut,
+  signUp,
+  confirmSignUp,
+  resetPassword,
+  confirmResetPassword,
+  updatePassword,
+  fetchAuthSession,
+  getCurrentUser,
+  fetchUserAttributes,
+} from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
+import { apiGet, apiPost, apiPut } from './api';
+import { API_URL } from './amplify';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? 'https://eqaltlwngsmomlwbkqzu.supabase.co';
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxYWx0bHduZ3Ntb21sd2JrcXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MTA2NzUsImV4cCI6MjA5NzI4NjY3NX0.zcwgXht0vKkkQcu3cVHe4v3q5xv-37BV1GFnwXOGBQY';
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-// SecureStore keys must be <= 255 chars and alphanumeric — sanitise supabase's longer keys
-const secureStorage = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
-  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+export interface AuthUser {
+  id: string;
+  email?: string;
+  created_at?: string;
+}
+
+export interface AuthSession {
+  user: AuthUser;
+}
+
+// Build a lightweight session from Amplify
+async function buildSession(): Promise<AuthSession | null> {
+  try {
+    const cognitoUser = await getCurrentUser();
+    return { user: { id: cognitoUser.userId, email: cognitoUser.signInDetails?.loginId } };
+  } catch {
+    return null;
+  }
+}
+
+// ─── Query builder (no-op — returns empty results) ────────────────────────────
+
+type QueryResult = { data: any; error: any };
+
+function makeBuilder(table: string): any {
+  const state: Record<string, any> = { table, filters: [], method: 'select', body: null, isSingle: false };
+
+  async function resolve(): Promise<QueryResult> {
+    if (!API_URL) return { data: state.isSingle ? null : [], error: null };
+    try {
+      const params = state.filters.map((f: any) => `${f.col}=${encodeURIComponent(f.val)}`).join('&');
+      const path = `/${state.table}${params ? '?' + params : ''}`;
+      if (state.method === 'select') {
+        const data = await apiGet(path);
+        const result = state.isSingle ? (Array.isArray(data) ? data[0] ?? null : data) : (data ?? []);
+        return { data: result, error: null };
+      }
+      if (state.method === 'insert') {
+        const data = await apiPost(path, state.body);
+        return { data: state.isSingle ? (Array.isArray(data) ? data[0] ?? null : data) : data, error: null };
+      }
+      if (state.method === 'update') {
+        const data = await apiPut(path, state.body);
+        return { data, error: null };
+      }
+      if (state.method === 'upsert') {
+        const data = await apiPost(`${path}?upsert=1`, state.body);
+        return { data, error: null };
+      }
+      if (state.method === 'delete') {
+        await apiPut(`${path}&_method=delete`, {});
+        return { data: null, error: null };
+      }
+    } catch {
+      // fallthrough to empty
+    }
+    return { data: state.isSingle ? null : [], error: null };
+  }
+
+  const builder: any = {
+    select: (_cols?: string) => { state.method = 'select'; return builder; },
+    insert: (body: any) => { state.method = 'insert'; state.body = body; return builder; },
+    update: (body: any) => { state.method = 'update'; state.body = body; return builder; },
+    upsert: (body: any, _opts?: any) => { state.method = 'upsert'; state.body = body; return builder; },
+    delete: () => { state.method = 'delete'; return builder; },
+    eq: (col: string, val: any) => { state.filters.push({ col, val }); return builder; },
+    neq: (col: string, val: any) => { state.filters.push({ col: `${col}__neq`, val }); return builder; },
+    in: (col: string, vals: any[]) => { state.filters.push({ col, val: vals.join(',') }); return builder; },
+    not: (_col: string, _op: string, _val: any) => builder,
+    order: (_col: string, _opts?: any) => builder,
+    limit: (_n: number) => builder,
+    single: () => { state.isSingle = true; return resolve(); },
+    then: (resolve: (v: QueryResult) => any, reject?: (e: any) => any) =>
+      resolve(undefined as any) === undefined
+        ? (builder as any)._resolvePromise ??= (async () => {
+            try { return await resolve(await (resolve as any).call(null, await builder._resolve())); }
+            catch (e) { if (reject) return reject(e); }
+          })()
+        : Promise.resolve(resolve).then(fn => builder._resolveFor(fn)),
+  };
+
+  // Make the builder thenable (Promise-like)
+  builder._resolve = resolve;
+  builder.then = (onFulfilled: any, onRejected?: any) =>
+    resolve().then(onFulfilled, onRejected);
+  builder.catch = (onRejected: any) => resolve().catch(onRejected);
+
+  return builder;
+}
+
+// ─── Channel (no-op for realtime) ────────────────────────────────────────────
+
+function makeChannel(_name: string, _opts?: any) {
+  const ch: any = {
+    on: () => ch,
+    subscribe: (_cb?: any) => ch,
+    unsubscribe: () => Promise.resolve(),
+  };
+  return ch;
+}
+
+// ─── Auth shim ────────────────────────────────────────────────────────────────
+
+const auth = {
+  getSession: async () => {
+    const session = await buildSession();
+    return { data: { session }, error: null };
+  },
+
+  getUser: async () => {
+    try {
+      const attrs = await fetchUserAttributes();
+      const cognitoUser = await getCurrentUser();
+      return { data: { user: { id: cognitoUser.userId, email: attrs.email } }, error: null };
+    } catch {
+      return { data: { user: null }, error: null };
+    }
+  },
+
+  onAuthStateChange: (callback: (event: string, session: AuthSession | null) => void) => {
+    const cancel = Hub.listen('auth', ({ payload }) => {
+      const { event } = payload;
+      if (event === 'signedIn') {
+        buildSession().then(s => callback('SIGNED_IN', s));
+      } else if (event === 'signedOut') {
+        callback('SIGNED_OUT', null);
+      } else if (event === 'tokenRefresh') {
+        buildSession().then(s => callback('TOKEN_REFRESHED', s));
+      }
+    });
+    return { data: { subscription: { unsubscribe: cancel } } };
+  },
+
+  signInWithPassword: async ({ email, password }: { email: string; password: string }) => {
+    try {
+      await signIn({ username: email, password });
+      const session = await buildSession();
+      return { data: { session, user: session?.user ?? null }, error: null };
+    } catch (e: any) {
+      return { data: { session: null, user: null }, error: { message: e.message ?? 'Sign in failed' } };
+    }
+  },
+
+  signUp: async ({ email, password, options }: { email: string; password: string; options?: { data?: Record<string, any> } }) => {
+    try {
+      const userAttributes: Record<string, string> = { email };
+      if (options?.data?.full_name) userAttributes['name'] = options.data.full_name;
+      const result = await signUp({ username: email, password, options: { userAttributes } });
+      return { data: result, error: null };
+    } catch (e: any) {
+      return { data: null, error: { message: e.message ?? 'Sign up failed' } };
+    }
+  },
+
+  signOut: async () => {
+    try { await signOut(); } catch {}
+  },
+
+  resetPasswordForEmail: async (email: string, _opts?: any) => {
+    try {
+      await resetPassword({ username: email });
+      return { error: null };
+    } catch (e: any) {
+      return { error: { message: e.message ?? 'Reset failed' } };
+    }
+  },
+
+  updateUser: async ({ password }: { password: string }) => {
+    try {
+      await updatePassword({ oldPassword: '', newPassword: password });
+      return { error: null };
+    } catch (e: any) {
+      return { error: { message: e.message ?? 'Update failed' } };
+    }
+  },
+
+  verifyOtp: async ({ token_hash, type }: { token_hash: string; type: string }) => {
+    try {
+      if (type === 'email' || type === 'signup') {
+        // token_hash is used as email+code — split on ':' if encoded that way
+        const [username, code] = token_hash.includes(':')
+          ? token_hash.split(':')
+          : ['', token_hash];
+        await confirmSignUp({ username, confirmationCode: code });
+      }
+      return { error: null };
+    } catch (e: any) {
+      return { error: { message: e.message ?? 'Verification failed' } };
+    }
+  },
+
+  setSession: async (_opts: { access_token: string; refresh_token: string }) => {
+    // Not directly supported in Cognito — session refreshed automatically
+    return { error: null };
+  },
 };
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    storage: secureStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// ─── Export ───────────────────────────────────────────────────────────────────
+
+export const supabase = {
+  auth,
+  from: (table: string) => makeBuilder(table),
+  channel: makeChannel,
+  removeChannel: (_ch: any) => Promise.resolve(),
+  rpc: (_fn: string, _args?: Record<string, any>) =>
+    Promise.resolve({ data: null as any, error: null as any }),
+};

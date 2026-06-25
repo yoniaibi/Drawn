@@ -127,14 +127,14 @@ export default function LiveScreen() {
       if (count > 0) setViewerCount(count);
     });
 
-    channel.subscribe(async (status) => {
+    channel.subscribe(async (status: any) => {
       if (status === 'SUBSCRIBED') {
         await channel.track({ online_at: new Date().toISOString() });
       }
     });
 
     channel
-      .on('broadcast', { event: 'chat' }, ({ payload }) => {
+      .on('broadcast', { event: 'chat' }, ({ payload }: { payload: any }) => {
         const msg: ChatMsg = {
           id: msgIdRef.current++,
           handle: payload.handle ?? '@anon',
@@ -145,7 +145,7 @@ export default function LiveScreen() {
         setChatMessages(prev => [...prev.slice(-30), msg]);
         setTimeout(() => chatRef.current?.scrollToEnd({ animated: true }), 50);
       })
-      .on('broadcast', { event: 'reaction' }, ({ payload }) => {
+      .on('broadcast', { event: 'reaction' }, ({ payload }: { payload: any }) => {
         const emoji = payload.emoji ?? '🔥';
         const x = 20 + Math.random() * 180;
         setFloatingReactions(prev => [...prev, { id: floatIdRef.current++, emoji, x }]);
