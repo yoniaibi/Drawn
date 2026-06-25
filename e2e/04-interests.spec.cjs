@@ -18,7 +18,7 @@ test.describe('Interests / Onboarding Screen', () => {
     expect(body).toMatch(/fashion/i);
     expect(body).toMatch(/watches/i);
     expect(body).toMatch(/tech/i);
-    expect(body).toMatch(/wine|spirits|travel|beauty|collectibles/i);
+    expect(body).toMatch(/bags|trainers|streetwear|jewellery|accessories/i);
   });
 
   test('shows step dots (step 2 of 2)', async ({ page }) => {

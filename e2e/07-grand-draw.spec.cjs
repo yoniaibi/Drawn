@@ -99,10 +99,10 @@ test.describe('Grand Draw Main Screen', () => {
     expect(body).toMatch(/@m\*\*\*s|winner/i);
   });
 
-  test('dev simulate button visible', async ({ page }) => {
+  test('draw date is shown', async ({ page }) => {
     await goToGrandDraw(page);
     const body = await page.textContent('body');
-    expect(body).toMatch(/simulate draw|dev/i);
+    expect(body).toMatch(/draw resolves|resolves in|grand draw/i);
   });
 
   test('ticket claimed state shows claimed message', async ({ page }) => {

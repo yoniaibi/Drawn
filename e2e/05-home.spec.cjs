@@ -21,7 +21,7 @@ test.describe('Home Feed', () => {
     await gotoAuthenticated(page, '/', waitForApp);
     const body = await page.textContent('body');
     expect(body).toMatch(/tonight/i);
-    expect(body).toMatch(/filling fast/i);
+    expect(body).toMatch(/womenswear|menswear/i);
     expect(body).toMatch(/high value/i);
     expect(body).toMatch(/bundles/i);
   });
