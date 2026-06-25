@@ -153,6 +153,9 @@ export default function RootLayout() {
         <Stack.Screen name="share/[drawId]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="notifications/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="search/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="legal/terms" options={{ headerShown: false }} />
+        <Stack.Screen name="legal/privacy" options={{ headerShown: false }} />
+        <Stack.Screen name="legal/seller-terms" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
     </ErrorBoundary>

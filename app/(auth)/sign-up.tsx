@@ -174,14 +174,14 @@ export default function SignUpScreen() {
             I agree to DRAWN's{' '}
             <Text
               style={styles.termsLink}
-              onPress={() => Linking.openURL('https://yoniaibi.github.io/Drawn/terms.html')}
+              onPress={() => router.push('/legal/terms' as any)}
             >
               Terms of Service
             </Text>
             {' '}and{' '}
             <Text
               style={styles.termsLink}
-              onPress={() => Linking.openURL('https://yoniaibi.github.io/Drawn/privacy.html')}
+              onPress={() => router.push('/legal/privacy' as any)}
             >
               Privacy Policy
             </Text>

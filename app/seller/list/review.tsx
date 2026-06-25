@@ -42,6 +42,7 @@ export default function ListReviewScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [agreedToDamages, setAgreedToDamages] = useState(false);
 
   const totalRaise = draft.ticketPrice * draft.totalTickets;
   const sellerGets = Math.round(totalRaise * SELLER_FEE_MULTIPLIER);
@@ -56,6 +57,7 @@ export default function ListReviewScreen() {
     if (!user) { setError('You must be logged in to list an item.'); return; }
     if (!draft.title || !draft.condition) { setError('Missing item details — go back and fill in all fields.'); return; }
     if (draft.retailValue <= 0) { setError('Missing retail value — go back and set it.'); return; }
+    if (!agreedToDamages) { setError('Please read and accept the liquidated damages clause to submit your listing.'); return; }
 
     // Validate close date duration
     const listedAt = new Date();
@@ -209,6 +211,23 @@ export default function ListReviewScreen() {
           </View>
         )}
 
+        <TouchableOpacity
+          style={styles.damagesRow}
+          onPress={() => setAgreedToDamages(v => !v)}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.checkbox, agreedToDamages && styles.checkboxDamages]}>
+            {agreedToDamages && <Ionicons name="checkmark" size={13} color={Colors.white} />}
+          </View>
+          <Text style={styles.damagesText}>
+            I have read and specifically accept the{' '}
+            <Text style={styles.damagesLink} onPress={() => router.push('/legal/seller-terms' as any)}>
+              liquidated damages clause (Section 7)
+            </Text>
+            {' '}and confirm this item is genuine and accurately described.
+          </Text>
+        </TouchableOpacity>
+
         {submitting ? (
           <View style={styles.loadingRow}>
             <ActivityIndicator color={Colors.lilac} />
@@ -257,6 +276,11 @@ const styles = StyleSheet.create({
   errorText: { flex: 1, fontSize: FontSizes.sm, color: Colors.danger },
   loadingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: Spacing.xl },
   loadingText: { fontSize: FontSizes.base, color: Colors.textSecondary, fontStyle: 'italic' },
+  damagesRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: 'rgba(226,75,74,0.06)', borderRadius: Radius.md, padding: Spacing.md, marginTop: Spacing.md, borderWidth: 1, borderColor: 'rgba(226,75,74,0.2)' },
+  checkbox: { width: 20, height: 20, borderRadius: 4, borderWidth: 1.5, borderColor: Colors.textTertiary, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  checkboxDamages: { backgroundColor: '#E24B4A', borderColor: '#E24B4A' },
+  damagesText: { flex: 1, fontSize: FontSizes.sm, color: Colors.textSecondary, lineHeight: 20 },
+  damagesLink: { color: '#E24B4A', fontWeight: '600' },
 
   // Success screen
   successScreen: { flex: 1, backgroundColor: Colors.darkBg, alignItems: 'center', padding: Spacing.xl, paddingTop: 80 },
