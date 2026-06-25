@@ -93,6 +93,7 @@ function makeBuilder(table: string): any {
     not: (_col: string, _op: string, _val: any) => builder,
     order: (_col: string, _opts?: any) => builder,
     limit: (_n: number) => builder,
+    maybeSingle: () => { state.isSingle = true; return resolve(); },
     single: () => { state.isSingle = true; return resolve(); },
     then: (resolve: (v: QueryResult) => any, reject?: (e: any) => any) =>
       resolve(undefined as any) === undefined
@@ -119,6 +120,8 @@ function makeChannel(_name: string, _opts?: any) {
     on: () => ch,
     subscribe: (_cb?: any) => ch,
     unsubscribe: () => Promise.resolve(),
+    track: () => Promise.resolve(),
+    presenceState: () => ({}),
   };
   return ch;
 }

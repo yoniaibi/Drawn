@@ -121,10 +121,20 @@ async function setupAuthMock(page) {
     });
   });
 
-  // Inject session into localStorage so Supabase client picks it up on init
-  await page.addInitScript(({ key, session }) => {
+  // Inject session into localStorage — supports both old Supabase key and new Amplify shim key
+  await page.addInitScript(({ key, session, e2eSession }) => {
     localStorage.setItem(key, JSON.stringify(session));
-  }, { key: STORAGE_KEY, session: MOCK_SESSION });
+    // New auth shim reads this key as a test-session fallback
+    localStorage.setItem('drawn-e2e-session', JSON.stringify(e2eSession));
+  }, {
+    key: STORAGE_KEY,
+    session: MOCK_SESSION,
+    e2eSession: {
+      userId: FAKE_USER_ID,
+      email: FAKE_EMAIL,
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+    },
+  });
 }
 
 // Map tab paths to their tab bar label text

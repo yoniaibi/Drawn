@@ -1,5 +1,6 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { API_URL } from './amplify';
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
 async function getToken(): Promise<string | null> {
   try {
