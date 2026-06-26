@@ -43,25 +43,33 @@ export default function SignUpScreen() {
 
     const handle = '@' + generateHandle(name);
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: { handle, avatar_letter: name.trim()[0].toUpperCase(), full_name: name.trim() },
-      },
-    });
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { handle, avatar_letter: name.trim()[0].toUpperCase(), full_name: name.trim() },
+        },
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (signUpError) {
-      const msg = typeof signUpError.message === 'string' && signUpError.message
-        ? signUpError.message
+      if (signUpError) {
+        const msg = typeof signUpError.message === 'string' && signUpError.message.trim()
+          ? signUpError.message.trim()
+          : 'Sign up failed. Please try again.';
+        setError(msg);
+        return;
+      }
+
+      router.replace('/(auth)/interests');
+    } catch (e: any) {
+      setLoading(false);
+      const msg = typeof e?.message === 'string' && e.message.trim()
+        ? e.message.trim()
         : 'Sign up failed. Please try again.';
       setError(msg);
-      return;
     }
-
-    router.replace('/(auth)/interests');
   }
 
   return (

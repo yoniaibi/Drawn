@@ -175,12 +175,17 @@ const auth = {
       const result = await signUp({ username: email, password, options: { userAttributes } });
       return { data: result, error: null };
     } catch (e: any) {
-      console.error('signUp error:', e);
-      const message = typeof e?.message === 'string' && e.message
-        ? e.message
-        : typeof e?.name === 'string' && e.name
-          ? e.name.replace(/([A-Z])/g, ' $1').trim()
-          : 'Sign up failed. Please try again.';
+      console.error('signUp error:', JSON.stringify(e), e);
+      let message: string;
+      if (e?.name === 'UsernameExistsException') {
+        message = 'An account with this email already exists. Please log in instead.';
+      } else if (typeof e?.message === 'string' && e.message.trim()) {
+        message = e.message.trim();
+      } else if (typeof e?.name === 'string' && e.name) {
+        message = e.name.replace(/([A-Z])/g, ' $1').trim();
+      } else {
+        message = 'Sign up failed. Please try again.';
+      }
       return { data: null, error: { message } };
     }
   },
