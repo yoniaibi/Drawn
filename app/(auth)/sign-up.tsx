@@ -1,57 +1,29 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Linking, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import { supabase } from '../../src/lib/supabase';
+
+function generateHandle(name: string): string {
+  const base = name.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const suffix = Math.floor(Math.random() * 900 + 100);
+  return base.slice(0, 12) + suffix;
+}
 
 export default function SignUpScreen() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [handle, setHandle] = useState('');
-  const [handleStatus, setHandleStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [showPw, setShowPw] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function onHandleChange(text: string) {
-    const cleaned = text.toLowerCase().replace(/[^a-z0-9_]/g, '');
-    setHandle(cleaned);
-    setError('');
-    setHandleStatus('idle');
-    if (handleCheckTimer.current) clearTimeout(handleCheckTimer.current);
-    if (cleaned.length >= 3) {
-      setHandleStatus('checking');
-      handleCheckTimer.current = setTimeout(async () => {
-        const { data, error } = await supabase.rpc('is_handle_available', { candidate: '@' + cleaned });
-        // If the RPC doesn't exist yet or errors, fall back to available (server enforces uniqueness via constraint)
-        if (error || data === null) { setHandleStatus('available'); return; }
-        setHandleStatus(data === true ? 'available' : 'taken');
-      }, 500);
-    }
-  }
-
   async function handleCreate() {
     if (!name.trim() || !email.trim() || !password) {
       setError('Please fill in all fields.');
-      return;
-    }
-    if (handle.length < 3) {
-      setError('Handle must be at least 3 characters.');
-      return;
-    }
-    if (handleStatus === 'taken') {
-      setError('That handle is already taken. Please choose another.');
-      return;
-    }
-    if (handleStatus === 'checking') {
-      setError('Still checking handle availability — please wait a moment.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -69,13 +41,13 @@ export default function SignUpScreen() {
     setError('');
     setLoading(true);
 
-    const fullHandle = '@' + handle;
+    const handle = '@' + generateHandle(name);
 
     const { error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        data: { handle: fullHandle, avatar_letter: name.trim()[0].toUpperCase(), full_name: name.trim() },
+        data: { handle, avatar_letter: name.trim()[0].toUpperCase(), full_name: name.trim() },
       },
     });
 
@@ -96,7 +68,7 @@ export default function SignUpScreen() {
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: Colors.darkBg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={Colors.textSecondary} />
+          <Text style={{ color: Colors.textSecondary, fontSize: 22 }}>‹</Text>
         </TouchableOpacity>
 
         <Text style={styles.title}>Join DRAWN</Text>
@@ -115,34 +87,13 @@ export default function SignUpScreen() {
           ))}
         </View>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {!!error && <Text style={styles.error}>{error}</Text>}
 
         <Text style={styles.label}>FULL NAME</Text>
         <TextInput
           style={styles.input} placeholder="Your name" placeholderTextColor={Colors.textTertiary}
           value={name} onChangeText={t => { setName(t); setError(''); }} autoCapitalize="words"
         />
-
-        <Text style={styles.label}>USERNAME (HANDLE)</Text>
-        <View style={styles.pwWrap}>
-          <Text style={[styles.input, { flex: 0, paddingRight: 0, marginBottom: 0, color: Colors.textSecondary }]}>@</Text>
-          <TextInput
-            style={[styles.input, { flex: 1, marginBottom: 0 }]}
-            placeholder="yourhandle"
-            placeholderTextColor={Colors.textTertiary}
-            value={handle}
-            onChangeText={onHandleChange}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          <View style={styles.eye}>
-            {handleStatus === 'checking' && <ActivityIndicator size="small" color={Colors.textTertiary} />}
-            {handleStatus === 'available' && <Ionicons name="checkmark-circle" size={18} color={Colors.success} />}
-            {handleStatus === 'taken' && <Ionicons name="close-circle" size={18} color={Colors.danger} />}
-          </View>
-        </View>
-        {handleStatus === 'taken' && <Text style={styles.handleHint}>Handle taken</Text>}
-        {handleStatus === 'available' && <Text style={[styles.handleHint, { color: Colors.success }]}>Available!</Text>}
 
         <Text style={styles.label}>EMAIL ADDRESS</Text>
         <TextInput
@@ -154,40 +105,29 @@ export default function SignUpScreen() {
         <Text style={styles.label}>PASSWORD</Text>
         <View style={styles.pwWrap}>
           <TextInput
-            style={[styles.input, { flex: 1, marginBottom: 0 }]}
-            placeholder="••••••••" placeholderTextColor={Colors.textTertiary}
+            style={[styles.input, { flex: 1 }]}
+            placeholder="8+ characters" placeholderTextColor={Colors.textTertiary}
             value={password} onChangeText={t => { setPassword(t); setError(''); }}
             secureTextEntry={!showPw}
           />
           <TouchableOpacity style={styles.eye} onPress={() => setShowPw(v => !v)}>
-            <Ionicons name={showPw ? 'eye-off' : 'eye'} size={16} color={Colors.textSecondary} />
+            <Text style={{ color: Colors.textSecondary, fontSize: 13 }}>{showPw ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         </View>
 
-        {/* T&Cs checkbox */}
         <TouchableOpacity
           style={styles.termsRow}
           onPress={() => { setAgreedToTerms(v => !v); setError(''); }}
           activeOpacity={0.7}
         >
           <View style={[styles.checkbox, agreedToTerms && styles.checkboxOn]}>
-            {agreedToTerms && <Ionicons name="checkmark" size={13} color={Colors.white} />}
+            {agreedToTerms && <Text style={{ color: Colors.white, fontSize: 13, lineHeight: 16 }}>✓</Text>}
           </View>
           <Text style={styles.termsText}>
             I agree to DRAWN's{' '}
-            <Text
-              style={styles.termsLink}
-              onPress={() => router.push('/legal/terms' as any)}
-            >
-              Terms of Service
-            </Text>
+            <Text style={styles.termsLink} onPress={() => router.push('/legal/terms' as any)}>Terms of Service</Text>
             {' '}and{' '}
-            <Text
-              style={styles.termsLink}
-              onPress={() => router.push('/legal/privacy' as any)}
-            >
-              Privacy Policy
-            </Text>
+            <Text style={styles.termsLink} onPress={() => router.push('/legal/privacy' as any)}>Privacy Policy</Text>
           </Text>
         </TouchableOpacity>
 
@@ -225,9 +165,9 @@ const styles = StyleSheet.create({
   label: { fontSize: 10, color: Colors.textSecondary, letterSpacing: 0.8, fontWeight: '600', marginBottom: 6, marginTop: 14 },
   input: {
     backgroundColor: Colors.darkCard, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.darkBorder,
-    paddingHorizontal: 14, paddingVertical: 13, fontSize: FontSizes.sm, color: Colors.white, marginBottom: 2,
+    paddingHorizontal: 14, paddingVertical: 13, fontSize: FontSizes.sm, color: Colors.white,
   },
-  pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  pwWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   eye: { padding: 8 },
   termsRow: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
@@ -246,5 +186,4 @@ const styles = StyleSheet.create({
   loginRow: { marginTop: 14, alignItems: 'center' },
   loginText: { fontSize: FontSizes.xs, color: Colors.lilac },
   loginLink: { color: Colors.pink, fontWeight: '600' },
-  handleHint: { fontSize: 9, color: Colors.danger, marginTop: 2, marginBottom: 4 },
 });
