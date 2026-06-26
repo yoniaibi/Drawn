@@ -30,8 +30,8 @@ export default function SignUpScreen() {
       setHandleStatus('checking');
       handleCheckTimer.current = setTimeout(async () => {
         const { data, error } = await supabase.rpc('is_handle_available', { candidate: '@' + cleaned });
-        // If the RPC doesn't exist yet or errors, fall back to idle (server enforces uniqueness via constraint)
-        if (error) { setHandleStatus('idle'); return; }
+        // If the RPC doesn't exist yet or errors, fall back to available (server enforces uniqueness via constraint)
+        if (error || data === null) { setHandleStatus('available'); return; }
         setHandleStatus(data === true ? 'available' : 'taken');
       }, 500);
     }
@@ -82,7 +82,10 @@ export default function SignUpScreen() {
     setLoading(false);
 
     if (signUpError) {
-      setError(signUpError.message);
+      const msg = typeof signUpError.message === 'string' && signUpError.message
+        ? signUpError.message
+        : 'Sign up failed. Please try again.';
+      setError(msg);
       return;
     }
 
