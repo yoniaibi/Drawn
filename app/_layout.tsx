@@ -36,7 +36,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold_Italic });
+  const [fontsLoaded, fontError] = useFonts({ PlayfairDisplay_700Bold_Italic });
   const { setSession, refreshProfile, session } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
