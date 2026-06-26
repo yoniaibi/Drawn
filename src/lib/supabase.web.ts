@@ -175,7 +175,13 @@ const auth = {
       const result = await signUp({ username: email, password, options: { userAttributes } });
       return { data: result, error: null };
     } catch (e: any) {
-      return { data: null, error: { message: e.message ?? 'Sign up failed' } };
+      console.error('signUp error:', e);
+      const message = typeof e?.message === 'string' && e.message
+        ? e.message
+        : typeof e?.name === 'string' && e.name
+          ? e.name.replace(/([A-Z])/g, ' $1').trim()
+          : 'Sign up failed. Please try again.';
+      return { data: null, error: { message } };
     }
   },
 
