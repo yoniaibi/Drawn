@@ -36,6 +36,14 @@ provider:
             - !Sub '${DrawsTable.Arn}/index/*'
             - !Sub '${TicketsTable.Arn}/index/*'
             - !Sub '${WalletTable.Arn}/index/*'
+  httpApi:
+    authorizers:
+      cognitoJwt:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.eu-west-2.amazonaws.com/${env:USER_POOL_ID}
+        audience:
+          - ${env:USER_POOL_CLIENT_ID}
 
 functions:
 
@@ -47,8 +55,7 @@ functions:
           path: /draws
           method: GET
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   getDrawById:
     handler: src/handlers/draws.getById
@@ -57,8 +64,7 @@ functions:
           path: /draws/{id}
           method: GET
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   listDrawsByCategory:
     handler: src/handlers/draws.listByCategory
@@ -67,8 +73,7 @@ functions:
           path: /draws/category/{category}
           method: GET
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   createDraw:
     handler: src/handlers/draws.create
@@ -77,8 +82,7 @@ functions:
           path: /draws
           method: POST
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   recentWinners:
     handler: src/handlers/draws.recentWinners
@@ -95,8 +99,7 @@ functions:
           path: /profiles/{userId}
           method: GET
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   updateProfile:
     handler: src/handlers/profiles.update
@@ -105,8 +108,7 @@ functions:
           path: /profiles/{userId}
           method: PUT
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   # ── Tickets ────────────────────────────────────────────────────────────────
   myTickets:
@@ -116,8 +118,7 @@ functions:
           path: /tickets
           method: GET
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   purchaseTickets:
     handler: src/handlers/tickets.purchase
@@ -126,8 +127,7 @@ functions:
           path: /tickets/purchase
           method: POST
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   # ── Wallet ─────────────────────────────────────────────────────────────────
   walletTransactions:
@@ -137,8 +137,7 @@ functions:
           path: /wallet/transactions
           method: GET
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
   addFunds:
     handler: src/handlers/wallet.addFunds
@@ -147,25 +146,10 @@ functions:
           path: /wallet/add
           method: POST
           authorizer:
-            type: jwt
-            id: !Ref CognitoAuthorizer
+            name: cognitoJwt
 
 resources:
   Resources:
-
-    # ── Cognito JWT Authorizer ────────────────────────────────────────────────
-    CognitoAuthorizer:
-      Type: AWS::ApiGatewayV2::Authorizer
-      Properties:
-        ApiId: !Ref HttpApi
-        AuthorizerType: JWT
-        Name: CognitoJWT
-        IdentitySource:
-          - '$request.header.Authorization'
-        JwtConfiguration:
-          Audience:
-            - ${env:USER_POOL_CLIENT_ID}
-          Issuer: !Sub 'https://cognito-idp.${self:provider.region}.amazonaws.com/${env:USER_POOL_ID}'
 
     # ── DynamoDB Tables ────────────────────────────────────────────────────────
     DrawsTable:
